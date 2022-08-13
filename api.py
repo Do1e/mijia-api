@@ -58,7 +58,7 @@ def getDevices(save: bool) -> dict:
 	dict, 设备列表的字典
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	data = {"getVirtualModel": False, "getHuamiDevices": 0}
 	msg = postData('/home/device_list', data, authorize)
 	devs = json.loads(msg)
@@ -80,7 +80,7 @@ def getRooms(save: bool) -> dict:
 	dict, 房间列表的字典
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	data = {"fg": False, "fetch_share" :True, \
 		"fetch_share_dev": True, "limit": 300, "app_ver": 7}
 	msg = postData('/v2/homeroom/gethome', data, authorize)
@@ -104,9 +104,9 @@ def getScenes(save: bool, roomIdx=0) -> dict:
 	dict, 场景列表的字典
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	if os.path.exists('./json/rooms.json'):
-		rooms = json.load(open('./json/rooms.json', 'r'))
+		rooms = json.load(open('./json/rooms.json', 'r', encoding='utf-8'))
 	else:
 		rooms = getRooms(save)
 	try:
@@ -136,9 +136,9 @@ def runScene(name: str) -> int:
 	-1: 执行失败
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	if os.path.exists('./json/scenes.json'):
-		scenes = json.load(open('./json/scenes.json', 'r'))
+		scenes = json.load(open('./json/scenes.json', 'r', encoding='utf-8'))
 	else:
 		scenes = getRooms(False)
 	scenesList = scenes['result']['scene_info_list']
@@ -172,7 +172,7 @@ def getDevAtt(devs: list) -> dict:
 	dict, 返回的设备属性字典
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	data = {"params": devs}
 	msg = postData('/miotspec/prop/get', data, authorize)
 	res = json.loads(msg)
@@ -191,7 +191,7 @@ def setDevAtt(devs: list) -> str:
 	dict, 返回信息
 	-------
 	"""
-	authorize = json.load(open('./json/authorize.json', 'r'))
+	authorize = json.load(open('./json/authorize.json', 'r', encoding='utf-8'))
 	data = {"params": devs}
 	msg = postData('/miotspec/prop/set', data, authorize)
 	return msg
