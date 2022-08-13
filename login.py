@@ -57,4 +57,4 @@ if __name__ == '__main__':
 	print(authorize['message'])
 	if authorize['code'] == 0:
 		with open("./json/authorize.json", "w") as f:
-			f.write(json.dumps(authorize, indent=4))
+			f.write(json.dumps(authorize, indent=4, ensure_ascii=False))
