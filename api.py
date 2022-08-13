@@ -7,9 +7,7 @@ import json
 import os
 
 def postData(uri: str, data: dict, authorize: dict) -> None:
-	data = str(data).replace("'", '"')
-	data = data.replace('True', 'true')
-	data = data.replace('False', 'false')
+	data = str(data).replace("'", '"').replace('True', 'true').replace('False', 'false')
 	try:
 		serviceToken = authorize['serviceToken']
 		securityToken = authorize['securityToken']
