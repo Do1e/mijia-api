@@ -1,3 +1,5 @@
 ref
-config.py
+config*
+json/*
+!.gitkeep
 __pycache__
