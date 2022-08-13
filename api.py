@@ -4,6 +4,7 @@ from hashlib import sha256
 import base64
 import hmac
 import json
+import os
 
 def postData(uri: str, data: dict, authorize: dict) -> None:
 	data = str(data).replace("'", '"')
@@ -46,7 +47,7 @@ def generateSignature(uri: str, signedNonce: str, nonce: str, data: str) -> str:
 
 def getDevices(save: bool) -> dict:
 	"""
-	getDevices(save) -> None.
+	getDevices(save) -> dict.
 	@description:
 	获取设备列表
 	-------
@@ -54,11 +55,11 @@ def getDevices(save: bool) -> dict:
 	save: bool, 是否保存到文件./json/devices.json中
 	-------
 	@Returns:
-	devs: dict, 设备列表的字典
+	dict, 设备列表的字典
 	-------
 	"""
 	authorize = json.load(open('./json/authorize.json', 'r'))
-	data = json.loads('{"getVirtualModel": false, "getHuamiDevices": 0}')
+	data = {"getVirtualModel": False, "getHuamiDevices": 0}
 	msg = postData('/home/device_list', data, authorize)
 	devs = json.loads(msg)
 	if save:
@@ -66,7 +67,172 @@ def getDevices(save: bool) -> dict:
 			f.write(json.dumps(devs, indent=4, ensure_ascii=False))
 	return devs
 
+def getRooms(save: bool) -> dict:
+	"""
+	getRooms(save) -> dict.
+	@description:
+	获取房间列表
+	-------
+	@param:
+	save: bool, 是否保存到文件./json/rooms.json中
+	-------
+	@Returns:
+	dict, 房间列表的字典
+	-------
+	"""
+	authorize = json.load(open('./json/authorize.json', 'r'))
+	data = {"fg": False, "fetch_share" :True, \
+		"fetch_share_dev": True, "limit": 300, "app_ver": 7}
+	msg = postData('/v2/homeroom/gethome', data, authorize)
+	rooms = json.loads(msg)
+	if save:
+		with open('./json/rooms.json', 'w') as f:
+			f.write(json.dumps(rooms, indent=4, ensure_ascii=False))
+	return rooms
+
+def getScenes(save: bool, roomIdx=0) -> dict:
+	"""
+	getScenes(save) -> dict.
+	@description:
+	获取场景列表
+	-------
+	@param:
+	save: bool, 是否保存到文件./json/scenes.json中
+	roomIdx: int, 房间索引(在./json/rooms.json中找到对应的房间索引，默认为0)
+	-------
+	@Returns:
+	dict, 场景列表的字典
+	-------
+	"""
+	authorize = json.load(open('./json/authorize.json', 'r'))
+	if os.path.exists('./json/rooms.json'):
+		rooms = json.load(open('./json/rooms.json', 'r'))
+	else:
+		rooms = getRooms(save)
+	try:
+		homeId = rooms['result']['homelist'][roomIdx]['id']
+	except IndexError:
+		print('房间号超出范围')
+		return
+	data = {"home_id": homeId}
+	msg = postData('/appgateway/miot/appsceneservice/AppSceneService/GetSceneList', data, authorize)
+	scenes = json.loads(msg)
+	if save:
+		with open('./json/scenes.json', 'w') as f:
+			f.write(json.dumps(scenes, indent=4, ensure_ascii=False))
+	return scenes
+
+def runScene(name: str) -> int:
+	"""
+	runScene(name: str) -> int.
+	@description:
+	执行手动场景
+	-------
+	@param:
+	name: str, 场景名称
+	-------
+	@Returns:
+	0: 执行成功
+	-1: 执行失败
+	-------
+	"""
+	authorize = json.load(open('./json/authorize.json', 'r'))
+	if os.path.exists('./json/scenes.json'):
+		scenes = json.load(open('./json/scenes.json', 'r'))
+	else:
+		scenes = getRooms(False)
+	scenesList = scenes['result']['scene_info_list']
+	for scene in scenesList:
+		if scene['name'] == name:
+			scene_id = scene['scene_id']
+			break
+	try:
+		data = {"scene_id": scene_id, "trigger_key": "user.click"}
+	except NameError:
+		print("场景名称不存在")
+		return -1
+	msg = postData('/appgateway/miot/appsceneservice/AppSceneService/RunScene', data, authorize)
+	msg = json.loads(msg)
+	if msg['result']:
+		return 0
+	else:
+		print(msg)
+		return -1
+
+def getDevAtt(devs: list) -> dict:
+	"""
+	getDevAtt(devs) -> dict.
+	@description:
+	获取设备属性
+	-------
+	@param:
+	devs: list, 参数列表
+	-------
+	@Returns:
+	dict, 返回的设备属性字典
+	-------
+	"""
+	authorize = json.load(open('./json/authorize.json', 'r'))
+	data = {"params": devs}
+	msg = postData('/miotspec/prop/get', data, authorize)
+	res = json.loads(msg)
+	return res
+
+def setDevAtt(devs: list) -> str:
+	"""
+	setDevAtt(devs) -> dict.
+	@description:
+	设置设备属性
+	-------
+	@param:
+	devs: list, 参数列表
+	-------
+	@Returns:
+	dict, 返回信息
+	-------
+	"""
+	authorize = json.load(open('./json/authorize.json', 'r'))
+	data = {"params": devs}
+	msg = postData('/miotspec/prop/set', data, authorize)
+	return msg
+
 if __name__ == '__main__':
 	# 获取设备列表
-	devs = getDevices(True)
-	print(devs)
+	# devs = getDevices(True)
+	# print(devs)
+
+	# 获取房间列表
+	# rooms = getRooms(True)
+	# print(rooms)
+
+	# 获取场景列表
+	scenes = getScenes(True, 0)
+	print(scenes)
+
+	# 执行手动场景
+	# runScene('控制台灯')
+
+	# 参数说明
+	# did: 设备ID
+	# siid: 功能分类ID
+	# piid: 设备属性ID
+	# aiid: 设备方法ID
+	# 从下述网站查询
+
+	# 米家产品库
+	# https://home.miot-spec.com/
+
+	# 获取全部设备列表
+	# 返回结果说明
+	# name: 设备名称
+	# did: 设备ID
+	# isOnline: 设备是否在线
+	# model: 设备产品型号, 根据这个去米家产品库查该产品相关的信息
+
+	# 获取设备属性，一次请求多个
+	# Atts = getDevAtt([{"did":"111111111","siid":2,"piid":1},{"did":"111111111","siid":2,"piid":6}])
+	# print(Atts)
+
+	# 设置设备属性
+	# res = setDevAtt([{"did":"111111111","siid":2,"piid":1,"value":True},{"did":"111111111","siid":2,"piid":6,"value":70}])
+	# print(res)
