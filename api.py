@@ -204,8 +204,8 @@ if __name__ == '__main__':
 	# print(rooms)
 
 	# 获取场景列表
-	scenes = getScenes(True, 0)
-	print(scenes)
+	# scenes = getScenes(True, 0)
+	# print(scenes)
 
 	# 执行手动场景
 	# runScene('控制台灯')
@@ -228,9 +228,13 @@ if __name__ == '__main__':
 	# model: 设备产品型号, 根据这个去米家产品库查该产品相关的信息
 
 	# 获取设备属性，一次请求多个
-	# Atts = getDevAtt([{"did":"111111111","siid":2,"piid":1},{"did":"111111111","siid":2,"piid":6}])
+	# Atts = getDevAtt([{"did":"111111111","siid":2,"piid":1},{"did":"111111111","siid":2,"piid":2},
+	# 	{"did":"111111111","siid":2,"piid":3},{"did":"111111111","siid":2,"piid":4}])
 	# print(Atts)
 
 	# 设置设备属性
-	# res = setDevAtt([{"did":"111111111","siid":2,"piid":1,"value":True},{"did":"111111111","siid":2,"piid":6,"value":70}])
+	# res = setDevAtt([{"did":"111111111","siid":2,"piid":1,"value":True},{"did":"111111111","siid":2,"piid":2,"value":100},
+	# 	{"did":"111111111","siid":2,"piid":3,"value":5000}])
 	# print(res)
+
+	pass
