@@ -1,5 +1,4 @@
-ref
 config*
 json/*
 !.gitkeep
-__pycache__
+*.pyc
