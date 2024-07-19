@@ -1,4 +1,8 @@
-config*
-json/*
+jsons/*
 !.gitkeep
 *.pyc
+build
+dist
+*.png
+*.egg-info
+scripts
