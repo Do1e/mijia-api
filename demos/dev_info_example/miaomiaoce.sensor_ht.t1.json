@@ -1,0 +1,42 @@
+{
+    "name": "小米米家电子温湿度计Pro",
+    "model": "miaomiaoce.sensor_ht.t1",
+    "properties": [
+        {
+            "name": "temperature",
+            "description": "温度",
+            "type": "float",
+            "rw": "r",
+            "unit": "celsius",
+            "range": [-30, 100],
+            "method": {
+                "siid": 2,
+                "piid": 1
+            }
+        },
+        {
+            "name": "relative-humidity",
+            "description": "相对湿度",
+            "type": "float",
+            "rw": "r",
+            "unit": "percentage",
+            "range": [0, 100],
+            "method": {
+                "siid": 2,
+                "piid": 2
+            }
+        },
+        {
+            "name": "battery-level",
+            "description": "电池电量",
+            "type": "uint",
+            "rw": "r",
+            "unit": "percentage",
+            "range": [0, 100],
+            "method": {
+                "siid": 3,
+                "piid": 1
+            }
+        }
+    ]
+}

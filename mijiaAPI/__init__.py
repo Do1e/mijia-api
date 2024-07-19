@@ -1,5 +1,6 @@
 from .login import mijiaLogin
 from .apis import mijiaAPI
+from .devices import mijiaDevices
 
 from .__version__ import (
     __title__,
