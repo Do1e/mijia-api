@@ -4,6 +4,9 @@ import sys
 sys.path.extend(['.', '..'])
 from mijiaAPI import mijiaLogin
 
+if not os.path.exists('jsons'):
+    os.mkdir('jsons')
+
 username = os.getenv('XIAOMI_USERNAME')
 password = os.getenv('XIAOMI_PASSWORD')
 api = mijiaLogin()
