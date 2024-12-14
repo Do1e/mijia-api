@@ -25,7 +25,7 @@ pip install mijiaAPI
   * `get_homes_list() -> list`：获取家庭列表，家庭字典中包含房间列表
   * `get_scenes_list(home_id: str) -> list`：获取手动场景列表，在 *米家->添加->手动控制* 中设置
   * `run_scene(scene_id: str) -> bool`：运行手动场景
-  * `get_consumable_items(did: str) -> list`：获取设备的耗材信息，`did`为设备id，在设备列表中获取
+  * `get_consumable_items(home_id: str) -> list`：获取设备的耗材信息
   * `get_devices_prop(data: list) -> list`：获取设备的属性
   * `set_devices_prop(data: list) -> list`：设置设备的属性
     * `data`为一个字典的列表，字典需要包含`did`, `siid`, `piid`，后面两个键可从 *https://home.miot-spec.com/spec/{model}* 中获取，其中`model`为设备的model，在设备列表中获取，如[米家台灯 1S](https://home.miot-spec.com/spec/yeelink.light.lamp4)。
