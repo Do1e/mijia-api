@@ -21,6 +21,7 @@ pip install mijiaAPI
 
 * `mijiaAPI`：API的实现，使用`mijiaLogin`登录后返回的信息进行初始化
   * `__init__(auth_data: dict)`：初始化
+  * `available -> bool`：传入的`auth_data`是否有效
   * `get_devices_list() -> list`：获取设备列表
   * `get_homes_list() -> list`：获取家庭列表，家庭字典中包含房间列表
   * `get_scenes_list(home_id: str) -> list`：获取手动场景列表，在 *米家->添加->手动控制* 中设置
