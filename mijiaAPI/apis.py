@@ -2,7 +2,7 @@ from typing import Union
 import requests
 import requests.cookies
 
-from .utils import defaultUA, post_data
+from .utils import defaultUA, post_data, PostDataError
 
 class mijiaAPI(object):
     def __init__(self, auth_data: dict):
@@ -24,6 +24,17 @@ class mijiaAPI(object):
         if data['code'] != 0:
             raise Exception(f'Failed to get data, {data["message"]}')
         return data['result']
+
+    @property
+    def available(self) -> bool:
+        """check if the API is available"""
+        uri = '/home/device_list'
+        data = {"getVirtualModel": False, "getHuamiDevices": 0}
+        try:
+            post_data(self.session, self.ssecurity, uri, data)
+            return True
+        except PostDataError:
+            return False
 
     def get_devices_list(self) -> list:
         """get devices list
