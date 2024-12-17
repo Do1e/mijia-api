@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 from time import sleep
 from .apis import mijiaAPI
 
@@ -19,16 +19,21 @@ class DevProp(object):
                f'  valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}'
 
 class mijiaDevices(object):
-    def __init__(self, api: mijiaAPI, dev_info: dict, sleep_time: float = 0.5):
+    def __init__(self, api: mijiaAPI, dev_info: dict,
+                 did: Optional[str] = None,
+                 sleep_time: Optional[Union[int, float]] = 0.5):
         self.api = api
         self.name = dev_info['name']
         self.model = dev_info['model']
         self.prop_list = {prop['name']: DevProp(prop) for prop in dev_info['properties']}
+        self.prop_list.update({prop['name'].replace('-', '_'): DevProp(prop) for prop in dev_info['properties'] if '-' in prop['name']})
+        self.did = did
         self.sleep_time = sleep_time
 
     def __str__(self):
+        prop_list = [str(v) for k, v in self.prop_list.items() if '_' not in k]
         return f'{self.name} ({self.model})\n' \
-               f'Properties:\n' + '\n'.join([str(v) for v in self.prop_list.values()])
+               f'Properties:\n' + '\n'.join(prop_list)
 
     def set(self, name: str, did: str, value: Union[bool, int]) -> Union[bool, int]:
         if name not in self.prop_list:
@@ -67,7 +72,19 @@ class mijiaDevices(object):
         sleep(self.sleep_time)
         return ret
 
-    def get(self, name: str, did: str) -> Union[bool, int]:
+    def set_v2(self, name: str, value: Union[bool, int], did: Optional[str] = None) -> Union[bool, int]:
+        if did is not None:
+            return self.set(name, did, value)
+        elif self.did is not None:
+            return self.set(name, self.did, value)
+        else:
+            raise ValueError('Please specify the did')
+
+    def get(self, name: str, did: Optional[str] = None) -> Union[bool, int]:
+        if did is None:
+            did = self.did
+        if did is None:
+            raise ValueError('Please specify the did')
         if name not in self.prop_list:
             raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
@@ -78,3 +95,16 @@ class mijiaDevices(object):
         ret = self.api.get_devices_prop([method])[0]['value']
         sleep(self.sleep_time)
         return ret
+
+    def __setattr__(self, name: str, value: Union[bool, int]) -> None:
+        if 'prop_list' in self.__dict__ and name in self.prop_list:
+            if not self.set_v2(name, value):
+                raise RuntimeError(f'Failed to set property: {name}')
+        else:
+            super().__setattr__(name, value)
+
+    def __getattr__(self, name: str) -> Union[bool, int]:
+        if 'prop_list' in self.__dict__ and name in self.prop_list:
+            return self.get(name)
+        else:
+            return super().__getattr__(name)

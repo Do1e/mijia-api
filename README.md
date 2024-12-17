@@ -34,9 +34,10 @@ pip install mijiaAPI
 
 
 * `mijiaDevices`：使用`mijiaAPI`和设备属性字典初始化，以便更方便地调用设备属性
-  * `__init__(api: mijiaAPI, dev_info: dict, sleep_time: float = 0.5)`：初始化，`dev_info`为设备属性，参考`demos/dev_info_example`，`sleep_time`为每次调用设备属性的间隔时间（注：设置属性后立刻获取属性会不符合预期，需要延迟一段时间）
+  * `__init__(api: mijiaAPI, dev_info: dict. did: str = None, sleep_time: float = 0.5)`：初始化，`dev_info`为设备属性，参考[demos/dev_info_example](demos/dev_info_example)，`sleep_time`为每次调用设备属性的间隔时间（注：设置属性后立刻获取属性会不符合预期，需要延迟一段时间）
   * `set(name: str, did: str, value: Union[bool, int]) -> Union[bool, int]`：设置设备属性
   * `get(name: str, did: str) -> Union[bool, int]`：获取设备属性
+  * v1.2.0 新增直接通过名称设置/获取属性，需要在初始化时传入`did`，详见[demos/test_devices_v2_light.py](demos/test_devices_v2_light.py)。名称中包含`-`的属性需要替换为`_`。
   * **欢迎大家把自己编写的设备属性字典分享到Issues中，方便大家使用**
 
 ## 致谢
