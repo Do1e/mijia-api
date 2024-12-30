@@ -5,8 +5,10 @@ import random
 import string
 
 import requests
+from lxml import etree
+import json
 
-from .urls import apiURL
+from .urls import apiURL, deviceURL
 
 defaultUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36 Edg/126.0.0.0'
 
@@ -41,3 +43,62 @@ def post_data(session: requests.Session, ssecurity: str, uri: str, data: dict) -
         raise PostDataError(ret.status_code, f'Failed to post data, {ret.text}')
     ret_data = ret.json()
     return ret_data
+
+def _get_device_info(device_model: str) -> dict:
+    response = response = requests.get(f'{deviceURL}{device_model}')
+    html = etree.HTML(response.text)
+    content = json.loads(str(html.xpath('//div[@id="app"]/@data-page')[0]))
+    result = {}
+    result['name'] = content['props']['product']['name']
+    result['model'] = content['props']['product']['model']
+    properties = []
+    actions = []
+
+    for siid in content['props']['spec']['services'].keys():
+        if 'properties' in content['props']['spec']['services'][siid].keys():
+            for piid in content['props']['spec']['services'][siid]['properties'].keys():
+                properties.append({
+                    'name': content['props']['spec']['services'][siid]['properties'][piid]['name'],
+                    'description': content['props']['spec']['services'][siid]['properties'][piid]['description'],
+                    'type': {
+                        # https://iot.mi.com/v2/new/doc/introduction/knowledge/spec
+                        'bool': 'bool',
+                        'uint8': 'int',
+                        'uint16': 'int',
+                        'uint32': 'int',
+                        'int8': 'int',
+                        'int16': 'int',
+                        'int32': 'int',
+                        'int64': 'int',
+                        'float': 'float',
+                        'string': 'string',
+                        'hex': 'hex'
+                    }[content['props']['spec']['services'][siid]['properties'][piid]['format']],
+                    'rw': ''.join([
+                        'r' if 'read'  in content['props']['spec']['services'][siid]['properties'][piid]['access'] else '',
+                        'w' if 'write' in content['props']['spec']['services'][siid]['properties'][piid]['access'] else '',
+                    ]),
+                    'unit': content['props']['spec']['services'][siid]['properties'][piid].get('unit', None),
+                    'range': content['props']['spec']['services'][siid]['properties'][piid]['value-range'][:2] if 'value-range' in content['props']['spec']['services'][siid]['properties'][piid].keys() else None,
+                    'method': {
+                        'siid': siid,
+                        'piid': piid
+                    }
+                })
+        if 'actions' in content['props']['spec']['services'][siid].keys():
+            for aiid in content['props']['spec']['services'][siid]['actions'].keys():
+                actions.append({
+                   'name': content['props']['spec']['services'][siid]['actions'][aiid]['name'],
+                   'description': content['props']['spec']['services'][siid]['actions'][aiid]['description'],
+                   'method': {
+                      'siid': int(siid),
+                      'aiid': int(aiid)
+                   },
+                   'in': [ { 'siid': siid, 'piid': in_piid } for in_piid in content['props']['spec']['services'][siid]['actions'][aiid]['in']]
+                })
+        
+
+    result['properties'] = properties
+    result['actions'] = actions
+
+    return result
