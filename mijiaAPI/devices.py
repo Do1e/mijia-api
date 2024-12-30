@@ -15,8 +15,17 @@ class DevProp(object):
         self.method = prop_dict['method']
 
     def __str__(self):
-        return f'{self.name}: {self.desc}\n' \
-               f'  valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}'
+        return f'  {self.name}: {self.desc}\n' \
+               f'    valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}'
+
+class DevAction(object):
+    def __init__(self, act_dict: dict):
+        self.name = act_dict['name']
+        self.desc = act_dict['description']
+        self.method = act_dict['method']
+
+    def __str__(self):
+        return f'  {self.name}: {self.desc}'
 
 class mijiaDevices(object):
     def __init__(self, api: mijiaAPI, dev_info: dict,
@@ -27,13 +36,19 @@ class mijiaDevices(object):
         self.model = dev_info['model']
         self.prop_list = {prop['name']: DevProp(prop) for prop in dev_info['properties']}
         self.prop_list.update({prop['name'].replace('-', '_'): DevProp(prop) for prop in dev_info['properties'] if '-' in prop['name']})
+        if 'actions' in dev_info:
+            self.action_list = {act['name']: DevAction(act) for act in dev_info['actions']}
+        else:
+            self.action_list = {}
         self.did = did
         self.sleep_time = sleep_time
 
     def __str__(self):
         prop_list = [str(v) for k, v in self.prop_list.items() if '_' not in k]
+        action_list = [str(v) for v in self.action_list.values()]
         return f'{self.name} ({self.model})\n' \
-               f'Properties:\n' + '\n'.join(prop_list)
+               'Properties:\n' + '\n'.join(prop_list) + '\n' \
+               'Actions:\n' + '\n'.join(action_list)
 
     def set(self, name: str, did: str, value: Union[bool, int]) -> Union[bool, int]:
         if name not in self.prop_list:
@@ -108,3 +123,19 @@ class mijiaDevices(object):
             return self.get(name)
         else:
             return super().__getattr__(name)
+
+    def run_action(self, name: str, did: Optional[str] = None, value: Optional[Union[list, tuple]] = None) -> bool:
+        if did is None:
+            did = self.did
+        if did is None:
+            raise ValueError('Please specify the did')
+        if name not in self.action_list:
+            raise ValueError(f'Unsupported action: {name}, available actions: {list(self.action_list.keys())}')
+        act = self.action_list[name]
+        method = act.method.copy()
+        method['did'] = did
+        if value is not None:
+            method['value'] = value
+        ret = self.api.run_action(method)['code'] == 0
+        sleep(self.sleep_time)
+        return ret

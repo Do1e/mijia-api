@@ -121,5 +121,15 @@
                 "value": 2
             }
         }
+    ],
+    "actions": [
+        {
+            "name": "toggle",
+            "description": "开关",
+            "method": {
+                "siid": 2,
+                "aiid": 1
+            }
+        }
     ]
 }

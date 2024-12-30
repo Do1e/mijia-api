@@ -74,6 +74,16 @@ dev_info = {
                 "piid": 2
             }
         },
+    ],
+    "actions": [
+        {
+            "name": "toggle",
+            "description": "开关",
+            "method": {
+                "siid": 3,
+                "aiid": 1
+            }
+        }
     ]
 }
 
@@ -94,3 +104,5 @@ print(device.get('target-temperature', did))
 print('---------------------')
 print(device.get('power-consumption', did))
 print(device.get('electric-power', did))
+print('---------------------')
+print(device.run_action('toggle', did))
