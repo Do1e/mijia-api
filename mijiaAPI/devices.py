@@ -1,10 +1,9 @@
 from typing import Union, Optional
+import json
+import re
+import requests
 from time import sleep
 from .apis import mijiaAPI
-
-import json
-import requests
-from lxml import etree
 from .urls import deviceURL
 
 class DevProp(object):
@@ -144,62 +143,61 @@ class mijiaDevices(object):
         ret = self.api.run_action(method)['code'] == 0
         sleep(self.sleep_time)
         return ret
-    
+
 def get_device_info(device_model: str) -> dict:
-    response = response = requests.get(f'{deviceURL}{device_model}')
-    html = etree.HTML(response.text)
-    content = json.loads(str(html.xpath('//div[@id="app"]/@data-page')[0]))
+    response = requests.get(deviceURL + device_model)
+    if response.status_code != 200:
+        raise RuntimeError(f'Failed to get device info')
+    content = re.search(r'data-page="(.*?)">', response.text)
+    if content is None:
+        raise RuntimeError(f'Failed to get device info')
+    content = content.group(1)
+    content = json.loads(content.replace('&quot;', '"'))
 
     result = {}
     result['name'] = content['props']['product']['name']
     result['model'] = content['props']['product']['model']
-    properties = []
-    actions = []
+    result['properties'] = []
+    result['actions'] = []
+    services = content['props']['spec']['services']
 
-    for siid in content['props']['spec']['services'].keys():
-        if 'properties' in content['props']['spec']['services'][siid].keys():
-            for piid in content['props']['spec']['services'][siid]['properties'].keys():
-                properties.append({
-                    'name': content['props']['spec']['services'][siid]['properties'][piid]['name'],
-                    'description': content['props']['spec']['services'][siid]['properties'][piid]['description'],
-                    # https://iot.mi.com/v2/new/doc/introduction/knowledge/spec
-                    'type': {
-                        'bool': 'bool',
-                        'uint8': 'int',
-                        'uint16': 'int',
-                        'uint32': 'int',
-                        'int8': 'int',
-                        'int16': 'int',
-                        'int32': 'int',
-                        'int64': 'int',
-                        'float': 'float',
-                        'string': 'string',
-                        'hex': 'hex'
-                    }[content['props']['spec']['services'][siid]['properties'][piid]['format']],
+    for siid in services:
+        if 'properties' in services[siid]:
+            for piid in services[siid]['properties']:
+                prop = services[siid]['properties'][piid]
+                if prop['format'].startswith('int'):
+                    prop_type = 'int'
+                elif prop['format'].startswith('uint'):
+                    prop_type = 'uint'
+                else:
+                    prop_type = prop['format']
+                item ={
+                    'name': prop['name'],
+                    'description': prop['description'],
+                    'type': prop_type,
                     'rw': ''.join([
-                        'r' if 'read'  in content['props']['spec']['services'][siid]['properties'][piid]['access'] else '',
-                        'w' if 'write' in content['props']['spec']['services'][siid]['properties'][piid]['access'] else '',
+                        'r' if 'read' in prop['access'] else '',
+                        'w' if 'write' in prop['access'] else ''
                     ]),
-                    'unit': content['props']['spec']['services'][siid]['properties'][piid].get('unit', None),
-                    'range': content['props']['spec']['services'][siid]['properties'][piid]['value-range'][:2] if 'value-range' in content['props']['spec']['services'][siid]['properties'][piid].keys() else None,
+                    'unit': prop.get('unit', None),
+                    'range': prop.get('value-range', None),
                     'method': {
-                        'siid': siid,
-                        'piid': piid
+                        'siid': int(siid),
+                        'piid': int(piid)
                     }
-                })
-        if 'actions' in content['props']['spec']['services'][siid].keys():
-            for aiid in content['props']['spec']['services'][siid]['actions'].keys():
-                actions.append({
-                    'name': content['props']['spec']['services'][siid]['actions'][aiid]['name'],
-                    'description': content['props']['spec']['services'][siid]['actions'][aiid]['description'],
+                }
+                if item['range'] is not None:
+                    item['range'] = item['range'][:2]
+                result['properties'].append({k: None if v == 'none' else v for k, v in item.items()})
+        if 'actions' in services[siid]:
+            for aiid in services[siid]['actions']:
+                act = services[siid]['actions'][aiid]
+                result['actions'].append({
+                    'name': act['name'],
+                    'description': act['description'],
                     'method': {
                         'siid': int(siid),
                         'aiid': int(aiid)
-                    },
-                    'in': [ { 'siid': siid, 'piid': in_piid } for in_piid in content['props']['spec']['services'][siid]['actions'][aiid]['in']]
+                    }
                 })
-        
-    result['properties'] = properties
-    result['actions'] = actions
-
     return result

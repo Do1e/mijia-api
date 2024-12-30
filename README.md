@@ -41,6 +41,7 @@ pip install mijiaAPI
   * `get(name: str, did: str) -> Union[bool, int]`：获取设备属性
   * v1.2.0 新增直接通过名称设置/获取属性，需要在初始化时传入`did`，详见[demos/test_devices_v2_light.py](demos/test_devices_v2_light.py)。名称中包含`-`的属性需要替换为`_`。
   * **欢迎大家把自己编写的设备属性字典分享到Issues中，方便大家使用**
+  * 也可以调用`get_device_info(device_model: str) -> dict`函数从[米家设备列表](https://home.miot-spec.com/)在线获取设备属性字典，详见[demos/test_get_device_info.py](demos/test_get_device_info.py)
 
 ## 致谢
 * [janzlan/mijia-api](https://gitee.com/janzlan/mijia-api/tree/master)
