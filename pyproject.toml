@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mijiaAPI"
+version = "0.0.0"
+description = "A Python API for Xiaomi Mijia"
+authors = ["Do1e <dpj.email@qq.com>"]
+license = "GPLv3"
+readme = "README.md"
+homepage = "https://github.com/Do1e/mijia-api"
+repository = "https://github.com/Do1e/mijia-api"
+packages = [
+    {include = "mijiaAPI"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+qrcode = "^8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
