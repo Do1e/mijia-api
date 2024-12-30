@@ -31,6 +31,8 @@ pip install mijiaAPI
   * `set_devices_prop(data: list) -> list`：设置设备的属性
     * `data`为一个字典的列表，字典需要包含`did`, `siid`, `piid`，后面两个键可从 *https://home.miot-spec.com/spec/{model}* 中获取，其中`model`为设备的model，在设备列表中获取，如[米家台灯 1S](https://home.miot-spec.com/spec/yeelink.light.lamp4)。
     * 网站上的方法并非全部可用，需要自行测试
+  * `run_action(data: dict) -> dict`：执行设备的action
+    * `data`为一个字典，需要包含`did`, `siid`, `aiid`，获取方法同上
 
 
 * `mijiaDevices`：使用`mijiaAPI`和设备属性字典初始化，以便更方便地调用设备属性

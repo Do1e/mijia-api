@@ -64,3 +64,8 @@ ret = api.set_devices_prop([
 print(f'Set device {name} properties:\n'
       f'Brightness: {"Success" if ret[0]["code"] == 0 else "Failed"}\n'
       f'Color temperature: {"Success" if ret[1]["code"] == 0 else "Failed"}')
+
+# ---------------------- run action ----------------------------
+did = devices[0]['did']
+ret = api.run_action({"did": did, "siid": 2, "aiid": 1})
+print(f'Switch on/off: {"Success" if ret["code"] == 0 else "Failed"}')
