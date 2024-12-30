@@ -6,3 +6,4 @@ dist
 *.png
 *.egg-info
 scripts
+.venv
