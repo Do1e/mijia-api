@@ -1,5 +1,5 @@
 # mijiaAPI
-小米米家设备的api，可以使用代码直接控制米家设备的功能
+小米米家设备的api，可以使用代码直接控制米家设备的功能，[Github link](https://github.com/Do1e/mijia-api)，[PyPI link](https://pypi.org/project/mijiaAPI/)。
 
 ## 安装
 ```bash
