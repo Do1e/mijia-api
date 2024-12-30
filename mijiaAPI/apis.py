@@ -147,3 +147,23 @@ class mijiaAPI(object):
         uri = '/miotspec/prop/set'
         data = {"params": data}
         return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+
+    def run_action(self, data: dict) -> dict:
+        """run action
+        mijiaAPI.run_action(data: dict) -> dict
+        @param
+        data: dict
+            dict keys:
+                - did: str, device id, get from get_devices_list
+                - siid: str, service id, get from https://home.miot-spec.com/spec/{model}, model from get_devices_list
+                - aiid: str, action id, get from https://home.miot-spec.com/spec/{model}, model from get_devices_list
+                - value: list, value to list
+            model xiaomi.feeder.pi2001 as an example:
+            {"did": "1234567890", "siid": 2, "aiid": 1, "value": [2]}, # Remote feeding (2 servings) of food
+        -------
+        @return
+        dict, result
+        """
+        uri = '/miotspec/action'
+        data = {"params": data}
+        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
