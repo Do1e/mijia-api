@@ -37,9 +37,9 @@ print('---------------------')
 print(f"{device.get('color-temperature', did)} {device.prop_list['color-temperature'].unit}")
 print(device.set('ct-delta', did, -10))
 print(f"{device.get('color-temperature', did)} {device.prop_list['color-temperature'].unit}")
-print(device.set('ct-adjust-alexa-increase', did, 1))
+print(device.set('ct-adjust-alexa', did, 1)) # increase
 print(f"{device.get('color-temperature', did)} {device.prop_list['color-temperature'].unit}")
-print(device.set('ct-adjust-alexa-decrease', did, 2))
+print(device.set('ct-adjust-alexa', did, 2)) # decrease
 print(f"{device.get('color-temperature', did)} {device.prop_list['color-temperature'].unit}")
 print('---------------------')
 print(device.run_action('toggle', did))

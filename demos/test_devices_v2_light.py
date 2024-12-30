@@ -37,7 +37,10 @@ print('---------------------')
 print(f"{device.color_temperature} {device.prop_list['color-temperature'].unit}")
 device.ct_delta = -10
 print(f"{device.color_temperature} {device.prop_list['color-temperature'].unit}")
-device.ct_adjust_alexa_increase = 1
+device.ct_adjust_alexa = 1
 print(f"{device.color_temperature} {device.prop_list['color-temperature'].unit}")
-device.ct_adjust_alexa_decrease = 2
+device.ct_adjust_alexa = 2
 print(f"{device.color_temperature} {device.prop_list['color-temperature'].unit}")
+print('---------------------')
+print(device.run_action('toggle'))
+

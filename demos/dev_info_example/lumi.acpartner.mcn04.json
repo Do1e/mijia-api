@@ -9,6 +9,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 3,
         "piid": 1
@@ -21,6 +22,28 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Cool"
+        },
+        {
+          "value": 1,
+          "description": "Heat"
+        },
+        {
+          "value": 2,
+          "description": "Auto"
+        },
+        {
+          "value": 3,
+          "description": "Fan"
+        },
+        {
+          "value": 4,
+          "description": "Dry"
+        }
+      ],
       "method": {
         "siid": 3,
         "piid": 2
@@ -33,6 +56,12 @@
       "rw": "r",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "No Faults"
+        }
+      ],
       "method": {
         "siid": 3,
         "piid": 3
@@ -48,6 +77,7 @@
         16,
         30
       ],
+      "value-list": null,
       "method": {
         "siid": 3,
         "piid": 4
@@ -60,6 +90,24 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Auto"
+        },
+        {
+          "value": 1,
+          "description": "Low"
+        },
+        {
+          "value": 2,
+          "description": "Medium"
+        },
+        {
+          "value": 3,
+          "description": "High"
+        }
+      ],
       "method": {
         "siid": 4,
         "piid": 2
@@ -72,6 +120,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 4,
         "piid": 4
@@ -87,6 +136,7 @@
         0,
         3.4e+38
       ],
+      "value-list": null,
       "method": {
         "siid": 7,
         "piid": 1
@@ -102,6 +152,7 @@
         0,
         3.4e+38
       ],
+      "value-list": null,
       "method": {
         "siid": 7,
         "piid": 2
@@ -117,6 +168,7 @@
         0,
         3.4e+38
       ],
+      "value-list": null,
       "method": {
         "siid": 7,
         "piid": 3
@@ -132,6 +184,7 @@
         0,
         3.4e+38
       ],
+      "value-list": null,
       "method": {
         "siid": 7,
         "piid": 4
@@ -144,6 +197,7 @@
       "rw": "w",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 1
@@ -159,6 +213,7 @@
         0,
         4294967295
       ],
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 2
@@ -174,6 +229,7 @@
         0,
         4294967295
       ],
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 3
@@ -186,6 +242,20 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 1,
+          "description": "AC-Plug"
+        },
+        {
+          "value": 2,
+          "description": "AC-Unplug"
+        },
+        {
+          "value": 5,
+          "description": "AC-Plug-10"
+        }
+      ],
       "method": {
         "siid": 8,
         "piid": 4
@@ -198,6 +268,16 @@
       "rw": "r",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 1,
+          "description": "No-status"
+        },
+        {
+          "value": 2,
+          "description": "Have-status"
+        }
+      ],
       "method": {
         "siid": 8,
         "piid": 5
@@ -210,6 +290,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 6
@@ -222,6 +303,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 7
@@ -234,6 +316,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 8
@@ -249,6 +332,7 @@
         1,
         59
       ],
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 9
@@ -261,6 +345,16 @@
       "rw": "r",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Normal"
+        },
+        {
+          "value": 1,
+          "description": "Quick-cool"
+        }
+      ],
       "method": {
         "siid": 8,
         "piid": 10
@@ -273,6 +367,7 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 8,
         "piid": 11
@@ -285,6 +380,16 @@
       "rw": "r",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Normal"
+        },
+        {
+          "value": 1,
+          "description": "Sleep"
+        }
+      ],
       "method": {
         "siid": 8,
         "piid": 12
@@ -297,6 +402,16 @@
       "rw": "rw",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Disable"
+        },
+        {
+          "value": 1,
+          "description": "Enable"
+        }
+      ],
       "method": {
         "siid": 9,
         "piid": 1
@@ -312,6 +427,7 @@
         1,
         991378198
       ],
+      "value-list": null,
       "method": {
         "siid": 9,
         "piid": 2
@@ -324,6 +440,16 @@
       "rw": "",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Normal"
+        },
+        {
+          "value": 2,
+          "description": "Abnormal"
+        }
+      ],
       "method": {
         "siid": 10,
         "piid": 1
@@ -336,6 +462,16 @@
       "rw": "",
       "unit": null,
       "range": null,
+      "value-list": [
+        {
+          "value": 0,
+          "description": "Normal"
+        },
+        {
+          "value": 2,
+          "description": "Abnormal"
+        }
+      ],
       "method": {
         "siid": 10,
         "piid": 2
@@ -351,6 +487,7 @@
         -200,
         200
       ],
+      "value-list": null,
       "method": {
         "siid": 11,
         "piid": 1
@@ -363,6 +500,7 @@
       "rw": "",
       "unit": null,
       "range": null,
+      "value-list": null,
       "method": {
         "siid": 11,
         "piid": 2

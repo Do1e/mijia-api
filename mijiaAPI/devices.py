@@ -16,11 +16,13 @@ class DevProp(object):
         self.rw = prop_dict['rw']
         self.unit = prop_dict['unit']
         self.range = prop_dict['range']
+        self.value_list = prop_dict.get('value-list', None)
         self.method = prop_dict['method']
 
     def __str__(self):
         return f'  {self.name}: {self.desc}\n' \
-               f'    valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}'
+               f'    valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}' + \
+               (('\n    ' + ', '.join([f'{item["value"]}: {item["description"]}' for item in self.value_list])) if self.value_list else '')
 
 class DevAction(object):
     def __init__(self, act_dict: dict):
@@ -60,6 +62,9 @@ class mijiaDevices(object):
         prop = self.prop_list[name]
         if 'w' not in prop.rw:
             raise ValueError(f'Property {name} is read-only')
+        if prop.value_list:
+            if value not in [item['value'] for item in prop.value_list]:
+                raise ValueError(f'Invalid value: {value}, should be in {prop.value_list}')
         if prop.type == 'bool':
             if not isinstance(value, bool):
                 raise ValueError(f'Invalid value for bool: {value}, should be True or False')
@@ -181,6 +186,7 @@ def get_device_info(device_model: str) -> dict:
                     ]),
                     'unit': prop.get('unit', None),
                     'range': prop.get('value-range', None),
+                    'value-list': prop.get('value-list', None),
                     'method': {
                         'siid': int(siid),
                         'piid': int(piid)

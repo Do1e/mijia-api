@@ -1,135 +1,157 @@
 {
-    "name": "米家台灯 1S",
-    "model": "yeelink.light.lamp4",
-    "properties": [
+  "name": "米家台灯 1S",
+  "model": "yeelink.light.lamp4",
+  "properties": [
+    {
+      "name": "on",
+      "description": "Switch Status",
+      "type": "bool",
+      "rw": "rw",
+      "unit": null,
+      "range": null,
+      "value-list": null,
+      "method": {
+        "siid": 2,
+        "piid": 1
+      }
+    },
+    {
+      "name": "brightness",
+      "description": "Brightness",
+      "type": "uint",
+      "rw": "rw",
+      "unit": "percentage",
+      "range": [
+        1,
+        100
+      ],
+      "value-list": null,
+      "method": {
+        "siid": 2,
+        "piid": 2
+      }
+    },
+    {
+      "name": "color-temperature",
+      "description": "Color Temperature",
+      "type": "uint",
+      "rw": "rw",
+      "unit": "kelvin",
+      "range": [
+        2600,
+        5000
+      ],
+      "value-list": null,
+      "method": {
+        "siid": 2,
+        "piid": 3
+      }
+    },
+    {
+      "name": "mode",
+      "description": "Mode",
+      "type": "uint",
+      "rw": "w",
+      "unit": null,
+      "range": null,
+      "value-list": [
         {
-            "name": "on",
-            "description": "开关",
-            "type": "bool",
-            "rw": "rw",
-            "unit": null,
-            "range": null,
-            "method": {
-                "siid": 2,
-                "piid": 1
-            }
+          "value": 0,
+          "description": "Reading"
         },
         {
-            "name": "brightness",
-            "description": "亮度",
-            "type": "uint",
-            "rw": "rw",
-            "unit": "percentage",
-            "range": [
-                1,
-                100
-            ],
-            "method": {
-                "siid": 2,
-                "piid": 2
-            }
+          "value": 1,
+          "description": "Computer"
         },
         {
-            "name": "color-temperature",
-            "description": "色温",
-            "type": "uint",
-            "rw": "rw",
-            "unit": "kelvin",
-            "range": [
-                2600,
-                5000
-            ],
-            "method": {
-                "siid": 2,
-                "piid": 3
-            }
+          "value": 2,
+          "description": "Night Reading"
         },
         {
-            "name": "mode",
-            "description": "模式，0-6分别为[Reading, Computer, Night Reading, Anti-blue, Effective Work, Candle, Twinkle]",
-            "type": "uint",
-            "rw": "w",
-            "unit": null,
-            "range": [
-                0,
-                6
-            ],
-            "method": {
-                "siid": 2,
-                "piid": 4
-            }
+          "value": 3,
+          "description": "Anti-blue"
         },
         {
-            "name": "brightness-delta",
-            "description": "百分比调节亮度",
-            "type": "int",
-            "rw": "w",
-            "unit": "percentage",
-            "range": [
-                -100,
-                100
-            ],
-            "method": {
-                "siid": 3,
-                "piid": 1
-            }
+          "value": 4,
+          "description": "Effective Work"
         },
         {
-            "name": "ct-delta",
-            "description": "百分比调节色温",
-            "type": "int",
-            "rw": "w",
-            "unit": "percentage",
-            "range": [
-                -100,
-                100
-            ],
-            "method": {
-                "siid": 3,
-                "piid": 2
-            }
+          "value": 5,
+          "description": "Candle"
         },
         {
-            "name": "ct-adjust-alexa-increase",
-            "description": "色温增加",
-            "type": "uint",
-            "rw": "w",
-            "unit": null,
-            "range": [
-                1,
-                1
-            ],
-            "method": {
-                "siid": 3,
-                "piid": 3,
-                "value": 1
-            }
-        },
-        {
-            "name": "ct-adjust-alexa-decrease",
-            "description": "色温减少",
-            "type": "uint",
-            "rw": "w",
-            "unit": null,
-            "range": [
-                2,
-                2
-            ],
-            "method": {
-                "siid": 3,
-                "piid": 3,
-                "value": 2
-            }
+          "value": 6,
+          "description": "Twinkle"
         }
-    ],
-    "actions": [
+      ],
+      "method": {
+        "siid": 2,
+        "piid": 4
+      }
+    },
+    {
+      "name": "brightness-delta",
+      "description": "Adjust brightness",
+      "type": "int",
+      "rw": "w",
+      "unit": "percentage",
+      "range": [
+        -100,
+        100
+      ],
+      "value-list": null,
+      "method": {
+        "siid": 3,
+        "piid": 1
+      }
+    },
+    {
+      "name": "ct-delta",
+      "description": "Adjust Color Temperature",
+      "type": "int",
+      "rw": "w",
+      "unit": "percentage",
+      "range": [
+        -100,
+        100
+      ],
+      "value-list": null,
+      "method": {
+        "siid": 3,
+        "piid": 2
+      }
+    },
+    {
+      "name": "ct-adjust-alexa",
+      "description": "Alexa Adjust Color Temperature",
+      "type": "uint",
+      "rw": "w",
+      "unit": null,
+      "range": null,
+      "value-list": [
         {
-            "name": "toggle",
-            "description": "开关",
-            "method": {
-                "siid": 2,
-                "aiid": 1
-            }
+          "value": 1,
+          "description": "Increase"
+        },
+        {
+          "value": 2,
+          "description": "Decrease"
         }
-    ]
+      ],
+      "method": {
+        "siid": 3,
+        "piid": 3
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "toggle",
+      "description": "Toggle",
+      "method": {
+        "siid": 2,
+        "aiid": 1
+      }
+    }
+  ]
 }
