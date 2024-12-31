@@ -3,7 +3,7 @@
 
 ## 安装
 ```bash
-python setup.py install
+poetry install
 ```
 或者
 ```bash
