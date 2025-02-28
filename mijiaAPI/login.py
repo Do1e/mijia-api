@@ -11,7 +11,7 @@ from qrcode import QRCode
 import requests
 
 from .urls import msgURL, loginURL, qrURL
-from .utils import defaultUA
+from .utils import defaultUA, _encrypt_password_md5
 
 class LoginError(Exception):
     def __init__(self, code: int, message: str):
@@ -28,7 +28,7 @@ class mijiaLogin(object):
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br, zstd',
             'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Cookie': f'deviceId={self.deviceId}; sdkVersion=3.4.1'
+            'Cookie': f'deviceId={self.deviceId}; sdkVersion=3.9'
         })
 
     def _get_index(self) -> Tuple[requests.Session, dict]:
@@ -62,8 +62,9 @@ class mijiaLogin(object):
             'sid': 'xiaomiio',
             '_json': 'true',
             'user': username,
-            'hash': (hashlib.md5(password.encode()).hexdigest().upper() + '0' * 32)[:32],
+            'hash': _encrypt_password_md5(password),
         }
+        self.session.cookies.update({'userId': username})
         ret = self.session.post(loginURL, data=post_data)
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to post login page, {ret.text}')
