@@ -160,8 +160,8 @@ def get_device_info(device_model: str) -> dict:
     content = json.loads(content.replace('&quot;', '"'))
 
     result = {}
-    result['name'] = content['props']['product']['name']
-    result['model'] = content['props']['product']['model']
+    result['name'] = content['props']['spec']['name']
+    result['model'] = content['props']['spec']['model']
     result['properties'] = []
     result['actions'] = []
     services = content['props']['spec']['services']
