@@ -166,6 +166,8 @@ def get_device_info(device_model: str) -> dict:
     result['actions'] = []
     services = content['props']['spec']['services']
 
+    properties_name = []
+    actions_name = []
     for siid in services:
         if 'properties' in services[siid]:
             for piid in services[siid]['properties']:
@@ -194,10 +196,16 @@ def get_device_info(device_model: str) -> dict:
                 }
                 if item['range'] is not None:
                     item['range'] = item['range']
+                if item['name'] in properties_name:
+                    item["name"] = f'{services[siid]['name']}-{item["name"]}'
+                properties_name.append(item['name'])
                 result['properties'].append({k: None if v == 'none' else v for k, v in item.items()})
         if 'actions' in services[siid]:
             for aiid in services[siid]['actions']:
                 act = services[siid]['actions'][aiid]
+                if act['name'] in actions_name:
+                    act['name'] = f'{services[siid]["name"]}-{act["name"]}'
+                actions_name.append(act['name'])
                 result['actions'].append({
                     'name': act['name'],
                     'description': act['description'],
