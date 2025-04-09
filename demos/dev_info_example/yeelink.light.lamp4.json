@@ -23,7 +23,8 @@
       "unit": "percentage",
       "range": [
         1,
-        100
+        100,
+        1
       ],
       "value-list": null,
       "method": {
@@ -39,7 +40,8 @@
       "unit": "kelvin",
       "range": [
         2600,
-        5000
+        5000,
+        1
       ],
       "value-list": null,
       "method": {
@@ -97,7 +99,8 @@
       "unit": "percentage",
       "range": [
         -100,
-        100
+        100,
+        1
       ],
       "value-list": null,
       "method": {
@@ -113,7 +116,8 @@
       "unit": "percentage",
       "range": [
         -100,
-        100
+        100,
+        1
       ],
       "value-list": null,
       "method": {

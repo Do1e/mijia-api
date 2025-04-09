@@ -69,21 +69,21 @@ class mijiaDevices(object):
             if not isinstance(value, bool):
                 raise ValueError(f'Invalid value for bool: {value}, should be True or False')
         elif prop.type in ['int', 'uint']:
-            try:
-                value = int(value)
-                if prop.range:
-                    if value < prop.range[0] or value > prop.range[1]:
-                        raise ValueError(f'Value out of range: {value}, should be in range {prop.range}')
-            except ValueError:
-                raise ValueError(f'Invalid value for int: {value}, should be an integer')
+            value = int(value)
+            if prop.range:
+                if value < prop.range[0] or value > prop.range[1]:
+                    raise ValueError(f'Value out of range: {value}, should be in range {prop.range[:2]}')
+                if len(prop.range) >= 3 and prop.range[2] != 1:
+                    if (value - prop.range[0]) % prop.range[2] != 0:
+                        raise ValueError(f'Invalid value: {value}, should be in range {prop.range[:2]} with step {prop.range[2]}')
         elif prop.type == 'float':
-            try:
-                value = float(value)
-                if prop.range:
-                    if value < prop.range[0] or value > prop.range[1]:
-                        raise ValueError(f'Value out of range: {value}, should be in range {prop.range}')
-            except ValueError:
-                raise ValueError(f'Invalid value for float: {value}, should be a float')
+            value = float(value)
+            if prop.range:
+                if value < prop.range[0] or value > prop.range[1]:
+                    raise ValueError(f'Value out of range: {value}, should be in range {prop.range[:2]}')
+                if len(prop.range) >= 3 and isinstance(prop.range[2], int):
+                    if int(value - prop.range[0]) % prop.range[2] != 0:
+                        raise ValueError(f'Invalid value: {value}, should be in range {prop.range[:2]} with step {prop.range[2]}')
         elif prop.type == 'string':
             if not isinstance(value, str):
                 raise ValueError(f'Invalid value for string: {value}, should be a string')
@@ -193,7 +193,7 @@ def get_device_info(device_model: str) -> dict:
                     }
                 }
                 if item['range'] is not None:
-                    item['range'] = item['range'][:2]
+                    item['range'] = item['range']
                 result['properties'].append({k: None if v == 'none' else v for k, v in item.items()})
         if 'actions' in services[siid]:
             for aiid in services[siid]['actions']:

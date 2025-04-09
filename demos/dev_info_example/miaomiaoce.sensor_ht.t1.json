@@ -10,7 +10,8 @@
       "unit": "celsius",
       "range": [
         -30,
-        100
+        100,
+        0.1
       ],
       "value-list": null,
       "method": {
@@ -26,7 +27,8 @@
       "unit": "percentage",
       "range": [
         0,
-        100
+        100,
+        0.1
       ],
       "value-list": null,
       "method": {
@@ -42,7 +44,8 @@
       "unit": "percentage",
       "range": [
         0,
-        100
+        100,
+        1
       ],
       "value-list": null,
       "method": {
