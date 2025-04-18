@@ -16,7 +16,7 @@ pip install mijiaAPI
 有三个类分别用于登录和API调用
 
 * `mijiaLogin`：登录小米账号，获取控制设备必须的`userId`, `ssecurity`, `deviceId`, `serviceToken`，方法列表
-  * `login(username: str, password: str) -> dict`：账号密码登录，返回上述信息
+  * `login(username: str, password: str) -> dict`：账号密码登录，返回上述信息。<span style="color:#dd4f4e">注意，目前这一方法大概率遇到手机验证码，请尽可能使用`QRlogin`。</span>
   * `QRlogin() -> dict`：扫描二维码登录，返回上述信息（会在支持tty的终端打印二维码，若打印识别可查看当前文件夹下的`qr.png`）
 
 * `mijiaAPI`：API的实现，使用`mijiaLogin`登录后返回的信息进行初始化
