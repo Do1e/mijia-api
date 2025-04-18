@@ -4,6 +4,7 @@ import json
 import os
 import random
 import string
+import sys
 import time
 from urllib import parse
 
@@ -54,6 +55,11 @@ class mijiaLogin(object):
         @return
         dict, data for authorization, including userId, ssecurity, deviceId, serviceToken
         """
+        warning_msg = 'WARNING: there is a high probability of verification code with account and password. Please try other login methods'
+        if sys.stdout.isatty():
+            print(f'\033[33;1m{warning_msg}\033[0m')
+        else:
+            print(warning_msg)
         data = self._get_index()
         post_data = {
             'qs': data['qs'],
@@ -72,6 +78,8 @@ class mijiaLogin(object):
             raise LoginError(ret_data['code'], ret_data['desc'])
         if 'location' not in ret_data:
             raise LoginError(-1, 'Failed to get location')
+        if 'notificationUrl' in ret_data:
+            raise LoginError(-1, 'Verification code required, please try other login methods')
         auth_data = {
             'userId': ret_data['userId'],
             'ssecurity': ret_data['ssecurity'],
