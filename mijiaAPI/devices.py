@@ -197,7 +197,7 @@ def get_device_info(device_model: str) -> dict:
                 if item['range'] is not None:
                     item['range'] = item['range']
                 if item['name'] in properties_name:
-                    item["name"] = f'{services[siid]['name']}-{item["name"]}'
+                    item["name"] = f'{services[siid]["name"]}-{item["name"]}'
                 properties_name.append(item['name'])
                 result['properties'].append({k: None if v == 'none' else v for k, v in item.items()})
         if 'actions' in services[siid]:
