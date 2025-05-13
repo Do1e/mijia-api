@@ -133,7 +133,7 @@ class mijiaDevices(object):
         else:
             return super().__getattr__(name)
 
-    def run_action(self, name: str, did: Optional[str] = None, value: Optional[Union[list, tuple]] = None) -> bool:
+    def run_action(self, name: str, did: Optional[str] = None, value: Optional[Union[list, tuple]] = None, **kwargs) -> bool:
         if did is None:
             did = self.did
         if did is None:
@@ -145,6 +145,13 @@ class mijiaDevices(object):
         method['did'] = did
         if value is not None:
             method['value'] = value
+        if kwargs:
+            for k, v in kwargs.items():
+                if k.startswith("_"):
+                    k = k[1:]
+                if k in method:
+                    raise ValueError(f'Invalid argument: {k}, available arguments: {list(method.keys())}')
+                method[k] = v
         ret = self.api.run_action(method)['code'] == 0
         sleep(self.sleep_time)
         return ret
