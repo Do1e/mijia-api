@@ -156,6 +156,32 @@ class mijiaDevices(object):
         sleep(self.sleep_time)
         return ret
 
+class mijiaDevicesV2(mijiaDevices):
+    def __init__(self,
+                 api: mijiaAPI,
+                 dev_name: str,
+                 sleep_time: Optional[Union[int, float]] = 0.5):
+        self.api = api
+        self.devname = dev_name
+        dev_info, did = self.get_device_info()
+        super().__init__(api, dev_info, did, sleep_time)
+
+    def get_device_info(self) -> tuple[dict, str]:
+        devices_list = self.api.get_devices_list()
+        # noinspection PyTypeChecker
+        matches = [device for device in devices_list['list'] if device['name'] == self.devname]
+
+        if not matches:
+            raise ValueError(f"未找到名为 {self.devname} 的设备")
+        elif len(matches) > 1:
+            raise ValueError(f"存在多个名为 {self.devname} 的设备")
+        else:
+            did = matches[0]['did']
+            model = matches[0]['model']
+            dev_info = get_device_info(model)
+
+            return dev_info, did
+
 def get_device_info(device_model: str) -> dict:
     response = requests.get(deviceURL + device_model)
     if response.status_code != 200:
