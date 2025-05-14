@@ -1,5 +1,5 @@
 sid = 'xiaomiio'
-msgURL = 'https://account.xiaomi.com/pass/serviceLogin?sid=%s&_json=true' % sid
+msgURL = f'https://account.xiaomi.com/pass/serviceLogin?sid={sid}&_json=true'
 loginURL = 'https://account.xiaomi.com/pass/serviceLoginAuth2'
 qrURL = 'https://account.xiaomi.com/longPolling/loginUrl'
 apiURL = 'https://api.io.mi.com/app'

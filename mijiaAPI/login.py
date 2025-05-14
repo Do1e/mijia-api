@@ -1,4 +1,3 @@
-from typing import Tuple
 import hashlib
 import json
 import os
@@ -22,6 +21,8 @@ class LoginError(Exception):
 
 class mijiaLogin(object):
     def __init__(self):
+        self.auth_data = None
+
         self.deviceId = ''.join(random.sample(string.digits + string.ascii_letters, 16))
         self.session = requests.Session()
         self.session.headers.update({
@@ -32,7 +33,7 @@ class mijiaLogin(object):
             'Cookie': f'deviceId={self.deviceId}; sdkVersion=3.4.1'
         })
 
-    def _get_index(self) -> Tuple[requests.Session, dict]:
+    def _get_index(self) -> dict[str, str]:
         ret = self.session.get(msgURL)
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get index page, {ret.text}')
