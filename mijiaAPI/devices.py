@@ -34,10 +34,24 @@ class DevAction(object):
         return f'  {self.name}: {self.desc}'
 
 class mijiaDevices(object):
-    def __init__(self, api: mijiaAPI, dev_info: dict,
+    def __init__(self, api: mijiaAPI,
+                 dev_info: Optional[dict] = None,
+                 dev_name: Optional[str] = None,
                  did: Optional[str] = None,
                  sleep_time: Optional[Union[int, float]] = 0.5):
         self.api = api
+        if dev_info is None:
+            if dev_name is None:
+                raise ValueError('Please specify the device name or device info')
+            devices_list = self.api.get_devices_list()
+            matches = [device for device in devices_list['list'] if device['name'] == dev_name]
+            if not matches:
+                raise ValueError(f"Device {dev_name} not found")
+            elif len(matches) > 1:
+                raise ValueError(f"Multiple devices named {dev_name} found")
+            else:
+                dev_info = get_device_info(matches[0]['model'])
+                did = matches[0]['did']
         self.name = dev_info['name']
         self.model = dev_info['model']
         self.prop_list = {prop['name']: DevProp(prop) for prop in dev_info['properties']}
@@ -150,37 +164,11 @@ class mijiaDevices(object):
                 if k.startswith("_"):
                     k = k[1:]
                 if k in method:
-                    raise ValueError(f'Invalid argument: {k}, available arguments: {list(method.keys())}')
+                    raise ValueError(f'Invalid argument: {k}. Do not use arguments in ({", ".join(method.keys())})')
                 method[k] = v
         ret = self.api.run_action(method)['code'] == 0
         sleep(self.sleep_time)
         return ret
-
-class mijiaDevicesV2(mijiaDevices):
-    def __init__(self,
-                 api: mijiaAPI,
-                 dev_name: str,
-                 sleep_time: Optional[Union[int, float]] = 0.5):
-        self.api = api
-        self.devname = dev_name
-        dev_info, did = self.get_device_info()
-        super().__init__(api, dev_info, did, sleep_time)
-
-    def get_device_info(self) -> tuple[dict, str]:
-        devices_list = self.api.get_devices_list()
-        # noinspection PyTypeChecker
-        matches = [device for device in devices_list['list'] if device['name'] == self.devname]
-
-        if not matches:
-            raise ValueError(f"未找到名为 {self.devname} 的设备")
-        elif len(matches) > 1:
-            raise ValueError(f"存在多个名为 {self.devname} 的设备")
-        else:
-            did = matches[0]['did']
-            model = matches[0]['model']
-            dev_info = get_device_info(model)
-
-            return dev_info, did
 
 def get_device_info(device_model: str) -> dict:
     response = requests.get(deviceURL + device_model)
