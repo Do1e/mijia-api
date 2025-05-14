@@ -22,19 +22,10 @@ class mijiaAPI(object):
         })
 
     @staticmethod
-    def _post_process(data: dict) -> Union[list, bool, dict]:
+    def _post_process(data: dict) -> Union[list, bool]:
         if data['code'] != 0:
             raise Exception(f'Failed to get data, {data["message"]}')
-        if 'result' not in data:
-            raise RuntimeError('Invalid data format')
-        result = data['result'][0] if isinstance(data['result'], list) else data['result']
-        if 'code' in result:
-            if result['code'] != 0:
-                raise RuntimeError(f'Failed to get data, {ERROR_CODE.get(str(result["code"]))}')
-            if 'result' not in result:
-                raise RuntimeError('Invalid data format')
-            return result['result']
-        return result
+        return data['result']
 
     @property
     def available(self) -> bool:
