@@ -19,25 +19,6 @@ pip install mijiaAPI
 * `login(username: str, password: str) -> dict`：账号密码登录，返回上述信息。**注意，目前这一方法大概率遇到手机验证码，请尽可能使用`QRlogin`。**
 * `QRlogin() -> dict`：扫描二维码登录，返回上述信息（会在支持tty的终端打印二维码，若打印识别可查看当前文件夹下的`qr.png`）
 
-**手动登录方法**
-
-可以使用浏览器，手动获取`userId`, `ssecurity`, `deviceId`, `serviceToken`。当然我还是更推荐大家使用扫码登录，但大家也可以根据下述步骤了解如何获取这些信息。
-
-打开浏览器访问 https://account.xiaomi.com/pass/serviceLogin?sid=xiaomiio&_json=true ，会得到下述信息，复制location中的url到新的界面打开：
-
-```text
-&&&START&&&{"serviceParam":"{\"checkSafePhone\":false,\"checkSafeAddress\":false,\"lsrp_score\":0.0}","qs":"%3Fsid%3Dxiaomiio%26_json%3Dtrue","code":70016,"description":"登录验证失败","securityStatus":0,"_sign":"0psXfr43eNI0IX6q9Suk3qWbRqU=","sid":"xiaomiio","result":"error","captchaUrl":null,"callback":"https://sts.api.io.mi.com/sts","location":"https://account.xiaomi.com/fe/service/login?_json=true&sid=xiaomiio&qs=%253Fsid%253Dxiaomiio%2526_json%253Dtrue&callback=.........","pwd":0,"child":0,"desc":"登录验证失败"}
-```
-
-打开后会进入小米的登录界面（如果直接显示了`ok`，是因为保存了之前的cookie，建议使用无痕窗口重新开始上述步骤），此时需要先按下 `F12` 打开开发者工具，切换到`Network`选项卡，之后可以输入账号密码或者扫码登录。完成后页面会显示一个`ok`。
-
-此时在网络选项卡中按下`Ctrl+F`，搜索上述所需的`userId`, `ssecurity`, `deviceId`, `serviceToken`即可。
-
-或者筛选请求：
-1. `https://sts.api.io.mi.com/sts`，其中的`set-cookie`中包含`userId`和`serviceToken`（`=`到`;`前止）。
-2. `https://account.xiaomi.com/pass/serviceLoginAuth2/end`，其中的`extension-pragma`中包含`ssecurity`（`:"`到`"`前止）。
-3. `https://account.xiaomi.com/identity/authStart`，其中的`cookie`中包含`deviceId`（`=`到`;`前止）。
-
 
 ### API
 
@@ -57,6 +38,8 @@ pip install mijiaAPI
   * `data`为一个字典，需要包含`did`, `siid`, `aiid`，获取方法同上
 
 ### 针对设备的封装
+
+最简单的使用方法是直接使用自然语言调用小爱音箱，参见[demos/test_device_wifispeaker.py](demos/test_device_wifispeaker.py)
 
 `mijiaDevices`：使用`mijiaAPI`和设备属性字典初始化，以便更方便地调用设备属性
 * `__init__(api: mijiaAPI, dev_info: dict. did: str = None, sleep_time: float = 0.5)`：初始化，`dev_info`为设备属性，参考[demos/dev_info_example](demos/dev_info_example)，`sleep_time`为每次调用设备属性的间隔时间（注：设置属性后立刻获取属性会不符合预期，需要延迟一段时间）
