@@ -6,7 +6,7 @@ from time import sleep
 from .apis import mijiaAPI
 from .code import ERROR_CODE
 from .urls import deviceURL
-
+from .logger import logger
 
 class DevProp(object):
     def __init__(self, prop_dict: dict):
@@ -73,7 +73,7 @@ class mijiaDevices(object):
         """
         assert dev_info is not None or dev_name is not None, "Either 'dev_info' or 'dev_name' must be provided."
         if dev_info is not None and dev_name is not None:
-            print("Warning: Both 'dev_info' and 'dev_name' provided. Using 'dev_info' for initialization.")
+            logger.warning("Both 'dev_info' and 'dev_name' provided. Using 'dev_info' for initialization.")
 
         self.api = api
         if dev_info is None:

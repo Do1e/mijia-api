@@ -12,6 +12,7 @@ import requests
 
 from .urls import msgURL, loginURL, qrURL, accountURL
 from .utils import defaultUA
+from .logger import logger
 
 
 class LoginError(Exception):
@@ -66,9 +67,9 @@ class mijiaLogin(object):
                 self.save_path = os.path.abspath(self.save_path)
             with open(self.save_path, 'w') as f:
                 json.dump(self.auth_data, f, indent=2)
-            print(f'Auth data saved to [{self.save_path}]')
+            logger.info(f'Auth data saved to [{self.save_path}]')
         else:
-            print('Auth data not saved')
+            logger.info('Auth data not saved')
 
     def login(self, username: str, password: str) -> dict:
         """login with username and password
@@ -81,11 +82,7 @@ class mijiaLogin(object):
         @return
         dict, data for authorization, including userId, ssecurity, deviceId, serviceToken
         """
-        warning_msg = 'WARNING: there is a high probability of verification code with account and password. Please try other login methods'
-        if sys.stdout.isatty():
-            print(f'\033[33;1m{warning_msg}\033[0m')
-        else:
-            print(warning_msg)
+        logger.warning('There is a high probability of verification code with account and password. Please try other login methods')
         data = self._get_index()
         post_data = {
             'qs': data['qs'],
@@ -125,7 +122,7 @@ class mijiaLogin(object):
 
     @staticmethod
     def _print_qr(loginurl: str, box_size: int = 10) -> None:
-        print('Scan the QR code below with Mi Home app')
+        logger.info('Scan the QR code below with Mi Home app')
         qr = QRCode(border=1, box_size=box_size)
         qr.add_data(loginurl)
         qr.make_image().save('qr.png')
@@ -133,8 +130,10 @@ class mijiaLogin(object):
             qr.print_ascii(invert=True, tty=True)
         except OSError:
             qr.print_ascii(invert=True, tty=False)
-            print('If the QR code can not be scanned, please change the font of the terminal, such as "Maple Mono", "Fira Code", etc.')
-            print('Or just use the qr.png file in the current directory.')
+            logger.info('If the QR code can not be scanned, '
+                        'please change the font of the terminal, '
+                        'such as "Maple Mono", "Fira Code", etc.\n'
+                        'Or just use the qr.png file in the current directory.')
 
     def QRlogin(self) -> dict:
         """login with QR code
