@@ -1,18 +1,21 @@
-from typing import Optional
 import hashlib
 import json
 import os
 import random
+import re
 import string
 import time
+from datetime import datetime
+from typing import Optional
 from urllib import parse
 
-from qrcode import QRCode
+import pytz
 import requests
+from qrcode import QRCode
 
+from .logger import logger
 from .urls import msgURL, loginURL, qrURL, accountURL
 from .utils import defaultUA
-from .logger import logger
 
 
 class LoginError(Exception):
@@ -94,6 +97,40 @@ class mijiaLogin(object):
         }
         return data
 
+    @staticmethod
+    def extract_latest_gmt_datetime(data: dict) -> datetime:
+        """
+        提取过期时间并转换为中国时区。
+
+        Args:
+            data (dict): 用户凭证数据，包含GMT时间的键值对。
+
+        Returns:
+            datetime: 转换后的中国时区时间。
+
+        Raises:
+            LoginError: 如果没有找到GMT时间键或解析失败，抛出登录错误。
+        """
+
+        gmt_time_keys = [
+            k for k in data.keys() if
+            isinstance(k, str) and re.match(r'\d{2}-[A-Za-z]{3}-\d{4} \d{2}:\d{2}:\d{2} GMT', k)
+        ]
+
+        if not gmt_time_keys:
+            raise LoginError(-1, 'No GMT time keys found in the data')
+
+        parsed_times = [datetime.strptime(k, '%d-%b-%Y %H:%M:%S GMT') for k in gmt_time_keys]
+        latest_utc_time = max(parsed_times)
+
+        utc_zone = pytz.timezone('UTC')
+        latest_utc_time = utc_zone.localize(latest_utc_time)
+
+        china_zone = pytz.timezone('Asia/Shanghai')
+        china_time = latest_utc_time.astimezone(china_zone)
+
+        return china_time
+
     def _save_auth(self) -> None:
         """
         保存认证数据到文件。
@@ -127,7 +164,8 @@ class mijiaLogin(object):
         Raises:
             LoginError: 登录失败时抛出。
         """
-        logger.warning('There is a high probability of verification code with account and password. Please try other login methods')
+        logger.warning(
+            'There is a high probability of verification code with account and password. Please try other login methods')
         data = self._get_index()
         post_data = {
             'qs': data['qs'],
@@ -148,21 +186,22 @@ class mijiaLogin(object):
             raise LoginError(-1, 'Failed to get location')
         if 'notificationUrl' in ret_data:
             raise LoginError(-1, 'Verification code required, please try other login methods')
-        auth_data = {
-            'userId': ret_data['userId'],
-            'ssecurity': ret_data['ssecurity'],
-            'deviceId': data['deviceId'],
-        }
         ret = self.session.get(ret_data['location'])
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get location, {ret.text}')
         cookies = self.session.cookies.get_dict()
-        auth_data['serviceToken'] = cookies['serviceToken']
-        self.auth_data = auth_data
-        self.auth_data.update(self._get_account(auth_data['userId']))
+
+        self.auth_data = {
+            'userId': ret_data['userId'],
+            'ssecurity': ret_data['ssecurity'],
+            'deviceId': data['deviceId'],
+            'serviceToken': cookies['serviceToken'],
+            'expireTime': self.extract_latest_gmt_datetime(ret_data).strftime('%Y-%m-%d %H:%M:%S'),
+            **self._get_account(ret_data['userId'])
+        }
 
         self._save_auth()
-        return auth_data
+        return self.auth_data
 
     @staticmethod
     def _print_qr(loginurl: str, box_size: int = 10) -> None:
@@ -232,21 +271,22 @@ class mijiaLogin(object):
         ret_data = json.loads(ret.text[11:])
         if ret_data['code'] != 0:
             raise LoginError(ret_data['code'], ret_data['desc'])
-        auth_data = {
-            'userId': ret_data['userId'],
-            'ssecurity': ret_data['ssecurity'],
-            'deviceId': data['deviceId'],
-        }
         ret = self.session.get(ret_data['location'])
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get location, {ret.text}')
         cookies = self.session.cookies.get_dict()
-        auth_data['serviceToken'] = cookies['serviceToken']
-        self.auth_data = auth_data
-        self.auth_data.update(self._get_account(auth_data['userId']))
+
+        self.auth_data = {
+            'userId': ret_data['userId'],
+            'ssecurity': ret_data['ssecurity'],
+            'deviceId': data['deviceId'],
+            'serviceToken': cookies['serviceToken'],
+            'expireTime': self.extract_latest_gmt_datetime(ret_data).strftime('%Y-%m-%d %H:%M:%S'),
+            **self._get_account(ret_data['userId'])
+        }
 
         self._save_auth()
-        return auth_data
+        return self.auth_data
 
     def __del__(self):
         """

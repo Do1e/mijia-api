@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Union
+
 import requests
 import requests.cookies
 
@@ -16,8 +18,11 @@ class mijiaAPI(object):
         Raises:
             Exception: 当授权数据不完整时抛出异常。
         """
-        if any(k not in auth_data for k in ['userId', 'deviceId', 'ssecurity', 'serviceToken']):
+        if any(k not in auth_data for k in ['userId', 'deviceId', 'ssecurity', 'serviceToken', 'expireTime']):
             raise Exception('Invalid authorize data')
+        expire_time = datetime.strptime(auth_data['expireTime'], '%Y-%m-%d %H:%M:%S')
+        if expire_time < datetime.now():
+            raise Exception('Authorize data expired')
         self.userId = auth_data['userId']
         self.ssecurity = auth_data['ssecurity']
         self.session = requests.Session()
