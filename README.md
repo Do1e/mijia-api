@@ -39,7 +39,7 @@ pip install mijiaAPI
 
 ### 针对设备的封装
 
-最简单的使用方法是直接使用自然语言调用小爱音箱，参见[demos/test_device_wifispeaker.py](demos/test_device_wifispeaker.py)
+最简单的使用方法是直接使用自然语言调用小爱音箱，参见[demos/test_devices_wifispeaker.py](demos/test_devices_wifispeaker.py)
 
 `mijiaDevices`：使用`mijiaAPI`和设备属性字典初始化，以便更方便地调用设备属性
 * `__init__(api: mijiaAPI, dev_info: dict. did: str = None, sleep_time: float = 0.5)`：初始化，`dev_info`为设备属性，参考[demos/dev_info_example](demos/dev_info_example)，`sleep_time`为每次调用设备属性的间隔时间（注：设置属性后立刻获取属性会不符合预期，需要延迟一段时间）
