@@ -10,8 +10,9 @@ from urllib import parse
 from qrcode import QRCode
 import requests
 
-from .urls import msgURL, loginURL, qrURL
+from .urls import msgURL, loginURL, qrURL, accountURL
 from .utils import defaultUA
+
 
 class LoginError(Exception):
     def __init__(self, code: int, message: str):
@@ -19,9 +20,12 @@ class LoginError(Exception):
         self.message = message
         super().__init__(f'Error code: {code}, message: {message}')
 
+
 class mijiaLogin(object):
-    def __init__(self):
+    def __init__(self, save_auth=True, save_path='jsons/auth.json'):
         self.auth_data = None
+        self.save_auth = save_auth
+        self.save_path = save_path
 
         self.deviceId = ''.join(random.sample(string.digits + string.ascii_letters, 16))
         self.session = requests.Session()
@@ -40,10 +44,31 @@ class mijiaLogin(object):
         ret_data = json.loads(ret.text[11:])
         data = {'deviceId': self.deviceId}
         data.update({
-            k: v for k, v in ret_data.items() \
+            k: v for k, v in ret_data.items()
             if k in ['qs', '_sign', 'callback', 'location']
         })
         return data
+
+    def _get_account(self, user_id: str) -> dict[str, str]:
+        ret = self.session.get(accountURL + str(user_id))
+        if ret.status_code != 200:
+            raise LoginError(ret.status_code, f'Failed to get account page, {ret.text}')
+        ret_data = json.loads(ret.text[11:])['data']
+        data = {
+            k: v for k, v in ret_data.items()
+            if k in ['account', 'gender', 'nickName', 'icon']
+        }
+        return data
+
+    def _save_auth(self) -> None:
+        if self.save_auth and self.auth_data is not None:
+            if not os.path.isabs(self.save_path):
+                self.save_path = os.path.abspath(self.save_path)
+            with open(self.save_path, 'w') as f:
+                json.dump(self.auth_data, f, indent=2)
+            print(f'Auth data saved to [{self.save_path}]')
+        else:
+            print('Auth data not saved')
 
     def login(self, username: str, password: str) -> dict:
         """login with username and password
@@ -92,6 +117,10 @@ class mijiaLogin(object):
         cookies = self.session.cookies.get_dict()
         auth_data['serviceToken'] = cookies['serviceToken']
         self.auth_data = auth_data
+        self.auth_data.update(self._get_account(auth_data['userId']))
+
+        if self.save_auth:
+            self._save_auth()
         return auth_data
 
     @staticmethod
@@ -103,7 +132,10 @@ class mijiaLogin(object):
         try:
             qr.print_ascii(invert=True, tty=True)
         except OSError:
-            print('Failed to print QR code to terminal, please use the qr.png file in the current directory.')
+            try:
+                qr.print_ascii(invert=True, tty=False)
+            except OSError:
+                print('Failed to print QR code to terminal, please use the qr.png file in the current directory.')
 
     def QRlogin(self) -> dict:
         """login with QR code
@@ -159,6 +191,12 @@ class mijiaLogin(object):
         cookies = self.session.cookies.get_dict()
         auth_data['serviceToken'] = cookies['serviceToken']
         self.auth_data = auth_data
+        self.auth_data.update(self._get_account(auth_data['userId']))
+
+        if self.save_auth:
+            self._save_auth()
+        return auth_data
+
+    def __del__(self):
         if os.path.exists('qr.png'):
             os.remove('qr.png')
-        return auth_data
