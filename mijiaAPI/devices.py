@@ -11,8 +11,13 @@ from .logger import logger
 class DevProp(object):
     def __init__(self, prop_dict: dict):
         """
-        Initialize the property object 初始化属性对象
-        :param prop_dict:
+        初始化属性对象。
+
+        Args:
+            prop_dict (dict): 属性字典。
+
+        Raises:
+            ValueError: 如果属性类型不受支持。
         """
         self.name = prop_dict['name']
         self.desc = prop_dict['description']
@@ -27,8 +32,10 @@ class DevProp(object):
 
     def __str__(self):
         """
-        String representation of the property 返回属性的名称、描述、类型、读写权限、单位和范围
-        :return:
+        返回属性的字符串表示。
+
+        Returns:
+            str: 属性的名称、描述、类型、读写权限、单位和范围。
         """
         lines = [
             f"  {self.name}: {self.desc}",
@@ -44,11 +51,23 @@ class DevProp(object):
 
 class DevAction(object):
     def __init__(self, act_dict: dict):
+        """
+        初始化动作对象。
+
+        Args:
+            act_dict (dict): 动作字典。
+        """
         self.name = act_dict['name']
         self.desc = act_dict['description']
         self.method = act_dict['method']
 
     def __str__(self):
+        """
+        返回动作的字符串表示。
+
+        Returns:
+            str: 动作的名称和描述。
+        """
         return f'  {self.name}: {self.desc}'
 
 
@@ -62,16 +81,29 @@ class mijiaDevices(object):
             sleep_time: Optional[Union[int, float]] = 0.5
     ):
         """
-        Initialize the device object 初始化设备对象
-        若未提供设备信息，则根据设备名称获取设备信息，若两者均未提供，则抛出异常
-        若提供了设备信息的同时提供了设备名称，则以设备信息为准
-        :param api: 米家API对象
-        :param dev_info: 设备信息字典（可选）
-        :param dev_name: 设备名称（可选）
-        :param did: 设备ID（可选）
-        :param sleep_time: 调用设备属性的间隔时间（可选，默认0.5秒）
+        初始化设备对象。
+
+        如果未提供设备信息，则根据设备名称获取设备信息。如果两者均未提供，则抛出异常。
+        如果同时提供了设备信息和设备名称，则以设备信息为准。
+
+        Args:
+            api (mijiaAPI): 米家API对象。
+            dev_info (dict, optional): 设备信息字典，从get_device_info获取。默认为None。
+            dev_name (str, optional): 设备名称，从get_devices_list获取。默认为None。
+            did (str, optional): 设备ID，如未指定，则需要在调用get/set时指定。默认为None。
+            sleep_time ([int, float], optional): 调用设备属性的间隔时间。默认为0.5秒。
+
+        Raises:
+            RuntimeError: 如果dev_info和dev_name都未提供。
+            ValueError: 如果找不到指定设备或找到多个同名设备。
+
+        Note:
+            - 如果同时提供了dev_info和dev_name，则以dev_info为准。
+            - 如果只提供了dev_name，则根据名称自动获取设备信息。
+            - 如果只提供了dev_info，则直接使用该信息。
         """
-        assert dev_info is not None or dev_name is not None, "Either 'dev_info' or 'dev_name' must be provided."
+        if dev_info is None and dev_name is None:
+            raise RuntimeError("Either 'dev_info' or 'dev_name' must be provided.")
         if dev_info is not None and dev_name is not None:
             logger.warning("Both 'dev_info' and 'dev_name' provided. Using 'dev_info' for initialization.")
 
@@ -106,8 +138,10 @@ class mijiaDevices(object):
 
     def __str__(self) -> str:
         """
-        String representation of the device 返回设备的属性和动作列表
-        :return: 设备的属性和动作列表
+        返回设备的字符串表示。
+
+        Returns:
+            str: 设备的属性和动作列表。
         """
         prop_list_str = '\n'.join(filter(None, (str(v) for k, v in self.prop_list.items() if '_' not in k)))
         action_list_str = '\n'.join(map(str, self.action_list.values()))
@@ -115,13 +149,21 @@ class mijiaDevices(object):
                 f"Properties:\n{prop_list_str if prop_list_str else 'No properties available'}\n"
                 f"Actions:\n{action_list_str if action_list_str else 'No actions available'}")
 
-    def set(self, name: str, did: str, value: Union[bool, int]) -> Union[bool, int]:
+    def set(self, name: str, did: str, value: Union[bool, int, float, str]) -> bool:
         """
-        Set property value 设置设备的属性值
-        :param name: 属性名称
-        :param did: 设备ID
-        :param value: 属性值
-        :return: 执行结果（True/False）
+        设置设备的属性值。
+
+        Args:
+            name (str): 属性名称。
+            did (str): 设备ID。
+            value (Union[bool, int, float, str]): 属性值。
+
+        Returns:
+            bool: 执行结果（True/False）。
+
+        Raises:
+            ValueError: 如果属性不存在、属性为只读或值无效。
+            RuntimeError: 如果设置属性失败。
         """
         if name not in self.prop_list:
             raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
@@ -170,13 +212,20 @@ class mijiaDevices(object):
         sleep(self.sleep_time)
         return result['code'] == 0
 
-    def set_v2(self, name: str, value: Union[bool, int], did: Optional[str] = None) -> Union[bool, int]:
+    def set_v2(self, name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool:
         """
-        Set property value_v2 设置设备的属性值_v2（需在实例化时指定did）
-        :param name: 属性名称
-        :param value: 属性值
-        :param did: 设备ID（若未指定，则使用实例化时的did）
-        :return: 执行结果（True/False）
+        设置设备的属性值（v2版本，需在实例化时指定did或在调用时提供）。
+
+        Args:
+            name (str): 属性名称。
+            value (Union[bool, int, float, str]): 属性值。
+            did (str, optional): 设备ID。如未指定，则使用实例化时的did。默认为None。
+
+        Returns:
+            bool: 执行结果（True/False）。
+
+        Raises:
+            ValueError: 如果未指定设备ID。
         """
         if did is not None:
             return self.set(name, did, value)
@@ -185,12 +234,20 @@ class mijiaDevices(object):
         else:
             raise ValueError('Please specify the did')
 
-    def get(self, name: str, did: Optional[str] = None) -> Union[bool, int]:
+    def get(self, name: str, did: Optional[str] = None) -> Union[bool, int, float, str]:
         """
-        Get property value 获取设备的属性值
-        :param name: 属性名称
-        :param did: 设备ID（若未指定，则使用实例化时的did）
-        :return: 属性值
+        获取设备的属性值。
+
+        Args:
+            name (str): 属性名称。
+            did (str, optional): 设备ID。如未指定，则使用实例化时的did。默认为None。
+
+        Returns:
+            Union[bool, int, float, str]: 属性值。
+
+        Raises:
+            ValueError: 如果未指定设备ID、属性不存在或属性为只写。
+            RuntimeError: 如果获取属性失败。
         """
         if did is None:
             did = self.did
@@ -213,12 +270,16 @@ class mijiaDevices(object):
         sleep(self.sleep_time)
         return result['value']
 
-    def __setattr__(self, name: str, value: Union[bool, int]) -> None:
+    def __setattr__(self, name: str, value: Union[bool, int, float, str]) -> None:
         """
-        Set property value 设置设备的属性值（需在实例化时指定did）
-        :param name: 属性名称
-        :param value: 属性值
-        :return: None
+        设置设备的属性值（通过对象属性方式，需在实例化时指定did）。
+
+        Args:
+            name (str): 属性名称。
+            value (Union[bool, int, float, str]): 属性值。
+
+        Raises:
+            RuntimeError: 如果设置属性失败。
         """
         if 'prop_list' in self.__dict__ and name in self.prop_list:
             if not self.set_v2(name, value):
@@ -226,11 +287,15 @@ class mijiaDevices(object):
         else:
             super().__setattr__(name, value)
 
-    def __getattr__(self, name: str) -> Union[bool, int]:
+    def __getattr__(self, name: str) -> Union[bool, int, float, str]:
         """
-        Get property value 获取设备的属性值（需在实例化时指定did）
-        :param name: 属性名称
-        :return: 属性值
+        获取设备的属性值（通过对象属性方式，需在实例化时指定did）。
+
+        Args:
+            name (str): 属性名称。
+
+        Returns:
+            Union[bool, int, float, str]: 属性值。
         """
         if 'prop_list' in self.__dict__ and name in self.prop_list:
             return self.get(name)
@@ -245,12 +310,20 @@ class mijiaDevices(object):
             **kwargs
     ) -> bool:
         """
-        Run action 运行设备动作
-        :param name: 动作名称
-        :param did: 设备ID（若未指定，则使用实例化时的did）
-        :param value: 动作参数（若动作不需要参数，则不需要指定）
-        :param kwargs: 其它动作参数（若动作不需要参数，则不需要指定）
-        :return: 执行结果（True/False）
+        运行设备动作。
+
+        Args:
+            name (str): 动作名称。
+            did (Optional[str], optional): 设备ID。如未指定，则使用实例化时的did。默认为None。
+            value (Optional[Union[list, tuple]], optional): 动作参数。如动作不需要参数，则不需指定。默认为None。
+            **kwargs: 其它动作参数，如智能音箱的in参数[run_action('execute-text-directive', _in=['空调调至26度', True])]。
+
+        Returns:
+            bool: 执行结果（True/False）。
+
+        Raises:
+            ValueError: 如果未指定设备ID、动作不存在或参数无效。
+            RuntimeError: 如果运行动作失败。
         """
         if did is None:
             did = self.did
@@ -283,9 +356,16 @@ class mijiaDevices(object):
 
 def get_device_info(device_model: str) -> dict:
     """
-    Get device info 获取设备信息
-    :param device_model: 设备型号
-    :return: 设备信息字典
+    获取设备信息，用于初始化mijiaDevices对象。
+
+    Args:
+        device_model (str): 设备型号，从get_devices_list获取。
+
+    Returns:
+        dict: 设备信息字典。
+
+    Raises:
+        RuntimeError: 如果获取设备信息失败。
     """
     response = requests.get(deviceURL + device_model)
     if response.status_code != 200:

@@ -1,9 +1,9 @@
+from typing import Optional
 import hashlib
 import json
 import os
 import random
 import string
-import sys
 import time
 from urllib import parse
 
@@ -17,13 +17,26 @@ from .logger import logger
 
 class LoginError(Exception):
     def __init__(self, code: int, message: str):
+        """
+        初始化登录错误异常。
+
+        Args:
+            code (int): 错误代码。
+            message (str): 错误消息。
+        """
         self.code = code
         self.message = message
         super().__init__(f'Error code: {code}, message: {message}')
 
 
 class mijiaLogin(object):
-    def __init__(self, save_path=None):
+    def __init__(self, save_path: Optional[str] = None):
+        """
+        初始化米家登录对象。
+
+        Args:
+            save_path (str, optional): 认证数据保存路径。默认为None。
+        """
         self.auth_data = None
         self.save_path = save_path
 
@@ -38,6 +51,15 @@ class mijiaLogin(object):
         })
 
     def _get_index(self) -> dict[str, str]:
+        """
+        获取索引页数据。
+
+        Returns:
+            dict[str, str]: 包含设备ID和其他必要参数的字典。
+
+        Raises:
+            LoginError: 请求索引页失败时抛出。
+        """
         ret = self.session.get(msgURL)
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get index page, {ret.text}')
@@ -50,6 +72,18 @@ class mijiaLogin(object):
         return data
 
     def _get_account(self, user_id: str) -> dict[str, str]:
+        """
+        获取账户信息。
+
+        Args:
+            user_id (str): 用户ID。
+
+        Returns:
+            dict[str, str]: 包含账户信息的字典。
+
+        Raises:
+            LoginError: 获取账户信息失败时抛出。
+        """
         ret = self.session.get(accountURL + str(user_id))
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get account page, {ret.text}')
@@ -61,6 +95,11 @@ class mijiaLogin(object):
         return data
 
     def _save_auth(self) -> None:
+        """
+        保存认证数据到文件。
+
+        如果设置了保存路径且有认证数据，则将其以JSON格式保存到指定路径。
+        """
         if self.save_path is not None and self.auth_data is not None:
             if not os.path.isabs(self.save_path):
                 self.save_path = os.path.abspath(self.save_path)
@@ -75,15 +114,18 @@ class mijiaLogin(object):
             logger.info('Auth data not saved')
 
     def login(self, username: str, password: str) -> dict:
-        """login with username and password
-        mijiaLogin.login(username: str, password: str) -> dict
-        -------
-        @param
-        username: str, xiaomi account username(email/phone number/xiaomi id)
-        password: str, xiaomi account password
-        -------
-        @return
-        dict, data for authorization, including userId, ssecurity, deviceId, serviceToken
+        """
+        使用用户名和密码登录。
+
+        Args:
+            username (str): 小米账户用户名（邮箱/手机号/小米ID）。
+            password (str): 小米账户密码。
+
+        Returns:
+            dict: 授权数据，包含userId、ssecurity、deviceId和serviceToken。
+
+        Raises:
+            LoginError: 登录失败时抛出。
         """
         logger.warning('There is a high probability of verification code with account and password. Please try other login methods')
         data = self._get_index()
@@ -124,6 +166,13 @@ class mijiaLogin(object):
 
     @staticmethod
     def _print_qr(loginurl: str, box_size: int = 10) -> None:
+        """
+        打印并保存二维码。
+
+        Args:
+            loginurl (str): 包含登录信息的URL。
+            box_size (int, optional): 二维码大小。默认为10。
+        """
         logger.info('Scan the QR code below with Mi Home app')
         qr = QRCode(border=1, box_size=box_size)
         qr.add_data(loginurl)
@@ -138,11 +187,14 @@ class mijiaLogin(object):
                         'Or just use the qr.png file in the current directory.')
 
     def QRlogin(self) -> dict:
-        """login with QR code
-        mijiaLogin.QRlogin() -> dict
-        -------
-        @return
-        dict, data for authorization, including userId, ssecurity, deviceId, serviceToken
+        """
+        使用二维码登录。
+
+        Returns:
+            dict: 授权数据，包含userId、ssecurity、deviceId和serviceToken。
+
+        Raises:
+            LoginError: 登录失败时抛出。
         """
         data = self._get_index()
         location = data['location']
@@ -197,5 +249,8 @@ class mijiaLogin(object):
         return auth_data
 
     def __del__(self):
+        """
+        析构函数，清理生成的二维码文件。
+        """
         if os.path.exists('qr.png'):
             os.remove('qr.png')
