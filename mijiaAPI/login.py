@@ -132,10 +132,9 @@ class mijiaLogin(object):
         try:
             qr.print_ascii(invert=True, tty=True)
         except OSError:
-            try:
-                qr.print_ascii(invert=True, tty=False)
-            except OSError:
-                print('Failed to print QR code to terminal, please use the qr.png file in the current directory.')
+            qr.print_ascii(invert=True, tty=False)
+            print('If the QR code can not be scanned, please change the font of the terminal, such as "Maple Mono", "Fira Code", etc.')
+            print('Or just use the qr.png file in the current directory.')
 
     def QRlogin(self) -> dict:
         """login with QR code
