@@ -65,6 +65,10 @@ class mijiaLogin(object):
         if self.save_auth and self.auth_data is not None:
             if not os.path.isabs(self.save_path):
                 self.save_path = os.path.abspath(self.save_path)
+            if os.path.exists(self.save_path) and not os.path.isfile(self.save_path):
+                raise ValueError(f'Path [{self.save_path}] is not a file')
+            if not os.path.exists(os.path.dirname(self.save_path)):
+                os.makedirs(os.path.dirname(self.save_path))
             with open(self.save_path, 'w') as f:
                 json.dump(self.auth_data, f, indent=2)
             logger.info(f'Auth data saved to [{self.save_path}]')
