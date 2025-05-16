@@ -23,9 +23,8 @@ class LoginError(Exception):
 
 
 class mijiaLogin(object):
-    def __init__(self, save_auth=True, save_path='jsons/auth.json'):
+    def __init__(self, save_path=None):
         self.auth_data = None
-        self.save_auth = save_auth
         self.save_path = save_path
 
         self.deviceId = ''.join(random.sample(string.digits + string.ascii_letters, 16))
@@ -62,7 +61,7 @@ class mijiaLogin(object):
         return data
 
     def _save_auth(self) -> None:
-        if self.save_auth and self.auth_data is not None:
+        if self.save_path is not None and self.auth_data is not None:
             if not os.path.isabs(self.save_path):
                 self.save_path = os.path.abspath(self.save_path)
             if os.path.exists(self.save_path) and not os.path.isfile(self.save_path):
@@ -120,8 +119,7 @@ class mijiaLogin(object):
         self.auth_data = auth_data
         self.auth_data.update(self._get_account(auth_data['userId']))
 
-        if self.save_auth:
-            self._save_auth()
+        self._save_auth()
         return auth_data
 
     @staticmethod
@@ -195,8 +193,7 @@ class mijiaLogin(object):
         self.auth_data = auth_data
         self.auth_data.update(self._get_account(auth_data['userId']))
 
-        if self.save_auth:
-            self._save_auth()
+        self._save_auth()
         return auth_data
 
     def __del__(self):
