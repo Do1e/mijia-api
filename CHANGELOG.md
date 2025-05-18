@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.3.14](https://github.com/Do1e/mijia-api/compare/v1.3.12...v1.3.13) - 2025-05-18
+### bugfix
+* `available`属性判断错误，始终返回False
+
 ## [1.3.13](https://github.com/Do1e/mijia-api/compare/v1.3.12...v1.3.13) - 2025-05-18
 ### new feature
 * 新增从cookie中提取有效期并保存在凭据中
