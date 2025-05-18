@@ -2,11 +2,11 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
-## [1.4.0](https://github.com/Do1e/mijia-api/compare/v1.3.13...v1.4.0) - 2025-05-19
+## [1.4.0](https://github.com/Do1e/mijia-api/compare/v1.3.14...v1.4.0) - 2025-05-19
 ### new feature
 * 新增`mijiaAPI`的cli支持，运行`mijiaAPI --help`查看帮助
 
-## [1.3.14](https://github.com/Do1e/mijia-api/compare/v1.3.12...v1.3.13) - 2025-05-18
+## [1.3.14](https://github.com/Do1e/mijia-api/compare/v1.3.13...v1.3.14) - 2025-05-18
 ### bugfix
 * `available`属性判断错误，始终返回False
 
