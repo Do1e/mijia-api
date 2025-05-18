@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.4.1](https://github.com/Do1e/mijia-api/compare/v1.4.0...v1.4.1) - 2025-05-19
+### new feature
+* cli支持`--run`以使用自然语言描述需求，交给小爱音箱执行
+
 ## [1.4.0](https://github.com/Do1e/mijia-api/compare/v1.3.14...v1.4.0) - 2025-05-19
 ### new feature
 * 新增`mijiaAPI`的cli支持，运行`mijiaAPI --help`查看帮助
