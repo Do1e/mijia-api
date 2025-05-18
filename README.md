@@ -143,9 +143,10 @@ current_temp = device.color_temperature  # 获取色温
 ```
 > python -m mijiaAPI --help
 > mijiaAPI --help
-usage: __main__.py [-h] [-p AUTH_PATH] [-l] [--list_homes] [--list_scenes] [--list_consumable_items]
-                   [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]] [--get_device_info DEVICE_MODEL]
-                   {get,set} ...
+usage: mijiaAPI [-h] [-p AUTH_PATH] [-l] [--list_homes] [--list_scenes] [--list_consumable_items]
+                [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]] [--get_device_info DEVICE_MODEL] [--run PROMPT]
+                [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
+                {get,set} ...
 
 Mijia API CLI
 
@@ -167,6 +168,10 @@ options:
                         运行场景，指定场景ID或名称
   --get_device_info DEVICE_MODEL
                         获取设备信息，指定设备model，先使用 --list_devices 获取
+  --run PROMPT          使用自然语言描述你的需求，如果你有小爱音箱的话
+  --wifispeaker_name WIFISPEAKER_NAME
+                        指定小爱音箱名称，默认是获取到的第一个小爱音箱
+  --quiet               小爱音箱静默执行
 ```
 
 ```
@@ -215,6 +220,8 @@ mijiaAPI --run_scene SCENE_ID/SCENE_NAME # 运行场景，指定场景ID或名�
 mijiaAPI --get_device_info DEVICE_MODEL # 获取设备信息，指定设备model，先使用 --list_devices 获取
 mijiaAPI get --dev_name DEV_NAME --prop_name PROP_NAME # 获取设备属性
 mijiaAPI set --dev_name DEV_NAME --prop_name PROP_NAME --value VALUE # 设置设备属性
+mijiaAPI --run 明天天气如何
+mijiaAPI --run 打开台灯并将亮度调至最大 --quiet
 ```
 
 ## 致谢

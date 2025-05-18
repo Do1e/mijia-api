@@ -51,6 +51,23 @@ def parse_args(args):
         help="获取设备信息，指定设备model，先使用 --list_devices 获取",
         metavar='DEVICE_MODEL',
     )
+    parser.add_argument(
+        '--run',
+        type=str,
+        help="使用自然语言描述你的需求，如果你有小爱音箱的话",
+        metavar='PROMPT',
+    )
+    parser.add_argument(
+        '--wifispeaker_name',
+        type=str,
+        help="指定小爱音箱名称，默认是获取到的第一个小爱音箱",
+        default=None,
+    )
+    parser.add_argument(
+        '--quiet',
+        action='store_true',
+        help="小爱音箱静默执行",
+    )
 
     get = subparsers.add_parser(
         'get',
@@ -273,6 +290,20 @@ def main(args):
     if args.get_device_info:
         device_info = get_device_info(args.get_device_info)
         print(json.dumps(device_info, indent=2, ensure_ascii=False))
+    if args.run:
+        if device_mapping is None:
+            device_mapping = get_devices_list(api, verbose=False)
+        if args.wifispeaker_name is None:
+            wifispeaker = None
+            for device in device_mapping.values():
+                if 'xiaomi.wifispeaker' in device['model']:
+                    wifispeaker = mijiaDevices(api, dev_name=device['name'])
+                    break
+            if wifispeaker is None:
+                raise ValueError("No wifispeaker found")
+        else:
+            wifispeaker = mijiaDevices(api, dev_name=args.wifispeaker_name)
+        wifispeaker.run_action('execute-text-directive', _in=[args.run, args.quiet])
     if hasattr(args, 'func') and args.func is not None:
         if args.func == 'get':
             get(args)
