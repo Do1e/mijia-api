@@ -5,11 +5,10 @@ import random
 import re
 import string
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from urllib import parse
 
-import pytz
 import requests
 from qrcode import QRCode
 
@@ -119,15 +118,9 @@ class mijiaLogin(object):
 
         if not gmt_time_keys:
             raise LoginError(-1, 'No GMT time keys found in the data')
-
         parsed_times = [datetime.strptime(k, '%d-%b-%Y %H:%M:%S GMT') for k in gmt_time_keys]
         latest_utc_time = max(parsed_times)
-
-        utc_zone = pytz.timezone('UTC')
-        latest_utc_time = utc_zone.localize(latest_utc_time)
-
-        china_zone = pytz.timezone('Asia/Shanghai')
-        china_time = latest_utc_time.astimezone(china_zone)
+        china_time = latest_utc_time + timedelta(hours=8)
 
         return china_time
 
