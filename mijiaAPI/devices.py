@@ -174,7 +174,23 @@ class mijiaDevices(object):
             if value not in [item['value'] for item in prop.value_list]:
                 raise ValueError(f'Invalid value: {value}, should be in {prop.value_list}')
         if prop.type == 'bool':
-            if not isinstance(value, bool):
+            if isinstance(value, str):
+                if value.lower() == 'true':
+                    value = True
+                elif value.lower() == 'false':
+                    value = False
+                elif value in ['0', '1']:
+                    value = bool(int(value))
+                else:
+                    raise ValueError(f'Invalid value for bool: {value}, should be True or False')
+            elif isinstance(value, int):
+                if value == 0:
+                    value = False
+                elif value == 1:
+                    value = True
+                else:
+                    raise ValueError(f'Invalid value for bool: {value}, should be True or False')
+            elif not isinstance(value, bool):
                 raise ValueError(f'Invalid value for bool: {value}, should be True or False')
         elif prop.type in ['int', 'uint']:
             value = int(value)

@@ -10,6 +10,9 @@ dependencies = [
     "requests>=2.32.3,<3.0.0",
 ]
 
+[project.scripts]
+mijiaAPI = "mijiaAPI.__main__:cli"
+
 [tool.poetry]
 name = "mijiaAPI"
 version = "0.0.0"
@@ -33,6 +36,9 @@ python = ">=3.9,<4.0"
 requests = "^2.32.3"
 qrcode = "^8.0"
 pillow = "^11.0.0"
+
+[tool.poetry.scripts]
+mijiaAPI = "mijiaAPI.__main__:cli"
 
 [tool.poetry-dynamic-versioning]
 enable = true

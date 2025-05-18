@@ -76,6 +76,19 @@ poetry install
 
 **注意**：并非所有米家产品库中列出的方法都可用，需要自行测试验证。
 
+### 设备信息获取
+
+使用 `get_device_info()` 函数可从米家规格平台在线获取设备属性字典：
+
+```python
+from mijiaAPI import get_device_info
+
+# 获取设备规格信息
+device_info = get_device_info('yeelink.light.lamp4')  # 米家台灯 1S 的 model
+```
+
+详细示例：[demos/test_get_device_info.py](demos/test_get_device_info.py)
+
 ### 设备控制封装
 
 `mijiaDevices`：基于 `mijiaAPI` 的高级封装，提供更简便的设备控制方式。
@@ -88,8 +101,14 @@ mijiaDevices(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: st
 
 * `api`：已初始化的 `mijiaAPI` 对象
 * `dev_info`：设备属性字典（可选）
+  - 可通过 `get_device_info()` 函数获取
+  - **注意**：如果提供了 `dev_info`，则不需要提供 `dev_name`
 * `dev_name`：设备名称，用于自动查找设备（可选）
+  - 例如：`dev_name='台灯'`，会自动查找名称包含“台灯”的设备
+  - **注意**：如果提供了 `dev_name`，则不需要提供 `dev_info` 和 `did`
 * `did`：设备ID，便于直接通过属性名访问（可选）
+  - 如果初始化时未提供，无法使用属性样式访问，需要使用 `get()` 和 `set()` 方法指定 `did`
+  - 使用 `dev_name` 初始化时，`did` 会自动获取
 * `sleep_time`：属性操作间隔时间，单位秒（默认0.5秒）
   - **重要**：设置属性后立即获取可能不符合预期，需设置适当延迟
 
@@ -118,19 +137,66 @@ current_temp = device.color_temperature  # 获取色温
 * 使用自然语言让小爱音箱执行：[demos/test_devices_wifispeaker.py](demos/test_devices_wifispeaker.py)
 * 通过属性直接控制台灯：[demos/test_devices_v2_light.py](demos/test_devices_v2_light.py)
 
-### 设备信息获取
+### Mijia API CLI
+`mijiaAPI` 还提供了一个命令行工具，可以直接在终端中使用。
 
-使用 `get_device_info()` 函数可从米家规格平台在线获取设备属性字典：
+```
+> python -m mijiaAPI --help
+> mijiaAPI --help
+usage: __main__.py [-h] [-p AUTH_PATH] [-l] [--list_homes] [--list_scenes] [--list_consumable_items]
+                   [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]] [--get_device_info DEVICE_MODEL]
+                   {get,set} ...
 
-```python
-from mijiaAPI import get_device_info
+Mijia API CLI
 
-# 获取设备规格信息
-device_info = get_device_info('yeelink.light.lamp4')  # 米家台灯 1S 的 model
+positional arguments:
+  {get,set}
+    get                 获取设备属性
+    set                 设置设备属性
+
+options:
+  -h, --help            show this help message and exit
+  -p AUTH_PATH, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
+  -l, --list_devices    列出所有米家设备
+  --list_homes          列出家庭列表
+  --list_scenes         列出场景列表
+  --list_consumable_items
+                        列出耗材列表
+  --run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]
+                        运行场景，指定场景ID或名称
+  --get_device_info DEVICE_MODEL
+                        获取设备信息，指定设备model，先使用 --list_devices 获取
 ```
 
-详细示例：[demos/test_get_device_info.py](demos/test_get_device_info.py)
+```
+> python -m mijiaAPI get --help
+> mijiaAPI get --help
+usage: __main__.py get [-h] [-p AUTH_PATH] --dev_name DEV_NAME --prop_name PROP_NAME
 
+options:
+  -h, --help            show this help message and exit
+  -p AUTH_PATH, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
+  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
+  --prop_name PROP_NAME
+                        属性名称，先使用 --get_device_info 获取
+```
+
+```
+> python -m mijiaAPI set --help
+> mijiaAPI set --help
+usage: __main__.py set [-h] [-p AUTH_PATH] --dev_name DEV_NAME --prop_name PROP_NAME --value VALUE
+
+options:
+  -h, --help            show this help message and exit
+  -p AUTH_PATH, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
+  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
+  --prop_name PROP_NAME
+                        属性名称，先使用 --get_device_info 获取
+  --value VALUE         需要设定的属性值
+```
 
 ## 致谢
 
