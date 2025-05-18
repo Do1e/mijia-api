@@ -23,6 +23,7 @@ class mijiaAPI(object):
         self.userId = auth_data['userId']
         self.ssecurity = auth_data['ssecurity']
         self.session = requests.Session()
+        self.expireTime = auth_data.get('expireTime', None)
         self.session.headers.update({
             'User-Agent': defaultUA,
             'x-xiaomi-protocal-flag-cli': 'PROTOCAL-HTTP2',
@@ -45,8 +46,8 @@ class mijiaAPI(object):
         Returns:
             bool: API可用返回True，否则返回False。
         """
-        if 'expireTime' in self.session.cookies:
-            expire_time = datetime.strptime(self.session.cookies['expireTime'], '%Y-%m-%d %H:%M:%S')
+        if self.expireTime:
+            expire_time = datetime.strptime(self.expireTime, '%Y-%m-%d %H:%M:%S')
             if expire_time < datetime.now():
                 return False
             return True
