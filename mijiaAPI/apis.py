@@ -18,11 +18,8 @@ class mijiaAPI(object):
         Raises:
             Exception: 当授权数据不完整时抛出异常。
         """
-        if any(k not in auth_data for k in ['userId', 'deviceId', 'ssecurity', 'serviceToken', 'expireTime']):
+        if any(k not in auth_data for k in ['userId', 'deviceId', 'ssecurity', 'serviceToken']):
             raise Exception('Invalid authorize data')
-        expire_time = datetime.strptime(auth_data['expireTime'], '%Y-%m-%d %H:%M:%S')
-        if expire_time < datetime.now():
-            raise Exception('Authorize data expired')
         self.userId = auth_data['userId']
         self.ssecurity = auth_data['ssecurity']
         self.session = requests.Session()
@@ -48,13 +45,12 @@ class mijiaAPI(object):
         Returns:
             bool: API可用返回True，否则返回False。
         """
-        uri = '/home/device_list'
-        data = {"getVirtualModel": False, "getHuamiDevices": 0}
-        try:
-            post_data(self.session, self.ssecurity, uri, data)
+        if 'expireTime' in self.session.cookies:
+            expire_time = datetime.strptime(self.session.cookies['expireTime'], '%Y-%m-%d %H:%M:%S')
+            if expire_time < datetime.now():
+                return False
             return True
-        except PostDataError:
-            return False
+        return False
 
     def get_devices_list(self) -> dict:
         """
