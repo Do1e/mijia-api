@@ -198,6 +198,25 @@ options:
   --value VALUE         需要设定的属性值
 ```
 
+或者直接使用`uvx`忽略安装步骤：
+
+```bash
+uvx mijiaAPI --help
+```
+
+#### 示例：
+
+```bash
+mijiaAPI -l # 列出所有米家设备
+mijiaAPI --list_homes # 列出家庭列表
+mijiaAPI --list_scenes # 列出场景列表
+mijiaAPI --list_consumable_items # 列出耗材列表
+mijiaAPI --run_scene SCENE_ID/SCENE_NAME # 运行场景，指定场景ID或名称
+mijiaAPI --get_device_info DEVICE_MODEL # 获取设备信息，指定设备model，先使用 --list_devices 获取
+mijiaAPI get --dev_name DEV_NAME --prop_name PROP_NAME # 获取设备属性
+mijiaAPI set --dev_name DEV_NAME --prop_name PROP_NAME --value VALUE # 设置设备属性
+```
+
 ## 致谢
 
 * [janzlan/mijia-api](https://gitee.com/janzlan/mijia-api/tree/master)
