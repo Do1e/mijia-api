@@ -15,8 +15,8 @@ def parse_args(args):
     parser.add_argument(
         '-p', '--auth_path',
         type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api-auth.json",
+        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
+        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
     )
     parser.add_argument(
         '-l', '--list_devices',
@@ -77,8 +77,8 @@ def parse_args(args):
     get.add_argument(
         '-p', '--auth_path',
         type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api-auth.json",
+        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
+        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
     )
     get.add_argument(
         '--dev_name',
@@ -101,8 +101,8 @@ def parse_args(args):
     set.add_argument(
         '-p', '--auth_path',
         type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api-auth.json",
+        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
+        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
     )
     set.add_argument(
         '--dev_name',

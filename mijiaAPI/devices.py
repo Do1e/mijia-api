@@ -1,5 +1,6 @@
 from typing import Union, Optional
 import json
+import os
 import re
 import requests
 from time import sleep
@@ -370,12 +371,13 @@ class mijiaDevices(object):
         return result['code'] == 0
 
 
-def get_device_info(device_model: str) -> dict:
+def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(os.path.expanduser("~"), ".config/mijia-api")) -> dict:
     """
     获取设备信息，用于初始化mijiaDevices对象。
 
     Args:
         device_model (str): 设备型号，从get_devices_list获取。
+        cache_path (str, optional): 缓存文件路径。默认为~/.config/mijia-api，设置为None则不使用缓存。
 
     Returns:
         dict: 设备信息字典。
@@ -383,6 +385,11 @@ def get_device_info(device_model: str) -> dict:
     Raises:
         RuntimeError: 如果获取设备信息失败。
     """
+    if cache_path is not None:
+        cache_file = os.path.join(cache_path, f'{device_model}.json')
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
     response = requests.get(deviceURL + device_model)
     if response.status_code != 200:
         raise RuntimeError(f'Failed to get device info')
@@ -446,4 +453,9 @@ def get_device_info(device_model: str) -> dict:
                         'aiid': int(aiid)
                     }
                 })
+    if cache_path is not None:
+        cache_file = os.path.join(cache_path, f'{device_model}.json')
+        os.makedirs(cache_path, exist_ok=True)
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
     return result
