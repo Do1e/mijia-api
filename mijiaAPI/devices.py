@@ -170,7 +170,7 @@ class mijiaDevices(object):
             raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
         if 'w' not in prop.rw:
-            raise ValueError(f'Property {name} is read-only')
+            raise ValueError(f'Property {name} can not be written')
         if prop.value_list:
             if value not in [item['value'] for item in prop.value_list]:
                 raise ValueError(f'Invalid value: {value}, should be in {prop.value_list}')
@@ -274,7 +274,7 @@ class mijiaDevices(object):
             raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
         if 'r' not in prop.rw:
-            raise ValueError(f'Property {name} is write-only')
+            raise ValueError(f'Property {name} can not be read')
         method = prop.method.copy()
         method['did'] = did
         result = self.api.get_devices_prop([method])[0]
@@ -399,9 +399,15 @@ def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(
     content = content.group(1)
     content = json.loads(content.replace('&quot;', '"'))
 
+    if content['props']['product']:
+        name = content['props']['product']['name']
+        model = content['props']['product']['model']
+    else:
+        name = content['props']['spec']['name']
+        model = device_model
     result = {
-        'name': content['props']['product']['name'],
-        'model': content['props']['product']['model'],
+        'name': name,
+        'model': model,
         'properties': [],
         'actions': []
     }
