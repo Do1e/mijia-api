@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.4.3](https://github.com/Do1e/mijia-api/compare/v1.4.2...v1.4.3) - 2025-05-22
+### bugfix
+* 针对部分特殊的设备，修复了`get_device_info`的TypeError
+
 ## [1.4.2](https://github.com/Do1e/mijia-api/compare/v1.4.1...v1.4.2) - 2025-05-19
 ### new feature
 * `get_device_info`支持缓存结果以加速
