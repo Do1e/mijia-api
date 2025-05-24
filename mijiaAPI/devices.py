@@ -7,7 +7,9 @@ from time import sleep
 from .apis import mijiaAPI
 from .code import ERROR_CODE
 from .urls import deviceURL
-from .logger import logger
+from .logger import get_logger
+
+logger = get_logger(__name__)
 
 class DevProp(object):
     def __init__(self, prop_dict: dict):
@@ -227,6 +229,7 @@ class mijiaDevices(object):
                 f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
             )
         sleep(self.sleep_time)
+        logger.debug(f"Set property: {self.name} -> {name}, value: {value}, result: {result}")
         return result['code'] == 0
 
     def set_v2(self, name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool:
@@ -285,6 +288,7 @@ class mijiaDevices(object):
                 f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
             )
         sleep(self.sleep_time)
+        logger.debug(f"Get property: {self.name} -> {name}, result: {result}")
         return result['value']
 
     def __setattr__(self, name: str, value: Union[bool, int, float, str]) -> None:
@@ -368,6 +372,7 @@ class mijiaDevices(object):
                 f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
             )
         sleep(self.sleep_time)
+        logger.debug(f"Run action: {self.name} -> {name}, result: {result}")
         return result['code'] == 0
 
 

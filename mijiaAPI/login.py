@@ -12,10 +12,11 @@ from urllib import parse
 import requests
 from qrcode import QRCode
 
-from .logger import logger
+from .logger import get_logger
 from .urls import msgURL, loginURL, qrURL, accountURL
 from .utils import defaultUA
 
+logger = get_logger(__name__)
 
 class LoginError(Exception):
     def __init__(self, code: int, message: str):
@@ -97,7 +98,7 @@ class mijiaLogin(object):
         return data
 
     @staticmethod
-    def extract_latest_gmt_datetime(data: dict) -> datetime:
+    def _extract_latest_gmt_datetime(data: dict) -> datetime:
         """
         提取过期时间并转换为中国时区。
 
@@ -189,7 +190,7 @@ class mijiaLogin(object):
             'ssecurity': ret_data['ssecurity'],
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
-            'expireTime': self.extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
+            'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
             **self._get_account(ret_data['userId'])
         }
 
@@ -274,7 +275,7 @@ class mijiaLogin(object):
             'ssecurity': ret_data['ssecurity'],
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
-            'expireTime': self.extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
+            'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
             **self._get_account(ret_data['userId'])
         }
 

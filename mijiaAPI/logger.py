@@ -22,16 +22,24 @@ class ColorFormatter(logging.Formatter):
             return f"{color_code}{log_message}{self.COLORS['RESET']}"
         return log_message
 
-logger = logging.getLogger('mijiaAPI')
-logger.setLevel(logging.INFO)
+def get_logger(name: str) -> logging.Logger:
+    """
+    获取指定名称的日志记录器。
 
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
+    Args:
+        name (str): 日志记录器的名称。
 
-formatter = ColorFormatter(
-    '%(asctime)s - %(name)s - %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-)
-console_handler.setFormatter(formatter)
+    Returns:
+        logging.Logger: 日志记录器对象。
+    """
+    logger = logging.getLogger(name)
 
-logger.addHandler(console_handler)
+    console_handler = logging.StreamHandler()
+
+    formatter = ColorFormatter(
+        '%(asctime)s - %(name)s - %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+    )
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    return logger
