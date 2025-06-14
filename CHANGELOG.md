@@ -2,6 +2,15 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.4.4](https://github.com/Do1e/mijia-api/compare/v1.4.3...v1.4.4) - 2025-06-14
+### new feature
+* `get_device_info`支持[https://home.miot-spec.com/](https://home.miot-spec.com/)中的中文描述
+### bugfix
+* cli修复了执行`get_device_info`必须先登录的问题
+### improvement
+* 优化日志输出
+* 使用`login`方法的警告修改得更加明确
+
 ## [1.4.3](https://github.com/Do1e/mijia-api/compare/v1.4.2...v1.4.3) - 2025-05-22
 ### bugfix
 * 针对部分特殊的设备，修复了`get_device_info`的TypeError
