@@ -271,6 +271,19 @@ def set(args):
 
 def main(args):
     args = parse_args(args)
+
+    if args.get_device_info:
+        device_info = get_device_info(args.get_device_info)
+        print(json.dumps(device_info, indent=2, ensure_ascii=False))
+    if not (args.list_devices or
+            args.list_homes or
+            args.list_scenes or
+            args.list_consumable_items or
+            args.run_scene or
+            args.run or
+            hasattr(args, 'func') and args.func is not None):
+        return
+
     api = init_api(args.auth_path)
     device_mapping = None
     home_mapping = None
@@ -287,9 +300,6 @@ def main(args):
     if args.run_scene:
         for scene_id in args.run_scene:
             run_scene(api, scene_id, scene_mapping=scenes_mapping)
-    if args.get_device_info:
-        device_info = get_device_info(args.get_device_info)
-        print(json.dumps(device_info, indent=2, ensure_ascii=False))
     if args.run:
         if device_mapping is None:
             device_mapping = get_devices_list(api, verbose=False)
