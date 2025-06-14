@@ -158,8 +158,7 @@ class mijiaLogin(object):
         Raises:
             LoginError: 登录失败时抛出。
         """
-        logger.warning(
-            'There is a high probability of verification code with account and password. Please try other login methods')
+        logger.warning('There is a high probability of verification code with account and password. Please try `QRlogin` method.')
         data = self._get_index()
         post_data = {
             'qs': data['qs'],
@@ -179,7 +178,7 @@ class mijiaLogin(object):
         if 'location' not in ret_data:
             raise LoginError(-1, 'Failed to get location')
         if 'notificationUrl' in ret_data:
-            raise LoginError(-1, 'Verification code required, please try other login methods')
+            raise LoginError(-1, 'Verification code required, please try `QRlogin` method')
         ret = self.session.get(ret_data['location'])
         if ret.status_code != 200:
             raise LoginError(ret.status_code, f'Failed to get location, {ret.text}')
