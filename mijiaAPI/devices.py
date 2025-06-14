@@ -432,7 +432,7 @@ def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(
                     prop_type = prop['format']
                 item = {
                     'name': prop['name'],
-                    'description': prop['description'],
+                    'description': f"{prop.get('description', '')} / {prop.get('desc_zh_cn', '')}",
                     'type': prop_type,
                     'rw': ''.join([
                         'r' if 'read' in prop['access'] else '',
@@ -458,7 +458,7 @@ def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(
                 actions_name.append(act['name'])
                 result['actions'].append({
                     'name': act['name'],
-                    'description': act['description'],
+                    'description': f"{act.get('description', '')} / {act.get('desc_zh_cn', '')}",
                     'method': {
                         'siid': int(siid),
                         'aiid': int(aiid)
