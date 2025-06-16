@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.4.5](https://github.com/Do1e/mijia-api/compare/v1.4.4...v1.4.5) - 2025-06-14
+### bugfix
+* 登陆过程中无法获取用户信息时，处理相关报错
+
 ## [1.4.4](https://github.com/Do1e/mijia-api/compare/v1.4.3...v1.4.4) - 2025-06-14
 ### new feature
 * `get_device_info`支持[https://home.miot-spec.com/](https://home.miot-spec.com/)中的中文描述
