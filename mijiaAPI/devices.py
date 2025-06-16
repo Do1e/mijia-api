@@ -74,7 +74,7 @@ class DevAction(object):
         return f'  {self.name}: {self.desc}'
 
 
-class mijiaDevices(object):
+class mijiaDevice(object):
     def __init__(
             self,
             api: mijiaAPI,
@@ -376,9 +376,44 @@ class mijiaDevices(object):
         return result['code'] == 0
 
 
+class mijiaDevices(mijiaDevice):
+    def __init__(
+            self,
+            api: mijiaAPI,
+            dev_info: Optional[dict] = None,
+            dev_name: Optional[str] = None,
+            did: Optional[str] = None,
+            sleep_time: Optional[Union[int, float]] = 0.5
+    ):
+        """
+        初始化设备对象。
+
+        如果未提供设备信息，则根据设备名称获取设备信息。如果两者均未提供，则抛出异常。
+        如果同时提供了设备信息和设备名称，则以设备信息为准。
+
+        Args:
+            api (mijiaAPI): 米家API对象。
+            dev_info (dict, optional): 设备信息字典，从get_device_info获取。默认为None。
+            dev_name (str, optional): 设备名称，从get_devices_list获取。默认为None。
+            did (str, optional): 设备ID，如未指定，则需要在调用get/set时指定。默认为None。
+            sleep_time ([int, float], optional): 调用设备属性的间隔时间。默认为0.5秒。
+
+        Raises:
+            RuntimeError: 如果dev_info和dev_name都未提供。
+            ValueError: 如果找不到指定设备或找到多个同名设备。
+
+        Note:
+            - 如果同时提供了dev_info和dev_name，则以dev_info为准。
+            - 如果只提供了dev_name，则根据名称自动获取设备信息。
+            - 如果只提供了dev_info，则直接使用该信息。
+        """
+        super().__init__(api, dev_info, dev_name, did, sleep_time)
+        logger.warning("`mijiaDevices` will be deprecated in future versions, use `mijiaDevice` instead.")
+
+
 def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(os.path.expanduser("~"), ".config/mijia-api")) -> dict:
     """
-    获取设备信息，用于初始化mijiaDevices对象。
+    获取设备信息，用于初始化mijiaDevice对象。
 
     Args:
         device_model (str): 设备型号，从get_devices_list获取。

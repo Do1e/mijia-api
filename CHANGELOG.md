@@ -65,9 +65,9 @@
 ## [1.3.8](https://github.com/Do1e/mijia-api/compare/v1.3.7...v1.3.8) - 2025-05-14
 ### improvement
 * 新增了devices里所有方法的注释
-* 新增了`mijiaDevices`实例化时的断言检查
+* 新增了`mijiaDevice`实例化时的断言检查
 * 新增了操作失败时的错误提示抛出与错误代码的详情
-* 优化了`mijiaDevices`实例化时的内部变量的赋值逻辑
+* 优化了`mijiaDevice`实例化时的内部变量的赋值逻辑
 * 优化了多处代码的可读性与简洁性
 ### bugfix
 * 修复多处由于数据类型更新而引发的警告
@@ -75,4 +75,4 @@
 ## [1.3.7](https://github.com/Do1e/mijia-api/compare/v1.3.6...v1.3.7) - 2025-05-14
 ### new feature
 * 新增自定义`run_action`参数，`in`等python关键字，可在前面加上下划线`_`
-* `mijiaDevices`支持传入设备名称(米家中自定义的名称)进行初始化
+* `mijiaDevice`支持传入设备名称(米家中自定义的名称)进行初始化

@@ -91,12 +91,12 @@ device_info = get_device_info('yeelink.light.lamp4')  # 米家台灯 1S 的 mode
 
 ### 设备控制封装
 
-`mijiaDevices`：基于 `mijiaAPI` 的高级封装，提供更简便的设备控制方式。
+`mijiaDevice`：基于 `mijiaAPI` 的高级封装，提供更简便的设备控制方式。
 
 #### 初始化：
 
 ```python
-mijiaDevices(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: str = None, sleep_time: float = 0.5)
+mijiaDevice(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: str = None, sleep_time: float = 0.5)
 ```
 
 * `api`：已初始化的 `mijiaAPI` 对象
@@ -124,7 +124,7 @@ mijiaDevices(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: st
 
 ```python
 # 示例：控制台灯
-device = mijiaDevices(api, dev_name='台灯')
+device = mijiaDevice(api, dev_name='台灯')
 device.on = True                 # 打开灯
 device.brightness = 60           # 设置亮度
 current_temp = device.color_temperature  # 获取色温

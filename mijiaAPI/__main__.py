@@ -6,7 +6,7 @@ import sys
 import time
 
 from .apis import mijiaAPI
-from .devices import mijiaDevices, get_device_info
+from .devices import mijiaDevice, get_device_info
 from .login import mijiaLogin
 
 def parse_args(args):
@@ -253,14 +253,14 @@ def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None
 
 def get(args):
     api = init_api(args.auth_path)
-    device = mijiaDevices(api, dev_name=args.dev_name)
+    device = mijiaDevice(api, dev_name=args.dev_name)
     value = device.get(args.prop_name)
     unit = device.prop_list[args.prop_name].unit
     print(f"The {args.prop_name} of {args.dev_name} is {value} {unit if unit else ''}")
 
 def set(args):
     api = init_api(args.auth_path)
-    device = mijiaDevices(api, dev_name=args.dev_name)
+    device = mijiaDevice(api, dev_name=args.dev_name)
     ret = device.set_v2(args.prop_name, args.value)
     unit = device.prop_list[args.prop_name].unit
     if ret:
@@ -307,12 +307,12 @@ def main(args):
             wifispeaker = None
             for device in device_mapping.values():
                 if 'xiaomi.wifispeaker' in device['model']:
-                    wifispeaker = mijiaDevices(api, dev_name=device['name'])
+                    wifispeaker = mijiaDevice(api, dev_name=device['name'])
                     break
             if wifispeaker is None:
                 raise ValueError("No wifispeaker found")
         else:
-            wifispeaker = mijiaDevices(api, dev_name=args.wifispeaker_name)
+            wifispeaker = mijiaDevice(api, dev_name=args.wifispeaker_name)
         wifispeaker.run_action('execute-text-directive', _in=[args.run, args.quiet])
     if hasattr(args, 'func') and args.func is not None:
         if args.func == 'get':

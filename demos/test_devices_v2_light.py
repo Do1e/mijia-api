@@ -1,7 +1,7 @@
 import json
 import sys
 sys.path.extend(['.', '..'])
-from mijiaAPI import mijiaDevices, mijiaAPI
+from mijiaAPI import mijiaDevice, mijiaAPI
 
 with open('jsons/auth.json') as f:
     auth = json.load(f)
@@ -9,7 +9,7 @@ api = mijiaAPI(auth)
 
 # sleep_time is optional, default is 0.5
 # get after set shuold be delayed for a while, or the result may be incorrect
-device = mijiaDevices(api, dev_name='台灯', sleep_time=2)
+device = mijiaDevice(api, dev_name='台灯', sleep_time=2)
 print(device)
 print('---------------------')
 print(device.on)
