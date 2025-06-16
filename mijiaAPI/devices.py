@@ -281,12 +281,17 @@ class mijiaDevices(object):
         method = prop.method.copy()
         method['did'] = did
         result = self.api.get_devices_prop([method])[0]
+       
         if result['code'] != 0:
-            raise RuntimeError(
-                f"Failed to get property: {name}, "
-                f"code: {result['code']}, "
-                f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
-            )
+            # yeelink.light.nl1 returns code -704220043 when no-motion-duration<2min
+            if result['code'] == -704220043 and 'value' not in result:
+                result.update({'value':0})
+            else:
+                raise RuntimeError(
+                    f"Failed to get property: {name}, "
+                    f"code: {result['code']}, "
+                    f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
+                )
         sleep(self.sleep_time)
         logger.debug(f"Get property: {self.name} -> {name}, result: {result}")
         return result['value']
