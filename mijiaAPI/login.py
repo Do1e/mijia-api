@@ -74,7 +74,7 @@ class mijiaLogin(object):
         })
         return data
 
-    def _get_account(self, user_id: str) -> dict[str, str]:
+    def _get_account_info(self, user_id: str) -> dict[str, str]:
         """
         获取账户信息。
 
@@ -87,14 +87,13 @@ class mijiaLogin(object):
         Raises:
             LoginError: 获取账户信息失败时抛出。
         """
-        ret = self.session.get(accountURL + str(user_id))
-        if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to get account page, {ret.text}')
-        ret_data = json.loads(ret.text[11:])['data']
-        data = {
-            k: v for k, v in ret_data.items()
-            if k in ['account', 'gender', 'nickName', 'icon']
-        }
+        try:
+            ret = self.session.get(accountURL + str(user_id))
+            if ret.status_code != 200:
+                raise LoginError(ret.status_code, f'Failed to get account page, {ret.text}')
+            data = json.loads(ret.text[11:])['data']
+        except (KeyError, json.JSONDecodeError) as e:
+            data = {}
         return data
 
     @staticmethod
@@ -190,7 +189,7 @@ class mijiaLogin(object):
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
             'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
-            **self._get_account(ret_data['userId'])
+            'account_info': self._get_account_info(ret_data['userId'])
         }
 
         self._save_auth()
@@ -275,7 +274,7 @@ class mijiaLogin(object):
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
             'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
-            **self._get_account(ret_data['userId'])
+            'account_info': self._get_account_info(ret_data['userId'])
         }
 
         self._save_auth()
