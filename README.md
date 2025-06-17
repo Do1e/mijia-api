@@ -29,6 +29,13 @@ pip install .
 poetry install
 ```
 
+### aur
+如果你使用 Arch Linux 或基于 Arch 的发行版，可以通过 AUR 安装：
+
+```bash
+yay -S python-mijia-api
+```
+
 ## 使用
 
 使用实例可以参考 `demos` 文件夹下的示例代码，以下是基本使用说明。
