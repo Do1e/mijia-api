@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [1.5.0](https://github.com/Do1e/mijia-api/compare/v1.4.5...v1.5.0) - 2025-06-19
+### new feature
+* 重命名`mijiaDevices`为`mijiaDevice`
+
 ## [1.4.5](https://github.com/Do1e/mijia-api/compare/v1.4.4...v1.4.5) - 2025-06-16
 ### bugfix
 * 登陆过程中无法获取用户信息时，处理相关报错
