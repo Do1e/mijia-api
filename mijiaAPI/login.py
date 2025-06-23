@@ -122,6 +122,8 @@ class mijiaLogin(object):
         latest_utc_time = max(parsed_times)
         china_time = latest_utc_time + timedelta(hours=8)
 
+        # [FIXME] 实测此处的过期时间并不准确，实际过期时间可能大于此处获取的时间
+        #         cookie 中唯一用到的 serviceToken 并无过期时间
         return china_time
 
     def _save_auth(self) -> None:
@@ -188,6 +190,7 @@ class mijiaLogin(object):
             'ssecurity': ret_data['ssecurity'],
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
+            'cUserId': cookies['cUserId'],
             'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
             'account_info': self._get_account_info(ret_data['userId'])
         }
@@ -273,6 +276,7 @@ class mijiaLogin(object):
             'ssecurity': ret_data['ssecurity'],
             'deviceId': data['deviceId'],
             'serviceToken': cookies['serviceToken'],
+            'cUserId': cookies['cUserId'],
             'expireTime': self._extract_latest_gmt_datetime(cookies).strftime('%Y-%m-%d %H:%M:%S'),
             'account_info': self._get_account_info(ret_data['userId'])
         }
