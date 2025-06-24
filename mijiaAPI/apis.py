@@ -155,7 +155,7 @@ class mijiaAPI(object):
 
                 示例(yeelink.light.lamp4)：
                 [
-                    {"did": "1234567890", "siid": 2, "piid": 2, "value": 50} # 设置亮度为50%
+                    {"did": "1234567890", "siid": 2, "piid": 2, "value": 50},  # 设置亮度为50%
                     {"did": "1234567890", "siid": 2, "piid": 3, "value": 2700} # 设置色温为2700K
                 ]
 
@@ -178,11 +178,44 @@ class mijiaAPI(object):
                 - value: 参数列表
 
                 示例(xiaomi.feeder.pi2001)：
-                {"did": "1234567890", "siid": 2, "aiid": 1, "value": [2]}, # 远程喂食2份
+                {"did": "1234567890", "siid": 2, "aiid": 1, "value": [2]} # 远程喂食2份
 
         Returns:
             dict: 操作结果。
         """
         uri = '/miotspec/action'
         data = {"params": data}
+        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+
+    def get_statistics(self, data: dict) -> list:
+        """
+        获取设备的统计信息。
+
+        Args:
+            data (dict): 请求参数，包含以下键：
+                - did: 设备ID，从get_devices_list获取
+                - key: siid.piid，表示要获取统计数据的属性
+                - data_type: 统计类型，可选值包括：
+                    - 'stat_hour_v3': 按小时统计
+                    - 'stat_day_v3': 按天统计
+                    - 'stat_week_v3': 按周统计
+                    - 'stat_month_v3': 按月统计
+                - limit: 返回的最大条目数，可选参数
+                - time_start: 开始时间戳，单位为秒
+                - time_end: 结束时间戳，单位为秒
+
+                示例(lumi.acpartner.mcn04 的 power-consumption)：
+                {
+                    "did": "1234567890",
+                    "key": "7.1",
+                    "data_type": "stat_month_v3",
+                    "limit": 24,
+                    "time_start": 1685548800,
+                    "time_end": 1750694400,
+                } # 2023-06-01 00:00:00 到 2025-06-24 00:00:00 的月度统计数据
+
+        Returns:
+            list: 统计信息列表。
+        """
+        uri = '/v2/user/statistics'
         return self._post_process(post_data(self.session, self.ssecurity, uri, data))

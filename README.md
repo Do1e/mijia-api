@@ -67,6 +67,8 @@ yay -S python-mijia-api
 
 #### 设备与场景获取与控制：
 
+下述方法可参考 [demos/test_apis.py](demos/test_apis.py) 中的示例。
+
 * `get_devices_list() -> list`：获取设备列表
 * `get_homes_list() -> list`：获取家庭列表（包含房间信息）
 * `get_scenes_list(home_id: str) -> list`：获取手动场景列表
@@ -76,6 +78,7 @@ yay -S python-mijia-api
 * `get_devices_prop(data: list) -> list`：获取设备属性
 * `set_devices_prop(data: list) -> list`：设置设备属性
 * `run_action(data: dict) -> dict`：执行设备的特定动作
+* `get_statistics(data: dict) -> list`：获取设备的统计信息，如空调每个月的耗电量，参考 [demos/test_get_statistics.py](demos/test_get_statistics.py)
 
 设备属性和动作的相关参数（`siid`, `piid`, `aiid`）可以从 [米家产品库](https://home.miot-spec.com) 查询：
 * 访问 `https://home.miot-spec.com/spec/{model}`（`model` 在设备列表中获取）
