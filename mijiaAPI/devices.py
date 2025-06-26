@@ -168,6 +168,10 @@ class mijiaDevice(object):
             ValueError: 如果属性不存在、属性为只读或值无效。
             RuntimeError: 如果设置属性失败。
         """
+        if did is None:
+            did = self.did
+        if did is None:
+            raise ValueError('Please specify the did')
         if name not in self.prop_list:
             raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
