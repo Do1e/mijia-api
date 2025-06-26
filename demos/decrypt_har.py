@@ -81,8 +81,18 @@ def simplify_har(har_data):
         request_url = entry.get('request', {}).get('url')
         request_method = entry.get('request', {}).get('method')
         request_data = entry.get('request', {}).get('postData', {})
+        if 'text' in request_data and isinstance(request_data['text'], str):
+            try:
+                request_data['text'] = json.loads(request_data['text'])
+            except json.JSONDecodeError:
+                pass
         response_status = entry.get('response', {}).get('status')
         response_content = entry.get('response', {}).get('content', {})
+        if 'text' in response_content and isinstance(response_content['text'], str):
+            try:
+                response_content['text'] = json.loads(response_content['text'])
+            except json.JSONDecodeError:
+                pass
         started_date = entry.get('startedDateTime')
         latency = entry.get('time', 0)
 
@@ -101,6 +111,14 @@ def simplify_har(har_data):
         })
     return data
 
+def update_headers(headers, content_length):
+    for header in headers:
+        if header['name'].lower() == 'content-type':
+            header['value'] = 'application/json'
+        elif header['name'].lower() == 'content-length':
+            header['value'] = str(content_length)
+    return headers
+
 if __name__ == "__main__":
     args = parse_args()
     with open(args.har_path, 'r', encoding='utf-8') as f:
@@ -114,11 +132,15 @@ if __name__ == "__main__":
 
         decrypted_data, nonce, ssecurity = decrypt_request(request)
         if decrypted_data:
-            entry['request']['postData']['data'] = json.loads(decrypted_data)
+            entry['request']['postData']['text'] = decrypted_data
+            entry['request']['postData']['mimeType'] = 'application/json'
+            entry['request']['headers'] = update_headers(entry['request'].get('headers', []), len(decrypted_data))
 
         decrypted_response = decrypt_response(entry.get('response', {}), nonce, ssecurity)
         if decrypted_response:
-            entry['response']['content']['data'] = json.loads(decrypted_response)
+            entry['response']['content']['text'] = decrypted_response
+            entry['response']['content']['mimeType'] = 'application/json'
+            entry['response']['headers'] = update_headers(entry['response'].get('headers', []), len(decrypted_response))
         entries.append(entry)
     har_data['log']['entries'] = entries
     save_name = args.har_path.rsplit('.', 1)[0] + '_decrypted.har'
