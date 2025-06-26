@@ -152,14 +152,14 @@ class mijiaDevice(object):
                 f"Properties:\n{prop_list_str if prop_list_str else 'No properties available'}\n"
                 f"Actions:\n{action_list_str if action_list_str else 'No actions available'}")
 
-    def set(self, name: str, did: str, value: Union[bool, int, float, str]) -> bool:
+    def set(self, name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool:
         """
         设置设备的属性值。
 
         Args:
             name (str): 属性名称。
-            did (str): 设备ID。
             value (Union[bool, int, float, str]): 属性值。
+            did (str, optional): 设备ID。如未指定，则使用实例化时的did。默认为None。
 
         Returns:
             bool: 执行结果（True/False）。
@@ -232,28 +232,6 @@ class mijiaDevice(object):
         logger.debug(f"Set property: {self.name} -> {name}, value: {value}, result: {result}")
         return result['code'] == 0
 
-    def set_v2(self, name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool:
-        """
-        设置设备的属性值（v2版本，需在实例化时指定did或在调用时提供）。
-
-        Args:
-            name (str): 属性名称。
-            value (Union[bool, int, float, str]): 属性值。
-            did (str, optional): 设备ID。如未指定，则使用实例化时的did。默认为None。
-
-        Returns:
-            bool: 执行结果（True/False）。
-
-        Raises:
-            ValueError: 如果未指定设备ID。
-        """
-        if did is not None:
-            return self.set(name, did, value)
-        elif self.did is not None:
-            return self.set(name, self.did, value)
-        else:
-            raise ValueError('Please specify the did')
-
     def get(self, name: str, did: Optional[str] = None) -> Union[bool, int, float, str]:
         """
         获取设备的属性值。
@@ -303,7 +281,7 @@ class mijiaDevice(object):
             RuntimeError: 如果设置属性失败。
         """
         if 'prop_list' in self.__dict__ and name in self.prop_list:
-            if not self.set_v2(name, value):
+            if not self.set(name, value):
                 raise RuntimeError(f'Failed to set property: {name}')
         else:
             super().__setattr__(name, value)
