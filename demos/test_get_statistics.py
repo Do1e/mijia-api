@@ -19,6 +19,12 @@ ret = api.get_statistics({
     "time_start": 1685548800,     # 2023-06-01 00:00:00
     "time_end": 1750694400,       # 2025-06-24 00:00:00
 })
+"""
+已知问题：
+比较旧的设备使用的API会不一样，需要将`data_type`中的`_v3`去掉。
+并且`key`也不一样，比如米家空调伴侣2的统计耗电量的`key`为`powerCost`。
+详见 https://github.com/Do1e/mijia-api/issues/46
+"""
 
 for item in ret:
     value = eval(item['value'])[0]
