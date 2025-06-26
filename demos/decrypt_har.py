@@ -125,7 +125,7 @@ if __name__ == "__main__":
     with open(save_name, 'w', encoding='utf-8') as f:
         json.dump(har_data, f, ensure_ascii=False, indent=2)
     print(f'Decrypted HAR file saved as: {save_name}')
-    save_name = save_name.rsplit('.', 1)[0] + '_simplified.har'
+    save_name = save_name.rsplit('.', 1)[0] + '_simplified.json'
     with open(save_name, 'w', encoding='utf-8') as f:
         json.dump(simplify_har(har_data), f, ensure_ascii=False, indent=2)
     print(f'Simplified HAR file saved as: {save_name}')
