@@ -124,9 +124,9 @@ mijiaDevice(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: str
 
 #### 使用方法控制：
 
-* `set(name: str, did: str, value: Union[bool, int]) -> bool`：设置设备属性
-* `get(name: str, did: str) -> Union[bool, int, float, str]`：获取设备属性
-* `run_action(name: str, did: str = None, value: Any = None, **kwargs) -> bool`：执行设备动作
+* `set(name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool`：设置设备属性
+* `get(name: str, did: Optional[str] = None) -> Union[bool, int, float, str]`：获取设备属性
+* `run_action(name: str, did: Optional[str] = None, value: Optional[Union[list, tuple]] = None, **kwargs) -> bool`：执行设备动作
 
 #### 属性样式访问：
 
