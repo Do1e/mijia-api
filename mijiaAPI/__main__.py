@@ -245,7 +245,7 @@ def get(args):
 def set(args):
     api = init_api(args.auth_path)
     device = mijiaDevice(api, dev_name=args.dev_name)
-    ret = device.set_v2(args.prop_name, args.value)
+    ret = device.set(args.prop_name, args.value)
     unit = device.prop_list[args.prop_name].unit
     if ret:
         print(f"The {args.prop_name} of {args.dev_name} is set to {args.value} {unit if unit else ''}")
