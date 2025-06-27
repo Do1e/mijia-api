@@ -60,9 +60,23 @@ class mijiaAPI(object):
         Returns:
             dict: 设备列表。
         """
-        uri = '/home/device_list'
-        data = {"getVirtualModel": False, "getHuamiDevices": 0}
-        return self._post_process(post_data(self.session, self.ssecurity, uri, data))['list']
+        uri = '/home/home_device_list'
+        home_list = self.get_homes_list()
+        devices = []
+        for home in home_list:
+            data = {
+                "home_owner": home['uid'],
+                "home_id": int(home['id']),
+                "limit": 200,
+                "get_split_device": True,
+                "support_smart_home": True,
+                "get_cariot_device": True,
+                "get_third_device": True
+            }
+            ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
+            if ret and ret.get('device_info'):
+                devices.extend(ret['device_info'])
+        return devices
 
     def get_homes_list(self) -> list:
         """
