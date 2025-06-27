@@ -53,7 +53,7 @@ class mijiaAPI(object):
             return True
         return False
 
-    def get_devices_list(self) -> dict:
+    def get_devices_list(self) -> list:
         """
         获取设备列表。
 
@@ -62,7 +62,7 @@ class mijiaAPI(object):
         """
         uri = '/home/device_list'
         data = {"getVirtualModel": False, "getHuamiDevices": 0}
-        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        return self._post_process(post_data(self.session, self.ssecurity, uri, data))['list']
 
     def get_homes_list(self) -> list:
         """
@@ -73,7 +73,7 @@ class mijiaAPI(object):
         """
         uri = '/v2/homeroom/gethome_merged'
         data = {"fg": True, "fetch_share": True, "fetch_share_dev": True, "limit": 300, "app_ver": 7}
-        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        return self._post_process(post_data(self.session, self.ssecurity, uri, data))['homelist']
 
     def get_scenes_list(self, home_id: str) -> list:
         """
@@ -89,7 +89,10 @@ class mijiaAPI(object):
         """
         uri = '/appgateway/miot/appsceneservice/AppSceneService/GetSceneList'
         data = {"home_id": home_id}
-        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        if ret and 'scene_info_list' in ret:
+            return ret['scene_info_list']
+        return []
 
     def run_scene(self, scene_id: str) -> bool:
         """
@@ -117,7 +120,10 @@ class mijiaAPI(object):
         """
         uri = '/v2/home/standard_consumable_items'
         data = {"home_id": int(home_id), "owner_id": self.userId}
-        return self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
+        if ret and 'items' in ret:
+            return ret['items']
+        return []
 
     def get_devices_prop(self, data: list) -> list:
         """

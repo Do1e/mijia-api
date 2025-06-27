@@ -146,10 +146,6 @@ def init_api(auth_path: str) -> mijiaAPI:
 
 def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
     devices = api.get_devices_list()
-    if 'list' in devices:
-        devices = devices['list']
-    else:
-        devices = []
     if verbose:
         print("Devices:")
         for device in devices:
@@ -165,10 +161,6 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
         if device_mapping is None:
             device_mapping = get_devices_list(api, verbose=False)
     homes = api.get_homes_list()
-    if 'homelist' in homes:
-        homes = homes['homelist']
-    else:
-        homes = []
     if verbose:
         print("Homes:")
         for home in homes:
@@ -200,10 +192,6 @@ def get_scenes_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional[
     scene_mapping = {}
     for home_id, home in home_mapping.items():
         scenes = api.get_scenes_list(home_id)
-        if 'scene_info_list' in scenes:
-            scenes = scenes['scene_info_list']
-        else:
-            scenes = []
         if scenes and verbose:
             print(f"Scenes in {home['name']} ({home_id}):")
             for scene in scenes:
@@ -219,10 +207,6 @@ def get_consumable_items(api: mijiaAPI, home_mapping: Optional[dict] = None):
         home_mapping = get_homes_list(api, verbose=False)
     for home_id, home in home_mapping.items():
         items = api.get_consumable_items(home_id)
-        if 'items' in items:
-            items = items['items'][0]['consumes_data']
-        else:
-            items = []
         print(f"Consumable items in {home['name']} ({home_id}):")
         for item in items:
             print(f"  - {item['details'][0]['description']} in {item['name']}({item['did']})\n"

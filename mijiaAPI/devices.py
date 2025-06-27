@@ -113,7 +113,7 @@ class mijiaDevice(object):
         self.api = api
         if dev_info is None:
             devices_list = self.api.get_devices_list()
-            matches = [device for device in devices_list.get('list', []) if device['name'] == dev_name]
+            matches = [device for device in devices_list if device['name'] == dev_name]
             if not matches:
                 raise ValueError(f"Device {dev_name} not found")
             elif len(matches) > 1:

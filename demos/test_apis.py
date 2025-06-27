@@ -10,20 +10,20 @@ api = mijiaAPI(auth)
 
 
 # ---------------------- get devices list ----------------------
-devices = api.get_devices_list()['list']
+devices = api.get_devices_list()
 with open('jsons/devices.json', 'w') as f:
     json.dump(devices, f, indent=2, ensure_ascii=False)
 time.sleep(2)
 
 # ---------------------- get homes list ------------------------
-homes = api.get_homes_list()['homelist']
+homes = api.get_homes_list()
 with open('jsons/homes.json', 'w') as f:
     json.dump(homes, f, indent=2, ensure_ascii=False)
 time.sleep(2)
 
 # ---------------------- get scenes list -----------------------
 home_id = homes[0]['id']
-scenes = api.get_scenes_list(home_id)['scene_info_list']
+scenes = api.get_scenes_list(home_id)
 with open('jsons/scenes.json', 'w') as f:
     json.dump(scenes, f, indent=2, ensure_ascii=False)
 time.sleep(2)
@@ -36,7 +36,7 @@ print(f'Run scene {scence_name}: {ret}')
 time.sleep(2)
 
 # ---------------------- get consumable items ------------------
-consumable_items = api.get_consumable_items(home_id)['items']
+consumable_items = api.get_consumable_items(home_id)
 with open('jsons/consumable_items.json', 'w') as f:
     json.dump(consumable_items, f, indent=2, ensure_ascii=False)
 time.sleep(2)
