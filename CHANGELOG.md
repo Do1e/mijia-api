@@ -2,6 +2,24 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [2.0.0](https://github.com/Do1e/mijia-api/compare/v1.5.0...v2.0.0)
+#### 此版本有多项破坏性变更，请在升级后参考下述说明修复
+### new feature
+* 新增API：`get_statistics`，用于获取设备的统计信息，使用方法参见[demos/test_get_statistics.py](demos/test_get_statistics.py)
+* 新增文件[demos/decrypt.py](demos/decrypt.py)和[demos/decrypt_har.py](demos/decrypt_har.py)，用于解密米家APP抓包
+* `get_homes_list`支持获取共享家庭
+* `get_consumable_items`支持获取共享家庭的耗材列表，需要额外指定`owner_id`参数
+* `get_devices_list`支持获取共享家庭的设备列表
+### improvement
+* 认证文件保存`cUserId`，可作为`userId`的替代，暂时未使用
+* **此版本彻底移除了`mijiaDevices`，请及时替换为`mijiaDevice`**
+* **`mijiaDevice`的`set`方法更换了参数顺序，请及时修复**
+* **部分API调用后需要读取返回值的字典，如`api.get_devices_list()['list']`，现在直接返回列表，请注意修改，如`api.get_devices_list()`，具体列表如下：**
+  * `api.get_devices_list()['list']` -> `api.get_devices_list()`
+  * `api.get_homes_list()['homelist']` -> `api.get_homes_list()`
+  * `api.get_scenes_list(home_id)['scene_info_list']` -> `api.get_scenes_list(home_id)`
+  * `api.get_consumable_items(home_id)['items']` -> `api.get_consumable_items(home_id)`
+
 ## [1.5.0](https://github.com/Do1e/mijia-api/compare/v1.4.5...v1.5.0) - 2025-06-19
 ### new feature
 * 重命名`mijiaDevices`为`mijiaDevice`
