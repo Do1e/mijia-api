@@ -181,7 +181,7 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
                 dids = ', '.join(devices_name)
                 print(f"    - {room['name']}\n"
                       f"      id: {room['id']}\n"
-                      f"      dids: {dids}\n"
+                      f"      devices: {dids}\n"
                       f"      create time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(room['create_time']))}")
     home_mapping = {home['id']: home for home in homes}
     return home_mapping
@@ -206,11 +206,12 @@ def get_consumable_items(api: mijiaAPI, home_mapping: Optional[dict] = None):
     if home_mapping is None:
         home_mapping = get_homes_list(api, verbose=False)
     for home_id, home in home_mapping.items():
-        items = api.get_consumable_items(home_id)
+        items = api.get_consumable_items(home_id, home['uid'])
         print(f"Consumable items in {home['name']} ({home_id}):")
         for item in items:
-            print(f"  - {item['details'][0]['description']} in {item['name']}({item['did']})\n"
-                  f"    value: {item['details'][0]['value']}")
+            for consumes_data in item['consumes_data']:
+                print(f"  - {consumes_data['details'][0]['description']} in {consumes_data['name']}({consumes_data['did']})\n"
+                    f"    value: {consumes_data['details'][0]['value']}")
 
 def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None) -> bool:
     if scene_mapping is None:
