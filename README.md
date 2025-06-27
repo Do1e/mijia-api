@@ -74,7 +74,7 @@ yay -S python-mijia-api
 * `get_scenes_list(home_id: str) -> list`：获取手动场景列表
   - 在米家 App 中通过 **米家→添加→手动控制** 设置
 * `run_scene(scene_id: str) -> bool`：运行指定场景
-* `get_consumable_items(home_id: str) -> list`：获取设备的耗材信息
+* `get_consumable_items(home_id: str, owner_id: Optional[int] = None) -> list`：获取设备的耗材信息，如果是共享家庭，需要额外指定 `owner_id` 参数
 * `get_devices_prop(data: list) -> list`：获取设备属性
 * `set_devices_prop(data: list) -> list`：设置设备属性
 * `run_action(data: dict) -> dict`：执行设备的特定动作

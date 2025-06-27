@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union
+from typing import Union, Optional
 
 import requests
 import requests.cookies
@@ -108,18 +108,19 @@ class mijiaAPI(object):
         data = {"scene_id": scene_id, "trigger_key": "user.click"}
         return self._post_process(post_data(self.session, self.ssecurity, uri, data))
 
-    def get_consumable_items(self, home_id: str) -> list:
+    def get_consumable_items(self, home_id: str, owner_id: Optional[int] = None) -> list:
         """
         获取耗材列表。
 
         Args:
             home_id (str): 家庭ID，从get_homes_list获取。
+            owner_id (str, optional): 用户ID，默认为None，如果`home_id`为共享家庭，则需要提供owner_id。
 
         Returns:
             list: 耗材列表。
         """
         uri = '/v2/home/standard_consumable_items'
-        data = {"home_id": int(home_id), "owner_id": self.userId}
+        data = {"home_id": int(home_id), "owner_id": int(owner_id) if owner_id else self.userId}
         ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
         if ret and 'items' in ret:
             return ret['items']
