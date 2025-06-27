@@ -64,18 +64,27 @@ class mijiaAPI(object):
         home_list = self.get_homes_list()
         devices = []
         for home in home_list:
-            data = {
-                "home_owner": home['uid'],
-                "home_id": int(home['id']),
-                "limit": 200,
-                "get_split_device": True,
-                "support_smart_home": True,
-                "get_cariot_device": True,
-                "get_third_device": True
-            }
-            ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
-            if ret and ret.get('device_info'):
-                devices.extend(ret['device_info'])
+            start_did = ''
+            has_more = True
+            while has_more:
+                data = {
+                    "home_owner": home['uid'],
+                    "home_id": int(home['id']),
+                    "limit": 200,
+                    "start_did": start_did,
+                    "get_split_device": True,
+                    "support_smart_home": True,
+                    "get_cariot_device": True,
+                    "get_third_device": True
+                }
+                ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
+                if ret and ret.get('device_info'):
+                    devices.extend(ret['device_info'])
+                    print(ret['max_did'], ret.get('has_more', False))
+                    start_did = ret.get('max_did', '')
+                    has_more = ret.get('has_more', False) and start_did != ''
+                else:
+                    has_more = False
         return devices
 
     def get_homes_list(self) -> list:
