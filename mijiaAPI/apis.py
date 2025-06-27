@@ -71,8 +71,8 @@ class mijiaAPI(object):
         Returns:
             list: 家庭列表，包括房间信息。
         """
-        uri = '/v2/homeroom/gethome'
-        data = {"fg": False, "fetch_share": True, "fetch_share_dev": True, "limit": 300, "app_ver": 7}
+        uri = '/v2/homeroom/gethome_merged'
+        data = {"fg": True, "fetch_share": True, "fetch_share_dev": True, "limit": 300, "app_ver": 7}
         return self._post_process(post_data(self.session, self.ssecurity, uri, data))
 
     def get_scenes_list(self, home_id: str) -> list:
