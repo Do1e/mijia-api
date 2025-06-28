@@ -133,7 +133,7 @@ def init_api(auth_path: str) -> mijiaAPI:
                 auth = json.load(f)
             api = mijiaAPI(auth_data=auth)
             if not api.available:
-                raise ValueError("Saved auth is no longer valid")
+                raise ValueError("认证信息已过期")
         except (json.JSONDecodeError, ValueError):
             api = mijiaLogin(save_path=auth_path)
             auth = api.QRlogin()
@@ -147,7 +147,7 @@ def init_api(auth_path: str) -> mijiaAPI:
 def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
     devices = api.get_devices_list()
     if verbose:
-        print("Devices:")
+        print("设备列表:")
         for device in devices:
             print(f"  - {device['name']}\n"
                     f"    did: {device['did']}\n"
@@ -162,14 +162,14 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
             device_mapping = get_devices_list(api, verbose=False)
     homes = api.get_homes_list()
     if verbose:
-        print("Homes:")
+        print("家庭列表:")
         for home in homes:
             print(f"  - {home['name']}\n"
-                f"    id: {home['id']}\n"
-                f"    address: {home['address']}\n"
-                f"    room count: {len(home['roomlist'])}\n"
-                f"    create time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(home['create_time']))}")
-            print("    Rooms:")
+                  f"    ID: {home['id']}\n"
+                  f"    地址: {home['address']}\n"
+                  f"    房间数量: {len(home['roomlist'])}\n"
+                  f"    创建时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(home['create_time']))}")
+            print( "    房间列表:")
             for room in home['roomlist']:
                 devices_name = []
                 if room['dids']:
@@ -180,9 +180,9 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
                             devices_name.append(did)
                 dids = ', '.join(devices_name)
                 print(f"    - {room['name']}\n"
-                      f"      id: {room['id']}\n"
-                      f"      devices: {dids}\n"
-                      f"      create time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(room['create_time']))}")
+                      f"      ID: {room['id']}\n"
+                      f"      设备列表: {dids}\n"
+                      f"      创建时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(room['create_time']))}")
     home_mapping = {home['id']: home for home in homes}
     return home_mapping
 
@@ -193,11 +193,11 @@ def get_scenes_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional[
     for home_id, home in home_mapping.items():
         scenes = api.get_scenes_list(home_id)
         if scenes and verbose:
-            print(f"Scenes in {home['name']} ({home_id}):")
+            print(f"{home['name']} ({home_id}) 中的场景:")
             for scene in scenes:
                 print(f"  - {scene['name']}\n"
-                      f"    id: {scene['scene_id']}\n"
-                      f"    create time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['create_time'])))}\n"
+                      f"    ID: {scene['scene_id']}\n"
+                      f"    创建时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['create_time'])))}\n"
                       f"    update time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['update_time'])))}")
         scene_mapping.update({scene['scene_id']: scene for scene in scenes})
     return scene_mapping
@@ -207,11 +207,11 @@ def get_consumable_items(api: mijiaAPI, home_mapping: Optional[dict] = None):
         home_mapping = get_homes_list(api, verbose=False)
     for home_id, home in home_mapping.items():
         items = api.get_consumable_items(home_id, home['uid'])
-        print(f"Consumable items in {home['name']} ({home_id}):")
+        print(f"{home['name']} ({home_id}) 中的耗材:")
         for item in items:
             for consumes_data in item['consumes_data']:
-                print(f"  - {consumes_data['details'][0]['description']} in {consumes_data['name']}({consumes_data['did']})\n"
-                    f"    value: {consumes_data['details'][0]['value']}")
+                print(f"  - {consumes_data['details'][0]['description']} 在 {consumes_data['name']}({consumes_data['did']})\n"
+                      f"    值: {consumes_data['details'][0]['value']}")
 
 def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None) -> bool:
     if scene_mapping is None:
@@ -225,15 +225,15 @@ def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None
                 found = True
                 break
         if not found:
-            print(f"Scene {scene_name_to_find} not found")
+            print(f"场景 {scene_name_to_find} 未找到")
             return False
     scene_name = scene_mapping[scene_id]['name']
     ret = api.run_scene(scene_id)
     if ret:
-        print(f"Scene {scene_name}({scene_id}) run successfully")
+        print(f"场景 {scene_name}({scene_id}) 运行成功")
         return True
     else:
-        print(f"Failed to run scene {scene_name}({scene_id})")
+        print(f"运行场景 {scene_name}({scene_id}) 失败")
         return False
 
 def get(args):
@@ -241,7 +241,7 @@ def get(args):
     device = mijiaDevice(api, dev_name=args.dev_name)
     value = device.get(args.prop_name)
     unit = device.prop_list[args.prop_name].unit
-    print(f"The {args.prop_name} of {args.dev_name} is {value} {unit if unit else ''}")
+    print(f"{args.dev_name} 的 {args.prop_name} 值为 {value} {unit if unit else ''}")
 
 def set(args):
     api = init_api(args.auth_path)
@@ -249,9 +249,9 @@ def set(args):
     ret = device.set(args.prop_name, args.value)
     unit = device.prop_list[args.prop_name].unit
     if ret:
-        print(f"The {args.prop_name} of {args.dev_name} is set to {args.value} {unit if unit else ''}")
+        print(f"{args.dev_name} 的 {args.prop_name} 值已设置为 {args.value} {unit if unit else ''}")
     else:
-        print(f"Failed to set the {args.prop_name} of {args.dev_name} to {args.value}")
+        print(f"设置 {args.dev_name} 的 {args.prop_name} 值为 {args.value} 失败")
 
 
 def main(args):
@@ -295,7 +295,7 @@ def main(args):
                     wifispeaker = mijiaDevice(api, dev_name=device['name'])
                     break
             if wifispeaker is None:
-                raise ValueError("No wifispeaker found")
+                raise ValueError("未找到小爱音箱设备")
         else:
             wifispeaker = mijiaDevice(api, dev_name=args.wifispeaker_name)
         wifispeaker.run_action('execute-text-directive', _in=[args.run, args.quiet])

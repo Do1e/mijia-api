@@ -37,6 +37,6 @@ def post_data(session: requests.Session, ssecurity: str, uri: str, data: dict) -
     post_data = {'_nonce': nonce, 'data': data, 'signature': signature}
     ret = session.post(apiURL + uri, data=post_data)
     if ret.status_code != 200:
-        raise PostDataError(ret.status_code, f'Failed to post data, {ret.text}')
+        raise PostDataError(ret.status_code, f'发送数据失败, {ret.text}')
     ret_data = ret.json()
     return ret_data

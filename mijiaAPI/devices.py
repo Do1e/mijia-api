@@ -26,7 +26,7 @@ class DevProp(object):
         self.desc = prop_dict['description']
         self.type = prop_dict['type']
         if self.type not in ['bool', 'int', 'uint', 'float', 'string']:
-            raise ValueError(f'Unsupported type: {self.type}, available types: bool, int, uint, float, string')
+            raise ValueError(f'不支持的类型: {self.type}, 可选类型: bool, int, uint, float, string')
         self.rw = prop_dict['rw']
         self.unit = prop_dict['unit']
         self.range = prop_dict['range']
@@ -106,18 +106,18 @@ class mijiaDevice(object):
             - 如果只提供了dev_info，则直接使用该信息。
         """
         if dev_info is None and dev_name is None:
-            raise RuntimeError("Either 'dev_info' or 'dev_name' must be provided.")
+            raise RuntimeError("必须提供 'dev_info' 或 'dev_name' 中的一个参数。")
         if dev_info is not None and dev_name is not None:
-            logger.warning("Both 'dev_info' and 'dev_name' provided. Using 'dev_info' for initialization.")
+            logger.warning("同时提供了 'dev_info' 和 'dev_name'。将使用 'dev_info' 进行初始化。")
 
         self.api = api
         if dev_info is None:
             devices_list = self.api.get_devices_list()
             matches = [device for device in devices_list if device['name'] == dev_name]
             if not matches:
-                raise ValueError(f"Device {dev_name} not found")
+                raise ValueError(f"未找到设备 {dev_name}")
             elif len(matches) > 1:
-                raise ValueError(f"Multiple devices named {dev_name} found")
+                raise ValueError(f"找到多个名为 {dev_name} 的设备")
             else:
                 dev_info = get_device_info(matches[0]['model'])
                 did = matches[0]['did']
@@ -171,15 +171,15 @@ class mijiaDevice(object):
         if did is None:
             did = self.did
         if did is None:
-            raise ValueError('Please specify the did')
+            raise ValueError('请指定设备ID (did)')
         if name not in self.prop_list:
-            raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
+            raise ValueError(f'不支持的属性: {name}, 可用属性: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
         if 'w' not in prop.rw:
-            raise ValueError(f'Property {name} can not be written')
+            raise ValueError(f'属性 {name} 不可写入')
         if prop.value_list:
             if value not in [item['value'] for item in prop.value_list]:
-                raise ValueError(f'Invalid value: {value}, should be in {prop.value_list}')
+                raise ValueError(f'无效值: {value}, 请使用 {prop.value_list}')
         if prop.type == 'bool':
             if isinstance(value, str):
                 if value.lower() == 'true':
@@ -189,51 +189,51 @@ class mijiaDevice(object):
                 elif value in ['0', '1']:
                     value = bool(int(value))
                 else:
-                    raise ValueError(f'Invalid value for bool: {value}, should be True or False')
+                    raise ValueError(f'无效布尔值: {value}')
             elif isinstance(value, int):
                 if value == 0:
                     value = False
                 elif value == 1:
                     value = True
                 else:
-                    raise ValueError(f'Invalid value for bool: {value}, should be True or False')
+                    raise ValueError(f'无效布尔值: {value}')
             elif not isinstance(value, bool):
-                raise ValueError(f'Invalid value for bool: {value}, should be True or False')
+                raise ValueError(f'无效布尔值: {value}')
         elif prop.type in ['int', 'uint']:
             value = int(value)
             if prop.range:
                 if value < prop.range[0] or value > prop.range[1]:
-                    raise ValueError(f'Value out of range: {value}, should be in range {prop.range[:2]}')
+                    raise ValueError(f'{value} 超出数值范围, 应该在 {prop.range[:2]} 之间')
                 if len(prop.range) >= 3 and prop.range[2] != 1:
                     if (value - prop.range[0]) % prop.range[2] != 0:
                         raise ValueError(
-                            f'Invalid value: {value}, should be in range {prop.range[:2]} with step {prop.range[2]}')
+                            f'无效的值: {value}, 应该在范围 {prop.range[:2]} 内且步长为 {prop.range[2]}')
         elif prop.type == 'float':
             value = float(value)
             if prop.range:
                 if value < prop.range[0] or value > prop.range[1]:
-                    raise ValueError(f'Value out of range: {value}, should be in range {prop.range[:2]}')
+                    raise ValueError(f'{value} 超出数值范围, 应该在 {prop.range[:2]} 之间')
                 if len(prop.range) >= 3 and isinstance(prop.range[2], int):
                     if int(value - prop.range[0]) % prop.range[2] != 0:
                         raise ValueError(
-                            f'Invalid value: {value}, should be in range {prop.range[:2]} with step {prop.range[2]}')
+                            f'无效的值: {value}, 应该在范围 {prop.range[:2]} 内且步长为 {prop.range[2]}')
         elif prop.type == 'string':
             if not isinstance(value, str):
-                raise ValueError(f'Invalid value for string: {value}, should be a string')
+                raise ValueError(f'无效字符串值: {value}')
         else:
-            raise ValueError(f'Unsupported type: {prop.type}, available types: bool, int, uint, float, string')
+            raise ValueError(f'不支持的类型: {prop.type}, 可用类型: bool, int, uint, float, string')
         method = prop.method.copy()
         method['did'] = did
         method['value'] = value
         result = self.api.set_devices_prop([method])[0]
         if result['code'] != 0:
             raise RuntimeError(
-                f"Failed to set property: {name}, "
-                f"code: {result['code']}, "
-                f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
+                f"设置属性 {name} 失败, "
+                f"错误码: {result['code']}, "
+                f"错误信息: {ERROR_CODE.get(str(result['code']), '未知错误')}"
             )
         sleep(self.sleep_time)
-        logger.debug(f"Set property: {self.name} -> {name}, value: {value}, result: {result}")
+        logger.debug(f"设置属性: {self.name} -> {name}, 值: {value}, 结果: {result}")
         return result['code'] == 0
 
     def get(self, name: str, did: Optional[str] = None) -> Union[bool, int, float, str]:
@@ -254,23 +254,23 @@ class mijiaDevice(object):
         if did is None:
             did = self.did
         if did is None:
-            raise ValueError('Please specify the did')
+            raise ValueError('请指定设备ID (did)')
         if name not in self.prop_list:
-            raise ValueError(f'Unsupported property: {name}, available properties: {list(self.prop_list.keys())}')
+            raise ValueError(f'不支持的属性: {name}, 可用属性: {list(self.prop_list.keys())}')
         prop = self.prop_list[name]
         if 'r' not in prop.rw:
-            raise ValueError(f'Property {name} can not be read')
+            raise ValueError(f'属性 {name} 不可读取')
         method = prop.method.copy()
         method['did'] = did
         result = self.api.get_devices_prop([method])[0]
         if result['code'] != 0:
             raise RuntimeError(
-                f"Failed to get property: {name}, "
-                f"code: {result['code']}, "
-                f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
+                f"获取属性 {name} 失败, "
+                f"错误码: {result['code']}, "
+                f"错误信息: {ERROR_CODE.get(str(result['code']), '未知错误')}"
             )
         sleep(self.sleep_time)
-        logger.debug(f"Get property: {self.name} -> {name}, result: {result}")
+        logger.debug(f"获取属性: {self.name} -> {name}, 结果: {result}")
         return result['value']
 
     def __setattr__(self, name: str, value: Union[bool, int, float, str]) -> None:
@@ -286,7 +286,7 @@ class mijiaDevice(object):
         """
         if 'prop_list' in self.__dict__ and name in self.prop_list:
             if not self.set(name, value):
-                raise RuntimeError(f'Failed to set property: {name}')
+                raise RuntimeError(f'设置属性 {name} 失败')
         else:
             super().__setattr__(name, value)
 
@@ -331,9 +331,9 @@ class mijiaDevice(object):
         if did is None:
             did = self.did
         if did is None:
-            raise ValueError('Please specify the did')
+            raise ValueError('请指定设备ID (did)')
         if name not in self.action_list:
-            raise ValueError(f'Unsupported action: {name}, available actions: {list(self.action_list.keys())}')
+            raise ValueError(f'不支持的动作: {name}, 可用动作: {list(self.action_list.keys())}')
         act = self.action_list[name]
         method = act.method.copy()
         method['did'] = did
@@ -344,17 +344,17 @@ class mijiaDevice(object):
                 if k.startswith("_"):
                     k = k[1:]
                 if k in method:
-                    raise ValueError(f'Invalid argument: {k}. Do not use arguments in ({", ".join(method.keys())})')
+                    raise ValueError(f'无效的参数: {k}. 请勿使用以下参数 ({", ".join(method.keys())})')
                 method[k] = v
         result = self.api.run_action(method)
         if result['code'] != 0:
             raise RuntimeError(
-                f"Failed to run action: {name}, "
-                f"code: {result['code']}, "
-                f"message: {ERROR_CODE.get(str(result['code']), 'Unknown error')}"
+                f"执行动作 {name} 失败, "
+                f"错误码: {result['code']}, "
+                f"错误信息: {ERROR_CODE.get(str(result['code']), '未知错误')}"
             )
         sleep(self.sleep_time)
-        logger.debug(f"Run action: {self.name} -> {name}, result: {result}")
+        logger.debug(f"执行动作: {self.name} -> {name}, 结果: {result}")
         return result['code'] == 0
 
 
@@ -379,10 +379,10 @@ def get_device_info(device_model: str, cache_path: Optional[str] = os.path.join(
                 return json.load(f)
     response = requests.get(deviceURL + device_model)
     if response.status_code != 200:
-        raise RuntimeError(f'Failed to get device info')
+        raise RuntimeError(f'获取设备信息失败')
     content = re.search(r'data-page="(.*?)">', response.text)
     if content is None:
-        raise RuntimeError(f'Failed to get device info')
+        raise RuntimeError(f'获取设备信息失败')
     content = content.group(1)
     content = json.loads(content.replace('&quot;', '"'))
 

@@ -20,7 +20,7 @@ class mijiaAPI(object):
             Exception: 当授权数据不完整时抛出异常。
         """
         if any(k not in auth_data for k in ['userId', 'deviceId', 'ssecurity', 'serviceToken']):
-            raise Exception('Invalid authorize data')
+            raise Exception('授权数据无效')
         self.userId = auth_data['userId']
         self.ssecurity = auth_data['ssecurity']
         self.session = requests.Session()
@@ -36,7 +36,7 @@ class mijiaAPI(object):
     @staticmethod
     def _post_process(data: dict) -> Union[list, bool]:
         if data['code'] != 0:
-            raise Exception(f'Failed to get data, {data["message"]}')
+            raise Exception(f'获取数据失败, {data["message"]}')
         return data['result']
 
     @property
@@ -81,7 +81,6 @@ class mijiaAPI(object):
                 ret = self._post_process(post_data(self.session, self.ssecurity, uri, data))
                 if ret and ret.get('device_info'):
                     devices.extend(ret['device_info'])
-                    print(ret['max_did'], ret.get('has_more', False))
                     start_did = ret.get('max_did', '')
                     has_more = ret.get('has_more', False) and start_did != ''
                 else:

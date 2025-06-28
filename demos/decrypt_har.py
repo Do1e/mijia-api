@@ -146,8 +146,8 @@ if __name__ == "__main__":
     save_name = args.har_path.rsplit('.', 1)[0] + '_decrypted.har'
     with open(save_name, 'w', encoding='utf-8') as f:
         json.dump(har_data, f, ensure_ascii=False, indent=2)
-    print(f'Decrypted HAR file saved as: {save_name}')
+    print(f'已保存解密的HAR文件: {save_name}')
     save_name = save_name.rsplit('.', 1)[0] + '_simplified.json'
     with open(save_name, 'w', encoding='utf-8') as f:
         json.dump(simplify_har(har_data), f, ensure_ascii=False, indent=2)
-    print(f'Simplified HAR file saved as: {save_name}')
+    print(f'已保存简化后的JSON文件: {save_name}')

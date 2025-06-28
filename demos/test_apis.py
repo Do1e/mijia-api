@@ -33,7 +33,7 @@ time.sleep(2)
 scence_id = scenes[0]['scene_id']
 scence_name = scenes[0]['name']
 ret = api.run_scene(scence_id)
-print(f'Run scene {scence_name}: {ret}')
+print(f'运行场景 {scence_name}: {ret}')
 time.sleep(2)
 
 # ---------------------- get consumable items ------------------
@@ -54,19 +54,19 @@ ret = api.get_devices_prop([
 ])
 brightness = ret[0]['value']
 color_temperature = ret[1]['value']
-print(f'Get device {name} properties:\nBrightness: {brightness}%\n'
-      f'Color temperature: {color_temperature}K')
+print(f'获取设备 {name} 属性:\n亮度: {brightness}%\n'
+      f'色温: {color_temperature}K')
 time.sleep(2)
 
 ret = api.set_devices_prop([
     {"did": did, "siid": 2, "piid": 2, "value": 50},
     {"did": did, "siid": 2, "piid": 3, "value": 2700},
 ])
-print(f'Set device {name} properties:\n'
-      f'Brightness: {"Success" if ret[0]["code"] == 0 else "Failed"}\n'
-      f'Color temperature: {"Success" if ret[1]["code"] == 0 else "Failed"}')
+print(f'设置设备 {name} 属性:\n'
+      f'亮度: {"成功" if ret[0]["code"] == 0 else "失败"}\n'
+      f'色温: {"成功" if ret[1]["code"] == 0 else "失败"}')
 
 # ---------------------- run action ----------------------------
 did = devices[0]['did']
 ret = api.run_action({"did": did, "siid": 2, "aiid": 1})
-print(f'Switch on/off: {"Success" if ret["code"] == 0 else "Failed"}')
+print(f'开关切换: {"成功" if ret["code"] == 0 else "失败"}')

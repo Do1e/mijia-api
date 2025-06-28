@@ -64,7 +64,7 @@ class mijiaLogin(object):
         """
         ret = self.session.get(msgURL)
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to get index page, {ret.text}')
+            raise LoginError(ret.status_code, f'获取索引页失败, {ret.text}')
         ret_data = json.loads(ret.text[11:])
         data = {'deviceId': self.deviceId}
         data.update({
@@ -89,7 +89,7 @@ class mijiaLogin(object):
         try:
             ret = self.session.get(accountURL + str(user_id))
             if ret.status_code != 200:
-                raise LoginError(ret.status_code, f'Failed to get account page, {ret.text}')
+                raise LoginError(ret.status_code, f'获取账户页面失败, {ret.text}')
             data = json.loads(ret.text[11:])['data']
         except (KeyError, json.JSONDecodeError) as e:
             data = {}
@@ -116,7 +116,7 @@ class mijiaLogin(object):
         ]
 
         if not gmt_time_keys:
-            raise LoginError(-1, 'No GMT time keys found in the data')
+            raise LoginError(-1, '在cookie中未找到GMT时间键')
         parsed_times = [datetime.strptime(k, '%d-%b-%Y %H:%M:%S GMT') for k in gmt_time_keys]
         latest_utc_time = max(parsed_times)
         china_time = latest_utc_time + timedelta(hours=8)
@@ -135,14 +135,14 @@ class mijiaLogin(object):
             if not os.path.isabs(self.save_path):
                 self.save_path = os.path.abspath(self.save_path)
             if os.path.exists(self.save_path) and not os.path.isfile(self.save_path):
-                raise ValueError(f'Path [{self.save_path}] is not a file')
+                raise ValueError(f'[{self.save_path}] 不是文件')
             if not os.path.exists(os.path.dirname(self.save_path)):
                 os.makedirs(os.path.dirname(self.save_path))
             with open(self.save_path, 'w') as f:
                 json.dump(self.auth_data, f, indent=2)
-            logger.info(f'Auth data saved to [{self.save_path}]')
+            logger.info(f'认证文件已保存到 [{self.save_path}]')
         else:
-            logger.info('Auth data not saved')
+            logger.info('认证文件未保存')
 
     def login(self, username: str, password: str) -> dict:
         """
@@ -158,7 +158,7 @@ class mijiaLogin(object):
         Raises:
             LoginError: 登录失败时抛出。
         """
-        logger.warning('There is a high probability of verification code with account and password. Please try `QRlogin` method.')
+        logger.warning('使用账号密码登录很可能需要验证码。请尝试使用 `QRlogin` 方法。')
         data = self._get_index()
         post_data = {
             'qs': data['qs'],
@@ -171,17 +171,17 @@ class mijiaLogin(object):
         }
         ret = self.session.post(loginURL, data=post_data)
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to post login page, {ret.text}')
+            raise LoginError(ret.status_code, f'登录页面提交失败, {ret.text}')
         ret_data = json.loads(ret.text[11:])
         if ret_data['code'] != 0:
             raise LoginError(ret_data['code'], ret_data['desc'])
         if 'location' not in ret_data:
-            raise LoginError(-1, 'Failed to get location')
+            raise LoginError(-1, '获取跳转位置失败')
         if 'notificationUrl' in ret_data:
-            raise LoginError(-1, 'Verification code required, please try `QRlogin` method')
+            raise LoginError(-1, '需要验证码，请尝试使用 `QRlogin` 方法')
         ret = self.session.get(ret_data['location'])
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to get location, {ret.text}')
+            raise LoginError(ret.status_code, f'获取跳转位置失败, {ret.text}')
         cookies = self.session.cookies.get_dict()
 
         self.auth_data = {
@@ -206,7 +206,7 @@ class mijiaLogin(object):
             loginurl (str): 包含登录信息的URL。
             box_size (int, optional): 二维码大小。默认为10。
         """
-        logger.info('Scan the QR code below with Mi Home app')
+        logger.info('请使用米家APP扫描下方二维码')
         qr = QRCode(border=1, box_size=box_size)
         qr.add_data(loginurl)
         qr.make_image().save('qr.png')
@@ -214,10 +214,10 @@ class mijiaLogin(object):
             qr.print_ascii(invert=True, tty=True)
         except OSError:
             qr.print_ascii(invert=True, tty=False)
-            logger.info('If the QR code can not be scanned, '
-                        'please change the font of the terminal, '
-                        'such as "Maple Mono", "Fira Code", etc.\n'
-                        'Or just use the qr.png file in the current directory.')
+            logger.info('如果无法扫描二维码，'
+                        '请更改终端字体，'
+                        '如"Maple Mono"、"Fira Code"等。\n'
+                        '或者直接使用当前目录下的qr.png文件。')
 
     def QRlogin(self) -> dict:
         """
@@ -250,7 +250,7 @@ class mijiaLogin(object):
         url = qrURL + '?' + parse.urlencode(params)
         ret = self.session.get(url)
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to get QR code URL, {ret.text}')
+            raise LoginError(ret.status_code, f'获取二维码URL失败, {ret.text}')
         ret_data = json.loads(ret.text[11:])
         if ret_data['code'] != 0:
             raise LoginError(ret_data['code'], ret_data['desc'])
@@ -259,15 +259,15 @@ class mijiaLogin(object):
         try:
             ret = self.session.get(ret_data['lp'], timeout=60, headers={'Connection': 'keep-alive'})
         except requests.exceptions.Timeout:
-            raise LoginError(-1, 'Timeout, please try again')
+            raise LoginError(-1, '超时，请重试')
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to wait for login, {ret.text}')
+            raise LoginError(ret.status_code, f'等待登录失败, {ret.text}')
         ret_data = json.loads(ret.text[11:])
         if ret_data['code'] != 0:
             raise LoginError(ret_data['code'], ret_data['desc'])
         ret = self.session.get(ret_data['location'])
         if ret.status_code != 200:
-            raise LoginError(ret.status_code, f'Failed to get location, {ret.text}')
+            raise LoginError(ret.status_code, f'获取跳转位置失败, {ret.text}')
         cookies = self.session.cookies.get_dict()
 
         self.auth_data = {
