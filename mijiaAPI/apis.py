@@ -4,7 +4,8 @@ from typing import Union, Optional
 import requests
 import requests.cookies
 
-from .utils import defaultUA, post_data, PostDataError
+from .consts import defaultUA
+from .utils import post_data
 
 
 class mijiaAPI(object):

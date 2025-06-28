@@ -6,7 +6,7 @@ import requests
 from time import sleep
 from .apis import mijiaAPI
 from .code import ERROR_CODE
-from .urls import deviceURL
+from .consts import deviceURL
 from .logger import get_logger
 
 logger = get_logger(__name__)

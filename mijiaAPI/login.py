@@ -13,8 +13,7 @@ import requests
 from qrcode import QRCode
 
 from .logger import get_logger
-from .urls import msgURL, loginURL, qrURL, accountURL
-from .utils import defaultUA
+from .consts import msgURL, loginURL, qrURL, accountURL, defaultUA
 
 logger = get_logger(__name__)
 
