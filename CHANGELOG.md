@@ -2,7 +2,13 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
-## [2.0.0](https://github.com/Do1e/mijia-api/compare/v1.5.0...v2.0.0)
+## [2.0.1](https://github.com/Do1e/mijia-api/compare/v2.0.0...v2.0.1) - 2025-06-29
+### bugfix
+* 处理一个家庭中超过200个设备的情况，修复了`get_devices_list`方法可能无法获取所有设备的问题
+### improvement
+* 所有打印内容均使用中文
+
+## [2.0.0](https://github.com/Do1e/mijia-api/compare/v1.5.0...v2.0.0) - 2025-06-27
 #### 此版本有多项破坏性变更，请在升级后参考下述说明修复
 ### new feature
 * 新增API：`get_statistics`，用于获取设备的统计信息，使用方法参见[demos/test_get_statistics.py](demos/test_get_statistics.py)
