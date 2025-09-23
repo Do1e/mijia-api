@@ -177,9 +177,6 @@ class mijiaDevice(object):
         prop = self.prop_list[name]
         if 'w' not in prop.rw:
             raise ValueError(f'属性 {name} 不可写入')
-        if prop.value_list:
-            if value not in [item['value'] for item in prop.value_list]:
-                raise ValueError(f'无效值: {value}, 请使用 {prop.value_list}')
         if prop.type == 'bool':
             if isinstance(value, str):
                 if value.lower() == 'true':
@@ -222,6 +219,9 @@ class mijiaDevice(object):
                 raise ValueError(f'无效字符串值: {value}')
         else:
             raise ValueError(f'不支持的类型: {prop.type}, 可用类型: bool, int, uint, float, string')
+        if prop.value_list:
+            if value not in [item['value'] for item in prop.value_list]:
+                raise ValueError(f'无效值: {value}, 请使用 {prop.value_list}')
         method = prop.method.copy()
         method['did'] = did
         method['value'] = value
