@@ -31,6 +31,7 @@ assignees: ''
 - **操作系统**: [例如: Windows 10, macOS Big Sur, Ubuntu 20.04]
 - **Python版本**: [例如: 3.8.5]
 - **项目版本**: [例如: 1.0.0]
+- **设备model**: [例如: "lumi.acpartner.v2"]
 
 ### 描述问题
 
