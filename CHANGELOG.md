@@ -2,6 +2,10 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [2.0.2](https://github.com/Do1e/mijia-api/compare/v2.0.1...v2.0.2) - 2025-09-23
+### bugfix
+* 修复了`set`方法在类型检查前进行value_list检查，导致某些设备无法设置值的问题
+
 ## [2.0.1](https://github.com/Do1e/mijia-api/compare/v2.0.0...v2.0.1) - 2025-06-29
 ### bugfix
 * 处理一个家庭中超过200个设备的情况，修复了`get_devices_list`方法可能无法获取所有设备的问题
