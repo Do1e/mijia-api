@@ -2,7 +2,7 @@
 name = "mijiaAPI"
 version = "3.0.0"
 description = "A Python API for Xiaomi Mijia"
-authors = [{ name = "Do1e", email = "dpj.email@qq.com" }]
+authors = [{ name = "Do1e", email = "i@do1e.cn" }]
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
 license = { text = "GPL-3.0-or-later" }
