@@ -1,10 +1,4 @@
-"""
-来源：https://github.com/kekeandzeyu/ha_xiaomi_home/blob/main/custom_components/xiaomi_home/miot/i18n/zh-Hans.json
-"""
-
-"""
-小米米家API错误码
-"""
+# https://github.com/kekeandzeyu/ha_xiaomi_home/blob/main/custom_components/xiaomi_home/miot/i18n/zh-Hans.json
 ERROR_CODE = {
     "-10000": "未知错误",
     "-10001": "服务不可用",
@@ -54,3 +48,36 @@ ERROR_CODE = {
     "-706012043": "Property值错误",
     "-706014006": "没找到设备描述"
 }
+
+
+class LoginError(Exception):
+    def __init__(self, code: int, message: str):
+        super().__init__(f"code: {code}, message: {message}")
+
+class APIError(Exception):
+    def __init__(self, code: int, message: str):
+        super().__init__(f"code: {code}, message: {message}")
+
+class DeviceNotFoundError(Exception):
+    def __init__(self, did: str):
+        super().__init__(f"未找到 did 为 '{did}' 的设备，请检查 did 是否正确")
+
+class MultipleDevicesFoundError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+class DeviceGetError(Exception):
+    def __init__(self, dev_name: str, name: str, code: int):
+        super().__init__(f"获取设备 '{dev_name}' 的属性 '{name}' 时失败, code: {code}, message: {ERROR_CODE.get(str(code), '未知错误')}")
+
+class DeviceSetError(Exception):
+    def __init__(self, dev_name: str, name: str, code: int):
+        super().__init__(f"设置设备 '{dev_name}' 的属性 '{name}' 时失败, code: {code}, message: {ERROR_CODE.get(str(code), '未知错误')}")
+
+class DeviceActionError(Exception):
+    def __init__(self, dev_name: str, name: str, code: int):
+        super().__init__(f"执行设备 '{dev_name}' 的动作 '{name}' 时失败, code: {code}, message: {ERROR_CODE.get(str(code), '未知错误')}")
+
+class GetDeviceInfoError(Exception):
+    def __init__(self, device_model: str):
+        super().__init__(f"获取设备型号 '{device_model}' 的设备信息失败")

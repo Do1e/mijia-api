@@ -2,6 +2,18 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [3.0.0](https://github.com/Do1e/mijia-api/compare/v2.0.2...v3.0.0) - 2025-11.28
+### new feature
+* 使用最新的米家API接口，从 https://api.io.mi.com/app 切换到 https://api.mijia.tech/app
+* `mijiaAPI` 类的初始化参数变更，请传递用于保存认证数据的路径 `auth_data_path` 而不是认证数据
+* 彻底移除账号密码登录方式，仅支持二维码登录
+* 部分 API 需要指定 `home_id`，不指定将遍历所有家庭
+* 实现自动 `serviceToken` 刷新，现在理论上扫码一次能保活一个月
+* 移除登录类 `mijiaLogin`，相关功能集成进入 `mijiaAPI` 类，请使用 `mijiaAPI.login()` / `mijiaAPI.QRlogin()`，两者均为二维码登录
+* `mijiaDevice` 类的初始化参数变更，不再需要传递 `dev_info`，请选择传递 `did` 或 `dev_name` 进行初始化
+* `mijiaDevice` 类的 `set`, `get`, `run_action` 彻底移除 `did` 参数，初始化时已完成
+* 一些其他更改，请参考代码注释
+
 ## [2.0.2](https://github.com/Do1e/mijia-api/compare/v2.0.1...v2.0.2) - 2025-09-23
 ### bugfix
 * 修复了`set`方法在类型检查前进行value_list检查，导致某些设备无法设置值的问题

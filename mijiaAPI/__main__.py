@@ -1,32 +1,36 @@
-from typing import Optional
 import argparse
 import json
-import os
+import logging
 import sys
 import time
+from pathlib import Path
+from typing import Optional
 
 from .apis import mijiaAPI
-from .devices import mijiaDevice, get_device_info
-from .login import mijiaLogin
+from .devices import get_device_info, mijiaDevice
+from .version import version
+
+
+logging.getLogger("mijiaAPI").setLevel(logging.INFO)
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description="Mijia API CLI")
+    parser = argparse.ArgumentParser(description=f"Mijia API CLI (v{version})")
     subparsers = parser.add_subparsers(dest='command')
     parser.add_argument(
         '-p', '--auth_path',
-        type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
-    )
-    parser.add_argument(
-        '-l', '--list_devices',
-        action='store_true',
-        help="列出所有米家设备",
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
     )
     parser.add_argument(
         '--list_homes',
         action='store_true',
         help="列出家庭列表",
+    )
+    parser.add_argument(
+        '-l', '--list_devices',
+        action='store_true',
+        help="列出所有米家设备",
     )
     parser.add_argument(
         '--list_scenes',
@@ -76,15 +80,19 @@ def parse_args(args):
     get.set_defaults(func='get')
     get.add_argument(
         '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    get.add_argument(
+        '--did',
         type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
+        help="设备did，优先于 --dev_name 使用",
     )
     get.add_argument(
         '--dev_name',
         type=str,
         help="设备名称，指定为米家APP中设定的名称",
-        required=True,
     )
     get.add_argument(
         '--prop_name',
@@ -100,15 +108,19 @@ def parse_args(args):
     set.set_defaults(func='set')
     set.add_argument(
         '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    set.add_argument(
+        '--did',
         type=str,
-        default=os.path.join(os.path.expanduser("~"), ".config/mijia-api", "mijia-api-auth.json"),
-        help="认证文件保存路径，默认保存在~/.config/mijia-api/mijia-api-auth.json",
+        help="设备did，优先于 --dev_name 使用",
     )
     set.add_argument(
         '--dev_name',
         type=str,
         help="设备名称，指定为米家APP中设定的名称",
-        required=True,
     )
     set.add_argument(
         '--prop_name',
@@ -124,37 +136,28 @@ def parse_args(args):
     )
     return parser.parse_args(args)
 
-def init_api(auth_path: str) -> mijiaAPI:
-    if os.path.isdir(auth_path):
-        auth_path = os.path.join(auth_path, "mijia-api-auth.json")
-    if os.path.exists(auth_path):
-        try:
-            with open(auth_path, 'r') as f:
-                auth = json.load(f)
-            api = mijiaAPI(auth_data=auth)
-            if not api.available:
-                raise ValueError("认证信息已过期")
-        except (json.JSONDecodeError, ValueError):
-            api = mijiaLogin(save_path=auth_path)
-            auth = api.QRlogin()
-            api = mijiaAPI(auth_data=auth)
-    else:
-        api = mijiaLogin(save_path=auth_path)
-        auth = api.QRlogin()
-        api = mijiaAPI(auth_data=auth)
-    return api
+def init_api(auth_path: Path) -> mijiaAPI:
+    class APIUnavailableError(Exception):
+        pass
 
-def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
-    devices = api.get_devices_list()
-    if verbose:
-        print("设备列表:")
-        for device in devices:
-            print(f"  - {device['name']}\n"
-                    f"    did: {device['did']}\n"
-                    f"    model: {device['model']}\n"
-                    f"    online: {device['isOnline']}")
-    device_mapping = {device['did']: device for device in devices}
-    return device_mapping
+    if Path(auth_path).is_dir():
+        auth_path = auth_path / "auth.json"
+    if auth_path.exists():
+        try:
+            api = mijiaAPI(auth_data_path=auth_path)
+            if not api.available:
+                api._refresh_token()
+            if not api.available:
+                raise APIUnavailableError()
+            return api
+        except (json.JSONDecodeError, APIUnavailableError):
+            auth_path.unlink(missing_ok=True)
+            api = mijiaAPI(auth_data_path=auth_path)
+            api.login()
+    else:
+        api = mijiaAPI(auth_data_path=auth_path)
+        api.login()
+    return api
 
 def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional[dict] = None) -> dict:
     if verbose:
@@ -186,6 +189,18 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
     home_mapping = {home['id']: home for home in homes}
     return home_mapping
 
+def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
+    devices = api.get_devices_list()
+    if verbose:
+        print("设备列表:")
+        for device in devices:
+            print(f"  - {device['name']}\n"
+                    f"    did: {device['did']}\n"
+                    f"    model: {device['model']}\n"
+                    f"    online: {device['isOnline']}")
+    device_mapping = {device['did']: device for device in devices}
+    return device_mapping
+
 def get_scenes_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional[dict] = None) -> dict:
     if home_mapping is None:
         home_mapping = get_homes_list(api, verbose=False)
@@ -197,8 +212,7 @@ def get_scenes_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional[
             for scene in scenes:
                 print(f"  - {scene['name']}\n"
                       f"    ID: {scene['scene_id']}\n"
-                      f"    创建时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['create_time'])))}\n"
-                      f"    update time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['update_time'])))}")
+                      f"    创建时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(scene['create_time'])))}\n")
         scene_mapping.update({scene['scene_id']: scene for scene in scenes})
     return scene_mapping
 
@@ -206,12 +220,11 @@ def get_consumable_items(api: mijiaAPI, home_mapping: Optional[dict] = None):
     if home_mapping is None:
         home_mapping = get_homes_list(api, verbose=False)
     for home_id, home in home_mapping.items():
-        items = api.get_consumable_items(home_id, home['uid'])
+        items = api.get_consumable_items(home_id)
         print(f"{home['name']} ({home_id}) 中的耗材:")
         for item in items:
-            for consumes_data in item['consumes_data']:
-                print(f"  - {consumes_data['details'][0]['description']} 在 {consumes_data['name']}({consumes_data['did']})\n"
-                      f"    值: {consumes_data['details'][0]['value']}")
+            print(f"  - {item['name']}({item['did']}) 中的 {item['details']['description']}\n"
+                  f"    值: {item['details']['value']}")
 
 def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None) -> bool:
     if scene_mapping is None:
@@ -228,7 +241,8 @@ def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None
             print(f"场景 {scene_name_to_find} 未找到")
             return False
     scene_name = scene_mapping[scene_id]['name']
-    ret = api.run_scene(scene_id)
+    scence_home_id = scene_mapping[scene_id]['home_id']
+    ret = api.run_scene(scene_id, scence_home_id)
     if ret:
         print(f"场景 {scene_name}({scene_id}) 运行成功")
         return True
@@ -238,21 +252,21 @@ def run_scene(api: mijiaAPI, scene_id: str, scene_mapping: Optional[dict] = None
 
 def get(args):
     api = init_api(args.auth_path)
-    device = mijiaDevice(api, dev_name=args.dev_name)
+    device = mijiaDevice(api, did=args.did, dev_name=args.dev_name)
     value = device.get(args.prop_name)
     unit = device.prop_list[args.prop_name].unit
-    print(f"{args.dev_name} 的 {args.prop_name} 值为 {value} {unit if unit else ''}")
+    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值为 {value} {unit if unit else ''}")
 
 def set(args):
     api = init_api(args.auth_path)
-    device = mijiaDevice(api, dev_name=args.dev_name)
-    ret = device.set(args.prop_name, args.value)
+    device = mijiaDevice(api, did=args.did, dev_name=args.dev_name)
+    try:
+        device.set(args.prop_name, args.value)
+    except Exception as e:
+        print(f"设置 {args.dev_name} 的 {args.prop_name} 值为 {args.value} 失败: {e}")
+        return
     unit = device.prop_list[args.prop_name].unit
-    if ret:
-        print(f"{args.dev_name} 的 {args.prop_name} 值已设置为 {args.value} {unit if unit else ''}")
-    else:
-        print(f"设置 {args.dev_name} 的 {args.prop_name} 值为 {args.value} 失败")
-
+    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值已设置为 {args.value} {unit if unit else ''}")
 
 def main(args):
     args = parse_args(args)

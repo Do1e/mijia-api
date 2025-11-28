@@ -1,17 +1,12 @@
-import json
-import os
-import sys
-sys.path.extend(['.', '..'])
-from mijiaAPI import mijiaLogin
+import logging
 
-if not os.path.exists('jsons'):
-    os.mkdir('jsons')
+from mijiaAPI import mijiaAPI
 
-# 此方法大概率需要手机验证码验证，建议优先使用二维码登录
 
-username = os.getenv('XIAOMI_USERNAME')
-password = os.getenv('XIAOMI_PASSWORD')
-api = mijiaLogin()
-auth = api.login(username, password)
-with open('jsons/auth.json', 'w') as f:
-    json.dump(auth, f, indent=2)
+logging.getLogger("mijiaAPI").setLevel(logging.DEBUG)
+
+api = mijiaAPI(".mijia-api-data/auth.json")
+print(api.available)
+api.login() # 实际就是调用 QRlogin 方法
+print(api.available)
+print(api.get_homes_list())

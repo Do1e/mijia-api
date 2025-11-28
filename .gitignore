@@ -1,9 +1,19 @@
-jsons/*
-!.gitkeep
-*.pyc
-build
-dist
-*.png
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
 *.egg-info
-scripts
+
+# Virtual environments
 .venv
+
+# data
+.mijia-api-data/
+
+# vscode debug
+.vscode/launch.json
+
+# har files
+*.har

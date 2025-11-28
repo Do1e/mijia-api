@@ -8,9 +8,11 @@
 
 ## ⚠️ 重要提醒
 
-**自 v1.5.0 版本以来，本项目包含多项破坏性变更！**
+**v1.5.0 和 v3.0.0包含多项破坏性变更！**
 
 如果您正在从旧版本升级，请务必查看 [CHANGELOG.md](CHANGELOG.md) 以了解详细的变更内容和迁移指南。
+
+常见问题见 [FAQ.md](FAQ.md)。
 
 ## 安装
 
@@ -27,12 +29,7 @@ git clone https://github.com/Do1e/mijia-api.git
 cd mijia-api
 pip install .
 # Or `pip install -e .` for editable mode
-```
-
-或者使用 poetry：
-
-```bash
-poetry install
+# Or `uv sync` for uv users
 ```
 
 ### aur
@@ -44,205 +41,461 @@ yay -S python-mijia-api
 
 ## 使用
 
-使用实例可以参考 `demos` 文件夹下的示例代码，以下是基本使用说明。
-
 ### 登录
 
-`mijiaLogin`：登录小米账号，获取控制设备必须的 `userId`, `ssecurity`, `deviceId`, `serviceToken` 等信息。
+#### 扫码登录
 
-#### 登录方法：
+首次使用需要通过二维码登录，认证数据将被保存以便后续使用：
 
-* `QRlogin() -> dict`：扫描二维码登录（推荐）
-  - 在支持 tty 的终端直接显示二维码
-  - 或在当前目录查看生成的 `qr.png` 文件
-  
-* `login(username: str, password: str) -> dict`：账号密码登录
-  - **注意：此方法大概率需要手机验证码验证，建议优先使用二维码登录**
+```python
+from mijiaAPI import mijiaAPI
 
+# 初始化API（认证文件默认保存在 ~/.config/mijia-api/auth.json）
+api = mijiaAPI()
 
-### API
+# 或指定自定义路径
+# api = mijiaAPI(".mijia-api-data/auth.json")
 
-`mijiaAPI`：核心API实现，使用 `mijiaLogin` 登录后返回的信息进行初始化。
+# 登录（如果Token有效会自动跳过）
+api.login()  # 使用二维码登录
+```
 
-#### 初始化与状态检查：
+登录时会在终端打印二维码，使用米家APP扫描即可完成身份验证。
 
-* `__init__(auth_data: dict)`：初始化 API 对象
-  - `auth_data` 必须包含 `userId`, `deviceId`, `ssecurity`, `serviceToken` 四个字段
+### API 基础使用
 
-* `available -> bool`：检查传入的 `auth_data` 是否有效，根据 `auth_data` 中的 `expireTime` 字段判断
+#### 1. 获取家庭和设备列表
 
-#### 设备与场景获取与控制：
+```python
+from mijiaAPI import mijiaAPI
 
-下述方法可参考 [demos/test_apis.py](demos/test_apis.py) 中的示例。
+api = mijiaAPI()
+api.login()
 
-* `get_devices_list() -> list`：获取设备列表
-* `get_homes_list() -> list`：获取家庭列表（包含房间信息）
-* `get_scenes_list(home_id: str) -> list`：获取手动场景列表
-  - 在米家 App 中通过 **米家→添加→手动控制** 设置
-* `run_scene(scene_id: str) -> bool`：运行指定场景
-* `get_consumable_items(home_id: str, owner_id: Optional[int] = None) -> list`：获取设备的耗材信息，如果是共享家庭，需要额外指定 `owner_id` 参数
-* `get_devices_prop(data: list) -> list`：获取设备属性
-* `set_devices_prop(data: list) -> list`：设置设备属性
-* `run_action(data: dict) -> dict`：执行设备的特定动作
-* `get_statistics(data: dict) -> list`：获取设备的统计信息，如空调每个月的耗电量，参考 [demos/test_get_statistics.py](demos/test_get_statistics.py)
+# 获取所有家庭
+homes = api.get_homes_list()
+print(homes)
 
-设备属性和动作的相关参数（`siid`, `piid`, `aiid`）可以从 [米家产品库](https://home.miot-spec.com) 查询：
-* 访问 `https://home.miot-spec.com/spec/{model}`（`model` 在设备列表中获取）
-* 例如：[米家台灯 1S](https://home.miot-spec.com/spec/yeelink.light.lamp4)
+# 获取所有设备
+devices = api.get_devices_list()
+for device in devices:
+    print(f"设备名称: {device['name']}, Model: {device['model']}, Did: {device['did']}")
 
-**注意**：并非所有米家产品库中列出的方法都可用，需要自行测试验证。
+# 获取指定家庭的设备
+home_id = homes[0]['id']
+devices_in_home = api.get_devices_list(home_id=home_id)
+```
+
+#### 2. 获取和设置设备属性
+
+```python
+# 获取设备属性（原始 siid/piid 方式）
+result = api.get_devices_prop({
+    "did": "device_did",
+    "siid": 2,
+    "piid": 2
+})
+print(f"属性值: {result['value']}")
+
+# 设置设备属性
+result = api.set_devices_prop({
+    "did": "device_did",
+    "siid": 2,
+    "piid": 2,
+    "value": 50
+})
+
+# 支持批量操作
+result = api.get_devices_prop([
+    {"did": "device_did1", "siid": 2, "piid": 2},
+    {"did": "device_did2", "siid": 2, "piid": 2},
+])
+```
+
+#### 3. 执行设备动作
+
+```python
+# 执行设备动作（如开关灯的切换动作）
+result = api.run_action({
+    "did": "device_did",
+    "siid": 2,
+    "aiid": 1
+})
+```
+
+#### 4. 场景控制
+
+```python
+# 获取场景列表
+scenes = api.get_scenes_list()
+
+# 执行场景
+result = api.run_scene(scene_id="scene_id", home_id="home_id")
+```
+
+#### 5. 耗材管理
+
+```python
+# 获取耗材列表（如滤芯、灯泡等）
+consumables = api.get_consumable_items()
+
+# 获取指定家庭的耗材
+consumables_in_home = api.get_consumable_items(home_id=home_id)
+```
+
+#### 6. 统计数据
+
+```python
+# 获取设备统计数据（如耗电量）
+import time
+
+result = api.get_statistics({
+    "did": "device_did",
+    "key": "7.1",                    # siid.piid
+    "data_type": "stat_month_v3",    # 统计类型：stat_hour_v3, stat_day_v3, stat_week_v3, stat_month_v3
+    "limit": 6,                      # 返回的最大条目数
+    "time_start": int(time.time() - 30*24*3600),
+    "time_end": int(time.time()),
+})
+
+for item in result:
+    print(f"时间: {item['time']}, 数值: {item['value']}")
+```
 
 ### 设备信息获取
 
-使用 `get_device_info()` 函数可从米家规格平台在线获取设备属性字典：
+使用 `get_device_info()` 函数可从[米家规格平台](https://home.miot-spec.com/)在线获取设备属性和动作信息：
 
 ```python
 from mijiaAPI import get_device_info
 
 # 获取设备规格信息
 device_info = get_device_info('yeelink.light.lamp4')  # 米家台灯 1S 的 model
+
+# 查看设备支持的属性和动作
+print(device_info)
 ```
 
-详细示例：[demos/test_get_device_info.py](demos/test_get_device_info.py)
+### 高级使用：mijiaDevice 类
 
-### 设备控制封装
+`mijiaDevice` 类提供了一个高级封装，让您可以像操作普通对象一样控制设备，而无需关心 siid/piid 的细节：
 
-`mijiaDevice`：基于 `mijiaAPI` 的高级封装，提供更简便的设备控制方式。
-
-#### 初始化：
+#### 初始化设备
 
 ```python
-mijiaDevice(api: mijiaAPI, dev_info: dict = None, dev_name: str = None, did: str = None, sleep_time: float = 0.5)
+from mijiaAPI import mijiaAPI, mijiaDevice
+
+api = mijiaAPI(".mijia-api-data/auth.json")
+api.login()
+
+# 通过设备ID初始化
+device = mijiaDevice(api, did="device_did")
+
+# 或通过设备名称初始化（推荐，更人性化）
+device = mijiaDevice(api, dev_name="我的台灯")
+
+# 打印设备信息
+print(device)
 ```
 
-* `api`：已初始化的 `mijiaAPI` 对象
-* `dev_info`：设备属性字典（可选）
-  - 可通过 `get_device_info()` 函数获取
-  - **注意**：如果提供了 `dev_info`，则不需要提供 `dev_name`
-* `dev_name`：设备名称，用于自动查找设备（可选）
-  - 例如：`dev_name='台灯'`，会自动查找名称包含“台灯”的设备
-  - **注意**：如果提供了 `dev_name`，则不需要提供 `dev_info` 和 `did`
-* `did`：设备ID，便于直接通过属性名访问（可选）
-  - 如果初始化时未提供，无法使用属性样式访问，需要使用 `get()` 和 `set()` 方法指定 `did`
-  - 使用 `dev_name` 初始化时，`did` 会自动获取
-* `sleep_time`：属性操作间隔时间，单位秒（默认0.5秒）
-  - **重要**：设置属性后立即获取可能不符合预期，需设置适当延迟
-
-#### 使用方法控制：
-
-* `set(name: str, value: Union[bool, int, float, str], did: Optional[str] = None) -> bool`：设置设备属性
-* `get(name: str, did: Optional[str] = None) -> Union[bool, int, float, str]`：获取设备属性
-* `run_action(name: str, did: Optional[str] = None, value: Optional[Union[list, tuple]] = None, **kwargs) -> bool`：执行设备动作
-
-#### 属性样式访问：
-
-需在初始化时提供 `did` 或者使用 `dev_name` 初始化
+#### 获取和设置属性
 
 ```python
-# 示例：控制台灯
-device = mijiaDevice(api, dev_name='台灯')
-device.on = True                 # 打开灯
-device.brightness = 60           # 设置亮度
-current_temp = device.color_temperature  # 获取色温
+# 获取属性值
+brightness = device.get('brightness')
+print(f"当前亮度: {brightness}%")
+
+# 设置属性值
+device.set('brightness', 60)      # 设置亮度为60%
+device.set('on', True)            # 打开设备
+device.set('color-temperature', 5000)  # 设置色温
 ```
 
-属性名规则：使用下划线替代连字符（如 `color-temperature` 变为 `color_temperature`）
+也可以直接使用属性值赋值的方式，包含"-"的属性名请使用下划线"_"替代：
 
-#### 示例：
+```python
+print(f"当前亮度: {device.brightness}%")
+device.brightness = 60  # 设置亮度为60%
+device.on = True        # 打开设备
+device.color_temperature = 5000  # 设置色温
+```
 
-* 使用自然语言让小爱音箱执行：[demos/test_devices_wifispeaker.py](demos/test_devices_wifispeaker.py)
-* 通过属性直接控制台灯：[demos/test_devices_v2_light.py](demos/test_devices_v2_light.py)
+#### 执行设备动作
+
+```python
+# 执行动作（如切换开关）
+device.run_action('toggle')
+```
+
+#### 查看设备属性和动作列表
+
+```python
+# 查看所有支持的属性
+for prop_name, prop_obj in device.prop_list.items():
+    print(f"属性: {prop_name} ({prop_obj.desc})")
+    print(f"  类型: {prop_obj.type}, 读写: {prop_obj.rw}, 单位: {prop_obj.unit}")
+
+# 查看所有支持的动作
+for action_name, action_obj in device.action_list.items():
+    print(f"动作: {action_name} ({action_obj.desc})")
+```
+
+
+### 异常处理
+
+在使用过程中可能遇到各种异常，以下是常见的异常类型及处理方式：
+
+```python
+from mijiaAPI import (
+    mijiaAPI,
+    mijiaDevice,
+    LoginError,
+    DeviceNotFoundError,
+    DeviceGetError,
+    DeviceSetError,
+    DeviceActionError,
+    APIError,
+)
+
+api = mijiaAPI()
+
+try:
+    # 登录异常
+    api.login()
+except LoginError as e:
+    print(f"登录失败: {e}")
+    exit(1)
+
+try:
+    # 设备不存在异常
+    device = mijiaDevice(api, dev_name="不存在的设备")
+except DeviceNotFoundError as e:
+    print(f"设备未找到: {e}")
+except MultipleDevicesFoundError as e:
+    print(f"找到多个匹配的设备: {e}")
+except Exception as e:
+    print(f"其他异常: {e}")
+
+try:
+    # 获取属性异常
+    device = mijiaDevice(api, dev_name="我的台灯")
+    brightness = device.get('brightness')
+except DeviceGetError as e:
+    print(f"获取属性失败: {e}")
+except ValueError as e:
+    print(f"属性名称不支持: {e}")
+
+try:
+    # 设置属性异常
+    device.set('brightness', 150)  # 超出范围
+except DeviceSetError as e:
+    print(f"设置属性失败: {e}")
+except ValueError as e:
+    print(f"属性值无效: {e}")
+
+try:
+    # 执行动作异常
+    device.run_action('invalid_action')
+except DeviceActionError as e:
+    print(f"执行动作失败: {e}")
+except ValueError as e:
+    print(f"动作不支持: {e}")
+
+try:
+    # API通用异常
+    devices = api.get_devices_list()
+except APIError as e:
+    print(f"API调用失败: {e}")
+```
 
 ### Mijia API CLI
-`mijiaAPI` 还提供了一个命令行工具，可以直接在终端中使用。
+
+`mijiaAPI` 提供了命令行工具，可以直接在终端中控制米家设备，无需编写Python代码。
+
+#### 主命令帮助
+
+```bash
+mijiaAPI --help
+```
+
+完整的命令行参数说明：
 
 ```
-> python -m mijiaAPI --help
-> mijiaAPI --help
-usage: mijiaAPI [-h] [-p AUTH_PATH] [-l] [--list_homes] [--list_scenes] [--list_consumable_items]
-                [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]] [--get_device_info DEVICE_MODEL] [--run PROMPT]
-                [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
-                {get,set} ...
-
-Mijia API CLI
+usage: mijiaAPI [-h] [-p AUTH_PATH] [--list_homes] [-l] [--list_scenes] 
+                 [--list_consumable_items] [--run_scene SCENE_ID/SCENE_NAME ...] 
+                 [--get_device_info DEVICE_MODEL] [--run PROMPT] 
+                 [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
+                 {get,set} ...
 
 positional arguments:
-  {get,set}
-    get                 获取设备属性
-    set                 设置设备属性
+  {get,set}                获取或设置设备属性
 
-options:
-  -h, --help            show this help message and exit
-  -p AUTH_PATH, --auth_path AUTH_PATH
-                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
-  -l, --list_devices    列出所有米家设备
-  --list_homes          列出家庭列表
-  --list_scenes         列出场景列表
-  --list_consumable_items
-                        列出耗材列表
+optional arguments:
+  -h, --help               显示此帮助信息
+  -p, --auth_path AUTH_PATH
+                           认证文件保存路径（默认：~/.config/mijia-api/auth.json）
+  --list_homes             列出所有家庭
+  -l, --list_devices       列出所有米家设备
+  --list_scenes            列出所有场景
+  --list_consumable_items  列出所有耗材
   --run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]
-                        运行场景，指定场景ID或名称
+                           执行场景，可指定场景ID或名称
   --get_device_info DEVICE_MODEL
-                        获取设备信息，指定设备model，先使用 --list_devices 获取
-  --run PROMPT          使用自然语言描述你的需求，如果你有小爱音箱的话
+                           获取设备规格信息（指定设备model）
+  --run PROMPT             使用自然语言描述需求（需要小爱音箱）
   --wifispeaker_name WIFISPEAKER_NAME
-                        指定小爱音箱名称，默认是获取到的第一个小爱音箱
-  --quiet               小爱音箱静默执行
+                           指定小爱音箱名称（默认为第一个小爱音箱）
+  --quiet                  小爱音箱静默执行
 ```
 
-```
-> python -m mijiaAPI get --help
-> mijiaAPI get --help
-usage: __main__.py get [-h] [-p AUTH_PATH] --dev_name DEV_NAME --prop_name PROP_NAME
+#### 获取设备属性
 
-options:
-  -h, --help            show this help message and exit
-  -p AUTH_PATH, --auth_path AUTH_PATH
-                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
-  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
-  --prop_name PROP_NAME
-                        属性名称，先使用 --get_device_info 获取
-```
+```bash
+# 查看帮助
+mijiaAPI get --help
 
-```
-> python -m mijiaAPI set --help
-> mijiaAPI set --help
-usage: __main__.py set [-h] [-p AUTH_PATH] --dev_name DEV_NAME --prop_name PROP_NAME --value VALUE
+# 获取设备属性
+mijiaAPI get --dev_name "卧室台灯" --prop_name "brightness"
 
-options:
-  -h, --help            show this help message and exit
-  -p AUTH_PATH, --auth_path AUTH_PATH
-                        认证文件保存路径，默认保存在~/.config/mijia-api-auth.json
-  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
-  --prop_name PROP_NAME
-                        属性名称，先使用 --get_device_info 获取
-  --value VALUE         需要设定的属性值
+# 指定认证文件路径
+mijiaAPI -p /path/to/auth.json get --dev_name "卧室台灯" --prop_name "on"
 ```
 
-或者直接使用`uvx`忽略安装步骤：
+#### 设置设备属性
+
+```bash
+# 查看帮助
+mijiaAPI set --help
+
+# 设置设备属性
+mijiaAPI set --dev_name "卧室台灯" --prop_name "brightness" --value 60
+
+# 打开设备
+mijiaAPI set --dev_name "卧室台灯" --prop_name "on" --value True
+```
+
+#### 常用命令示例
+
+```bash
+# 列出所有设备（首先需要这个来获取设备名称）
+mijiaAPI -l
+
+# 列出所有家庭
+mijiaAPI --list_homes
+
+# 列出所有场景
+mijiaAPI --list_scenes
+
+# 执行场景
+mijiaAPI --run_scene "睡眠模式" "晚安"
+
+# 获取设备规格信息
+mijiaAPI --get_device_info yeelink.light.lamp4
+
+# 列出耗材
+mijiaAPI --list_consumable_items
+
+# 使用小爱音箱执行自然语言命令
+mijiaAPI --run "打开卧室台灯"
+mijiaAPI --run "把亮度调到50%" --wifispeaker_name "卧室小爱"
+mijiaAPI --run "关闭所有灯" --quiet
+```
+
+#### 直接使用 uvx（无需安装）
+
+如果安装了 `uv` 工具，可以直接使用 `uvx` 运行，无需提前安装 `mijiaAPI`：
 
 ```bash
 uvx mijiaAPI --help
+uvx mijiaAPI -l
+uvx mijiaAPI get --dev_name "台灯" --prop_name "brightness"
 ```
 
-#### 示例：
+### 最佳实践
 
-```bash
-mijiaAPI -l # 列出所有米家设备
-mijiaAPI --list_homes # 列出家庭列表
-mijiaAPI --list_scenes # 列出场景列表
-mijiaAPI --list_consumable_items # 列出耗材列表
-mijiaAPI --run_scene SCENE_ID/SCENE_NAME # 运行场景，指定场景ID或名称
-mijiaAPI --get_device_info DEVICE_MODEL # 获取设备信息，指定设备model，先使用 --list_devices 获取
-mijiaAPI get --dev_name DEV_NAME --prop_name PROP_NAME # 获取设备属性
-mijiaAPI set --dev_name DEV_NAME --prop_name PROP_NAME --value VALUE # 设置设备属性
-mijiaAPI --run 明天天气如何
-mijiaAPI --run 打开台灯并将亮度调至最大 --quiet
+#### 设置 sleep_time 参数
+
+在使用 `mijiaDevice` 时，可以设置 `sleep_time` 参数来控制获取属性值时的等待时间。某些设备可能响应较慢，增加此参数可以获取更准确的值：
+
+```python
+# 默认 sleep_time 为 0.5 秒
+device = mijiaDevice(api, dev_name="我的设备", sleep_time=1.0)
+
+# 获取属性时会自动等待指定的时间
+value = device.get('brightness')
+```
+
+#### 查询设备规格信息
+
+在使用 API 之前，您可以通过以下方式查询设备支持的属性和动作：
+
+```python
+from mijiaAPI import get_device_info
+
+# 从米家规格平台获取设备信息
+device_info = get_device_info('yeelink.light.lamp4')
+
+# 查看原始信息
+import json
+print(json.dumps(device_info, ensure_ascii=False, indent=2))
+
+# 或者使用 mijiaDevice 类查看
+device = mijiaDevice(api, dev_name="我的台灯")
+print(device)  # 会列出所有支持的属性和动作
+```
+
+#### 使用正确的认证文件路径
+
+认证文件默认保存在用户主目录 `~/.config/mijia-api/auth.json`，您也可以自定义路径：
+
+```python
+from pathlib import Path
+
+# 默认方式（推荐，认证文件保存在 ~/.config/mijia-api/auth.json）
+api = mijiaAPI()
+
+# 方案1：保存在项目目录
+auth_path = Path(__file__).parent / ".mijia-api" / "auth.json"
+api = mijiaAPI(str(auth_path))
+
+# 方案2：直接传入目录，自动创建 auth.json
+api = mijiaAPI(".mijia-api-data")
+```
+
+#### 批量操作性能优化
+
+对多个设备进行操作时，建议使用批量操作而不是逐个操作：
+
+```python
+# 低效方式：逐个获取
+for device_id in device_ids:
+    result = api.get_devices_prop({"did": device_id, "siid": 2, "piid": 2})
+
+# 高效方式：批量获取
+props_list = [{"did": device_id, "siid": 2, "piid": 2} for device_id in device_ids]
+results = api.get_devices_prop(props_list)
+```
+
+#### 查看debug日志
+
+如果遇到问题，可以启用 debug 日志来了解详细的API调用过程：
+
+```python
+import logging
+
+# 启用 debug 日志
+logging.getLogger("mijiaAPI").setLevel(logging.DEBUG)
+
+# 现在所有 API 调用都会打印详细的日志
+api = mijiaAPI()
+api.login()
 ```
 
 ## 致谢
 
 * [janzlan/mijia-api](https://gitee.com/janzlan/mijia-api/tree/master)
+* [米家 APP 网络请求的抓包、加解密与构造的代码笔记](https://imkero.net/posts/mihome-app-api/)
+* [al-one/hass-xiaomi-miot](https://github.com/al-one/hass-xiaomi-miot)
 
 ## 开源许可
 
