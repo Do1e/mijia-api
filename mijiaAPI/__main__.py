@@ -17,6 +17,12 @@ def parse_args(args):
     parser = argparse.ArgumentParser(description=f"Mijia API CLI (v{version})")
     subparsers = parser.add_subparsers(dest='command')
     parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f"%(prog)s {version}",
+        help="显示版本信息并退出",
+    )
+    parser.add_argument(
         '-p', '--auth_path',
         type=Path,
         default=Path.home() / ".config" / "mijia-api" / "auth.json",

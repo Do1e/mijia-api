@@ -206,7 +206,6 @@ wheels = [
 
 [[package]]
 name = "mijiaapi"
-version = "3.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "pillow", version = "11.3.0", source = { registry = "https://mirror.nju.edu.cn/pypi/web/simple" }, marker = "python_full_version < '3.10'" },

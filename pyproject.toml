@@ -1,6 +1,6 @@
 [project]
 name = "mijiaAPI"
-version = "3.0.0"
+dynamic = ["version"]
 description = "A Python API for Xiaomi Mijia"
 authors = [{ name = "Do1e", email = "i@do1e.cn" }]
 readme = "README.md"
@@ -24,6 +24,9 @@ mijiaAPI = "mijiaAPI.__main__:cli"
 
 [tool.setuptools.packages.find]
 include = ["mijiaAPI"]
+
+[tool.setuptools.dynamic]
+version = {attr = "mijiaAPI.version.version"}
 
 [project.urls]
 Homepage = "https://github.com/Do1e/mijia-api"
