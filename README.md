@@ -76,7 +76,7 @@ api.login()
 homes = api.get_homes_list()
 print(homes)
 
-# 获取所有设备
+# 获取所有设备（不包含共享设备）
 devices = api.get_devices_list()
 for device in devices:
     print(f"设备名称: {device['name']}, Model: {device['model']}, Did: {device['did']}")
@@ -84,6 +84,9 @@ for device in devices:
 # 获取指定家庭的设备
 home_id = homes[0]['id']
 devices_in_home = api.get_devices_list(home_id=home_id)
+
+# 获取共享设备列表（无法指定家庭ID）
+shared_devices = api.get_shared_devices_list()
 ```
 
 #### 2. 获取和设置设备属性
@@ -328,24 +331,55 @@ usage: mijiaAPI [-h] [-p AUTH_PATH] [--list_homes] [-l] [--list_scenes]
                  {get,set} ...
 
 positional arguments:
-  {get,set}                获取或设置设备属性
+  {get,set}
+    get                 获取设备属性
+    set                 设置设备属性
 
-optional arguments:
-  -h, --help               显示此帮助信息
+options:
+  -h, --help            show this help message and exit
+  -v, --version         显示版本信息并退出
   -p, --auth_path AUTH_PATH
-                           认证文件保存路径（默认：~/.config/mijia-api/auth.json）
-  --list_homes             列出所有家庭
-  -l, --list_devices       列出所有米家设备
-  --list_scenes            列出所有场景
-  --list_consumable_items  列出所有耗材
+                        认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json
+  --list_homes          列出家庭列表
+  -l, --list_devices    列出所有米家设备，包含共享设备
+  --list_scenes         列出场景列表
+  --list_consumable_items
+                        列出耗材列表
   --run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]
-                           执行场景，可指定场景ID或名称
+                        运行场景，指定场景ID或名称
   --get_device_info DEVICE_MODEL
-                           获取设备规格信息（指定设备model）
-  --run PROMPT             使用自然语言描述需求（需要小爱音箱）
+                        获取设备信息，指定设备model，先使用 --list_devices 获取
+  --run PROMPT          使用自然语言描述你的需求，如果你有小爱音箱的话
   --wifispeaker_name WIFISPEAKER_NAME
-                           指定小爱音箱名称（默认为第一个小爱音箱）
-  --quiet                  小爱音箱静默执行
+                        指定小爱音箱名称，默认是获取到的第一个小爱音箱
+  --quiet               小爱音箱静默执行
+```
+
+```
+usage: mijiaAPI get [-h] [-p AUTH_PATH] [--did DID] [--dev_name DEV_NAME] --prop_name PROP_NAME
+
+options:
+  -h, --help            show this help message and exit
+  -p, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json
+  --did DID             设备did，优先于 --dev_name 使用
+  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
+  --prop_name PROP_NAME
+                        属性名称，先使用 --get_device_info 获取
+```
+
+```
+usage: mijiaAPI set [-h] [-p AUTH_PATH] [--did DID] [--dev_name DEV_NAME] --prop_name PROP_NAME --value VALUE
+
+options:
+  -h, --help            show this help message and exit
+  -p, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json
+  --did DID             设备did，优先于 --dev_name 使用
+  --dev_name DEV_NAME   设备名称，指定为米家APP中设定的名称
+  --prop_name PROP_NAME
+                        属性名称，先使用 --get_device_info 获取
+  --value VALUE         需要设定的属性值
 ```
 
 #### 获取设备属性

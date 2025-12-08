@@ -36,7 +36,7 @@ def parse_args(args):
     parser.add_argument(
         '-l', '--list_devices',
         action='store_true',
-        help="列出所有米家设备",
+        help="列出所有米家设备，包含共享设备",
     )
     parser.add_argument(
         '--list_scenes',
@@ -196,7 +196,7 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
     return home_mapping
 
 def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
-    devices = api.get_devices_list()
+    devices = api.get_devices_list() + api.get_shared_devices_list()
     if verbose:
         print("设备列表:")
         for device in devices:

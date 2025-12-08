@@ -23,6 +23,12 @@ with open(".mijia-api-data/devices.json", "w", encoding="utf-8") as f:
     json.dump(devices, f, ensure_ascii=False, indent=2)
 time.sleep(1)
 
+# -------------------- get shared homes list -------------------
+shared_devices = api.get_shared_devices_list()
+with open(".mijia-api-data/shared_devices.json", "w", encoding="utf-8") as f:
+    json.dump(shared_devices, f, ensure_ascii=False, indent=2)
+time.sleep(1)
+
 # ------------------ get devices with home_id ------------------
 devices_with_home = api.get_devices_list(home_id=home_id)
 with open(f".mijia-api-data/devices_in_{home_name}.json", "w", encoding="utf-8") as f:

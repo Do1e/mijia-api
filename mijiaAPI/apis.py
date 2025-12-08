@@ -413,6 +413,33 @@ class mijiaAPI():
         else:
             return self._get_devices_list(home_id)
 
+    def get_shared_devices_list(self) -> list:
+        """
+        获取共享设备列表
+
+        获取用户被共享的所有设备列表。
+
+        参数:
+            无
+
+        返回值:
+            list: 共享设备信息列表，每个元素为一个dict，包含以下常见字段：
+                - did (str): 设备ID
+                - name (str): 设备名称
+                - model (str): 设备型号
+                - uid (int): 设备所属用户ID
+                - ...
+        异常:
+            APIError: 当API请求失败或返回错误时抛出
+        """
+        uri = "/v2/home/device_list_page"
+        data = {"ssid": "<unknown ssid>", "bssid": "02:00:00:00:00:00", "getVirtualModel": True, "getHuamiDevices": 1, "get_split_device": True, "support_smart_home": True, "get_cariot_device": True, "get_third_device": True, "get_phone_device": True, "get_miwear_device": True}
+        ret = self._request(uri, data)
+        devices = [item for item in ret["list"] if item.get("owner", False)]
+        for device in devices:
+            device.update({"home_id": "shared"})
+        return devices
+
     def get_scenes_list(self, home_id: Optional[str] = None) -> list:
         """
         获取场景列表
