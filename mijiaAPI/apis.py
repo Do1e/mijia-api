@@ -24,6 +24,8 @@ from .miutils import (
 class mijiaAPI():
     def __init__(self, auth_data_path: Optional[str] = None):
         self.locale = locale.getlocale()[0] if locale.getlocale()[0] else "zh_CN"
+        if '_' not in self.locale: # #57, make sure locale is in correct format
+            self.locale = "zh_CN"
         self.api_base_url = "https://api.mijia.tech/app"
         self.login_url = "https://account.xiaomi.com/longPolling/loginUrl"
         self.service_login_url = f"https://account.xiaomi.com/pass/serviceLogin?_json=true&sid=mijia&_locale={self.locale}"
