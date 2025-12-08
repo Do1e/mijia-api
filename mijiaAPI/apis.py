@@ -297,6 +297,13 @@ class mijiaAPI():
         return data
 
 
+    def _get_home_owner(self, home_id: str) -> int:
+        homes = self.get_homes_list()
+        for home in homes:
+            if home["id"] == home_id:
+                return int(home["uid"])
+        raise APIError(-1, f"未找到 home_id={home_id} 的家庭信息")
+
     def _get_devices_list(self, home_id: str) -> list:
         uri = "/home/home_device_list"
         start_did = ""
@@ -304,7 +311,7 @@ class mijiaAPI():
         devices = []
         while has_more:
             data = {
-                "home_owner": int(self.auth_data["userId"]),
+                "home_owner": self._get_home_owner(home_id),
                 "home_id": int(home_id),
                 "limit": 200,
                 "start_did": start_did,
@@ -324,7 +331,7 @@ class mijiaAPI():
 
     def _get_scenes_list(self, home_id: str) -> list:
         uri = "/appgateway/miot/appsceneservice/AppSceneService/GetSimpleSceneList"
-        data = {"app_version": 12, "get_type": 2, "home_id": str(home_id), "owner_uid": int(self.auth_data["userId"])}
+        data = {"app_version": 12, "get_type": 2, "home_id": str(home_id), "owner_uid": self._get_home_owner(home_id)}
         ret = self._request(uri, data)
         if ret and "manual_scene_info_list" in ret:
             scenes = ret["manual_scene_info_list"]
@@ -333,7 +340,7 @@ class mijiaAPI():
 
     def _get_consumable_items(self, home_id: str) -> list:
         uri = "/v2/home/standard_consumable_items"
-        data = {"home_id": int(home_id), "owner_id": int(self.auth_data["userId"]), "filter_ignore": True}
+        data = {"home_id": int(home_id), "owner_id": self._get_home_owner(home_id), "filter_ignore": True}
         ret = self._request(uri, data)
         try:
             items = ret["items"][0]["consumes_data"]
@@ -455,7 +462,7 @@ class mijiaAPI():
             APIError: 当API请求失败或返回错误时抛出
         """
         uri = "/appgateway/miot/appsceneservice/AppSceneService/NewRunScene"
-        data = {"scene_id": scene_id, "scene_type": 2, "phone_id": "null", "home_id": str(home_id), "owner_uid": int(self.auth_data["userId"])}
+        data = {"scene_id": scene_id, "scene_type": 2, "phone_id": "null", "home_id": str(home_id), "owner_uid": self._get_home_owner(home_id)}
         return self._request(uri, data)
 
     def get_consumable_items(self, home_id: Optional[str] = None) -> list:
