@@ -2,14 +2,20 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
-## [3.0.1](https://github.com/Do1e/mijia-api/compare/v3.0.0...v3.0.1) - 2025-12.09
+## [3.0.2](https://github.com/Do1e/mijia-api/compare/v3.0.1...v3.0.2) - 2026-01-01
+### new feature
+* 为`available`属性添加了缓存机制，减少频繁调用带来的性能损耗
+### chore
+* 日志信息显示毫秒
+
+## [3.0.1](https://github.com/Do1e/mijia-api/compare/v3.0.0...v3.0.1) - 2025-12-09
 ### new feature
 * 新增 API `mijiaAPI.get_shared_devices_list()`，用于获取共享设备列表
 ### bugfix
 * 修复了 alpine 下 `locale` 无法正常获取，默认使用 `zh_CN` 解决，如果需要在 alpine 下使用其他位置，请自行设置环境变量 `LC_ALL` 和 `LANG`。
 * 修复了共享家庭中无权限的问题，确保传递正确的 `owner_id`。
 
-## [3.0.0](https://github.com/Do1e/mijia-api/compare/v2.0.2...v3.0.0) - 2025-11.28
+## [3.0.0](https://github.com/Do1e/mijia-api/compare/v2.0.2...v3.0.0) - 2025-11-28
 ### new feature
 * 使用最新的米家API接口，从 https://api.io.mi.com/app 切换到 https://api.mijia.tech/app
 * `mijiaAPI` 类的初始化参数变更，请传递用于保存认证数据的路径 `auth_data_path` 而不是认证数据
