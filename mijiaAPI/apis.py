@@ -37,6 +37,9 @@ class mijiaAPI():
         else:
             self.auth_data_path = Path(auth_data_path)
 
+        self._available_cache = None
+        self._available_cache_time = 0
+
         if self.auth_data_path.exists():
             with open(self.auth_data_path, "r") as f:
                 self.auth_data = json.load(f)
@@ -72,10 +75,21 @@ class mijiaAPI():
             return False
         if any(key not in self.auth_data for key in ["ua", "ssecurity", "userId", "cUserId", "serviceToken"]):
             return False
+
+        current_time = int(time.time())
+        if current_time - self._available_cache_time < 60:
+            logger.debug(f"使用缓存的available结果: {self._available_cache}")
+            return self._available_cache
+
         try:
             self.check_new_msg(refresh_token=False)
         except Exception:
+            self._available_cache = False
+            self._available_cache_time = current_time
             return False
+
+        self._available_cache = True
+        self._available_cache_time = current_time
         return True
 
     @property
