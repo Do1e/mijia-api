@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -11,7 +12,11 @@ from .devices import get_device_info, mijiaDevice
 from .version import version
 
 
-logging.getLogger("mijiaAPI").setLevel(logging.INFO)
+log_level_name = os.getenv('MIJIA_LOG_LEVEL', 'INFO').upper()
+if log_level_name not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+    raise ValueError(f"无效的日志级别: {log_level_name}, 可选值为 DEBUG, INFO, WARNING, ERROR, CRITICAL")
+log_level = getattr(logging, log_level_name, logging.INFO)
+logging.getLogger("mijiaAPI").setLevel(log_level)
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description=f"Mijia API CLI (v{version})")

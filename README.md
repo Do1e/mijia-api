@@ -321,6 +321,25 @@ except APIError as e:
 mijiaAPI --help
 ```
 
+#### 环境变量
+
+支持以下环境变量来配置 CLI 的行为：
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `MIJIA_LOG_LEVEL` | `INFO` | 日志级别，可选值：`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
+
+##### 示例
+
+```bash
+# 设置为 DEBUG 级别查看详细日志
+export MIJIA_LOG_LEVEL=DEBUG
+mijiaAPI --list_devices
+
+# 或直接在命令前指定
+MIJIA_LOG_LEVEL=WARNING mijiaAPI get --dev_name "卧室台灯" --prop_name "brightness"
+```
+
 完整的命令行参数说明：
 
 ```
