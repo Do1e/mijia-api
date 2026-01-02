@@ -2,6 +2,12 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [3.0.3](https://github.com/Do1e/mijia-api/compare/v3.0.2...v3.0.3) - 2026-01-02
+### new feature
+* 新增 `MIJIA_LOG_LEVEL` 环境变量支持，用于配置 CLI 日志级别
+### bugfix
+* 修复错误代码 "-10020" 描述中的错误拼写
+
 ## [3.0.2](https://github.com/Do1e/mijia-api/compare/v3.0.1...v3.0.2) - 2026-01-01
 ### new feature
 * 为`available`属性添加了缓存机制，减少频繁调用带来的性能损耗
