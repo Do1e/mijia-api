@@ -84,8 +84,8 @@ class mijiaAPI():
         try:
             self.check_new_msg(refresh_token=False)
         except Exception:
-            self._available_cache = False
-            self._available_cache_time = current_time
+            self._available_cache = None
+            self._available_cache_time = 0
             return False
 
         self._available_cache = True
