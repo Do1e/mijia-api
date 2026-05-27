@@ -6,12 +6,6 @@
 [![PyPI](https://img.shields.io/badge/PyPI-mijiaAPI-blue)](https://pypi.org/project/mijiaAPI/)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](https://opensource.org/licenses/GPL-3.0)
 
-## ⚠️ 重要提醒
-
-**v1.5.0 和 v3.0.0包含多项破坏性变更！**
-
-如果您正在从旧版本升级，请务必查看 [CHANGELOG.md](CHANGELOG.md) 以了解详细的变更内容和迁移指南。
-
 常见问题见 [FAQ.md](FAQ.md)。
 
 ## 安装
