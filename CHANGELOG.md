@@ -2,6 +2,13 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [3.1.0](https://github.com/Do1e/mijia-api/compare/v3.0.5...v3.1.0) - 2026-05-27
+### new feature
+* 删除设备属性的单位`unit`属性，因为 home.miot-spec.com 上已废弃
+### bugfix
+* 适配 home.miot-spec.com 新的规格页格式
+* 修复 execute-text-directive 中 quiet 参数的类型转换
+
 ## [3.0.5](https://github.com/Do1e/mijia-api/compare/v3.0.4...v3.0.5) - 2026-01-24
 ### bugfix
 * 蓝牙设备控制返回 code 为 1 时表示网关已经接收指令，视为成功。
