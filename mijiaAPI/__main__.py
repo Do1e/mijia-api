@@ -265,8 +265,7 @@ def get(args):
     api = init_api(args.auth_path)
     device = mijiaDevice(api, did=args.did, dev_name=args.dev_name)
     value = device.get(args.prop_name)
-    unit = device.prop_list[args.prop_name].unit
-    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值为 {value} {unit if unit else ''}")
+    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值为 {value}")
 
 def set(args):
     api = init_api(args.auth_path)
@@ -276,8 +275,7 @@ def set(args):
     except Exception as e:
         print(f"设置 {args.dev_name} 的 {args.prop_name} 值为 {args.value} 失败: {e}")
         return
-    unit = device.prop_list[args.prop_name].unit
-    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值已设置为 {args.value} {unit if unit else ''}")
+    print(f"{device.name} ({device.did}) 的 {args.prop_name} 值已设置为 {args.value}")
 
 def main(args):
     args = parse_args(args)

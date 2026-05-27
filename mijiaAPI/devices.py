@@ -30,7 +30,6 @@ class DevProp():
         if self.type not in ["bool", "int", "uint", "float", "string"]:
             raise ValueError(f"不支持的类型: {self.type}, 可选类型: bool, int, uint, float, string")
         self.rw = prop_dict["rw"]
-        self.unit = prop_dict["unit"]
         self.range = prop_dict["range"]
         self.value_list = prop_dict.get("value-list", None)
         self.method = prop_dict["method"]
@@ -38,7 +37,7 @@ class DevProp():
     def __str__(self):
         lines = [
             f"  {self.name}: {self.desc}",
-            f"    valuetype: {self.type}, rw: {self.rw}, unit: {self.unit}, range: {self.range}"
+            f"    valuetype: {self.type}, rw: {self.rw}, range: {self.range}"
         ]
 
         if self.value_list:
@@ -260,7 +259,6 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
                 - description (str): 属性描述
                 - type (str): 属性数据类型（int、uint、float、bool、string）
                 - rw (str): 读写权限（'r' 可读，'w' 可写，'rw' 可读写）
-                - unit (str): 属性单位
                 - range (list): 属性值范围 [min, max, step]
                 - value-list (list): 枚举值列表
                 - method (dict): API 调用方法参数
@@ -288,72 +286,84 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
     })
     if response.status_code != 200:
         raise GetDeviceInfoError(device_model)
-    content = re.search(r"data-page=\"(.*?)\">", response.text)
+    content = re.search(r"<script data-page=\"app\" type=\"application/json\">(.*?)</script>", response.text)
     if content is None:
         raise GetDeviceInfoError(device_model)
     content = content.group(1)
-    content = json.loads(content.replace("&quot;", "\""))
+    content = json.loads(content)
 
-    if content["props"]["product"]:
-        name = content["props"]["product"]["name"]
-        model = content["props"]["product"]["model"]
-    else:
-        name = content["props"]["spec"]["name"]
-        model = device_model
+    product = content["props"]["product"]
+    name = product["name"]
+    model = product["model"]
+    i18n_zh = content["props"]["i18n"]["zh_cn"]
     result = {
         "name": name,
         "model": model,
         "properties": [],
         "actions": []
     }
-    services = content["props"]["spec"]["services"]
+    services = content["props"]["tree"]["services"]
 
     properties_name = []
     actions_name = []
-    for siid in services:
-        if "properties" in services[siid]:
-            for piid in services[siid]["properties"]:
-                prop = services[siid]["properties"][piid]
-                if prop["format"].startswith("int"):
-                    prop_type = "int"
-                elif prop["format"].startswith("uint"):
-                    prop_type = "uint"
-                else:
-                    prop_type = prop["format"]
-                item = {
-                    "name": prop["name"],
-                    "description": f"{prop.get('description', '')} / {prop.get('desc_zh_cn', '')}",
-                    "type": prop_type,
-                    "rw": "".join([
-                        "r" if "read" in prop["access"] else "",
-                        "w" if "write" in prop["access"] else ""
-                    ]),
-                    "unit": prop.get("unit", None),
-                    "range": prop.get("value-range", None),
-                    "value-list": prop.get("value-list", None),
-                    "method": {
-                        "siid": int(siid),
-                        "piid": int(piid)
-                    }
+    for svc in services:
+        siid = svc["iid"]
+        svc_type = svc["type"]
+        for prop in svc.get("properties", []):
+            piid = prop["iid"]
+            if prop["format"].startswith("int"):
+                prop_type = "int"
+            elif prop["format"].startswith("uint"):
+                prop_type = "uint"
+            else:
+                prop_type = prop["format"]
+            access_str = "".join([
+                "r" if "read" in prop["access"] else "",
+                "w" if "write" in prop["access"] else ""
+            ])
+            zh_cn = i18n_zh.get(f"service:{siid:03d}:property:{piid:03d}", "")
+            item = {
+                "name": prop["type"],
+                "description": f"{prop['description']} / {zh_cn}".rstrip(" / "),
+                "type": prop_type,
+                "rw": access_str,
+                "range": prop.get("valueRange", None),
+                "value-list": None,
+                "method": {
+                    "siid": siid,
+                    "piid": piid
                 }
-                if item["name"] in properties_name:
-                    item["name"] = f"{services[siid]['name']}-{item['name']}"
-                properties_name.append(item["name"])
-                result["properties"].append({k: None if v == "none" else v for k, v in item.items()})
-        if "actions" in services[siid]:
-            for aiid in services[siid]["actions"]:
-                act = services[siid]["actions"][aiid]
-                if act["name"] in actions_name:
-                    act["name"] = f"{services[siid]['name']}-{act['name']}"
-                actions_name.append(act["name"])
-                result["actions"].append({
-                    "name": act["name"],
-                    "description": f"{act.get('description', '')} / {act.get('desc_zh_cn', '')}",
-                    "method": {
-                        "siid": int(siid),
-                        "aiid": int(aiid)
+            }
+            if prop.get("valueList"):
+                item["value-list"] = []
+                for vl_item in prop["valueList"]:
+                    vl_zh = i18n_zh.get(vl_item.get("i18nKey", ""), "")
+                    vl_entry = {
+                        "value": vl_item["value"],
+                        "description": vl_item["description"]
                     }
-                })
+                    if vl_zh:
+                        vl_entry["desc_zh_cn"] = vl_zh
+                    item["value-list"].append(vl_entry)
+            if item["name"] in properties_name:
+                item["name"] = f"{svc_type}-{item['name']}"
+            properties_name.append(item["name"])
+            result["properties"].append(item)
+        for act in svc.get("actions", []):
+            aiid = act["iid"]
+            zh_cn = i18n_zh.get(f"service:{siid:03d}:action:{aiid:03d}", "")
+            act_item = {
+                "name": act["type"],
+                "description": f"{act['description']} / {zh_cn}".rstrip(" / "),
+                "method": {
+                    "siid": siid,
+                    "aiid": aiid
+                }
+            }
+            if act_item["name"] in actions_name:
+                act_item["name"] = f"{svc_type}-{act_item['name']}"
+            actions_name.append(act_item["name"])
+            result["actions"].append(act_item)
 
     if cache_path is not None:
         cache_path = Path(cache_path)
