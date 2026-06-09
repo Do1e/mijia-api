@@ -69,16 +69,36 @@ def parse_args(args):
     parser.add_argument(
         '--run',
         type=str,
-        help="使用自然语言描述你的需求，如果你有小爱音箱的话",
+        help=argparse.SUPPRESS,
+        nargs='?',
+        default=None,
         metavar='PROMPT',
     )
-    parser.add_argument(
+
+    run = subparsers.add_parser(
+        'run',
+        help="使用自然语言描述你的需求，如果你有小爱音箱的话",
+    )
+    run.set_defaults(func='run')
+    run.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    run.add_argument(
+        'prompt',
+        type=str,
+        help="使用自然语言描述你的需求",
+        metavar='PROMPT',
+    )
+    run.add_argument(
         '--wifispeaker_name',
         type=str,
         help="指定小爱音箱名称，默认是获取到的第一个小爱音箱",
         default=None,
     )
-    parser.add_argument(
+    run.add_argument(
         '--quiet',
         action='store_true',
         help="小爱音箱静默执行",
@@ -280,6 +300,11 @@ def set(args):
 def main(args):
     args = parse_args(args)
 
+    if args.run is not None:
+        print("错误: '--run' 参数已弃用，请使用 'run' 子命令代替。")
+        print(f"新用法: mijiaAPI run \"{args.run}\"")
+        sys.exit(1)
+
     if args.get_device_info:
         device_info = get_device_info(args.get_device_info)
         print(json.dumps(device_info, indent=2, ensure_ascii=False))
@@ -288,7 +313,6 @@ def main(args):
             args.list_scenes or
             args.list_consumable_items or
             args.run_scene or
-            args.run or
             hasattr(args, 'func') and args.func is not None):
         return
 
@@ -308,25 +332,25 @@ def main(args):
     if args.run_scene:
         for scene_id in args.run_scene:
             run_scene(api, scene_id, scene_mapping=scenes_mapping)
-    if args.run:
-        if device_mapping is None:
-            device_mapping = get_devices_list(api, verbose=False)
-        if args.wifispeaker_name is None:
-            wifispeaker = None
-            for device in device_mapping.values():
-                if 'xiaomi.wifispeaker' in device['model']:
-                    wifispeaker = mijiaDevice(api, dev_name=device['name'])
-                    break
-            if wifispeaker is None:
-                raise ValueError("未找到小爱音箱设备")
-        else:
-            wifispeaker = mijiaDevice(api, dev_name=args.wifispeaker_name)
-        wifispeaker.run_action('execute-text-directive', _in=[args.run, 1 if args.quiet else 0])
     if hasattr(args, 'func') and args.func is not None:
         if args.func == 'get':
             get(args)
         if args.func == 'set':
             set(args)
+        if args.func == 'run':
+            if device_mapping is None:
+                device_mapping = get_devices_list(api, verbose=False)
+            if args.wifispeaker_name is None:
+                wifispeaker = None
+                for device in device_mapping.values():
+                    if 'xiaomi.wifispeaker' in device['model']:
+                        wifispeaker = mijiaDevice(api, dev_name=device['name'])
+                        break
+                if wifispeaker is None:
+                    raise ValueError("未找到小爱音箱设备")
+            else:
+                wifispeaker = mijiaDevice(api, dev_name=args.wifispeaker_name)
+            wifispeaker.run_action('execute-text-directive', _in=[args.prompt, 1 if args.quiet else 0])
 
 def cli():
     main(sys.argv[1:])

@@ -339,14 +339,17 @@ MIJIA_LOG_LEVEL=WARNING mijiaAPI get --dev_name "卧室台灯" --prop_name "brig
 完整的命令行参数说明：
 
 ```
-usage: mijiaAPI [-h] [-p AUTH_PATH] [--list_homes] [-l] [--list_scenes] 
-                 [--list_consumable_items] [--run_scene SCENE_ID/SCENE_NAME ...] 
-                 [--get_device_info DEVICE_MODEL] [--run PROMPT] 
-                 [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
-                 {get,set} ...
+usage: mijiaAPI [-h] [-v] [-p AUTH_PATH] [--list_homes] [-l]
+                   [--list_scenes] [--list_consumable_items]
+                   [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]]
+                   [--get_device_info DEVICE_MODEL]
+                   {run,get,set} ...
+
+Mijia API CLI (v3.1.0)
 
 positional arguments:
-  {get,set}
+  {run,get,set}
+    run                 使用自然语言描述你的需求，如果你有小爱音箱的话
     get                 获取设备属性
     set                 设置设备属性
 
@@ -364,10 +367,6 @@ options:
                         运行场景，指定场景ID或名称
   --get_device_info DEVICE_MODEL
                         获取设备信息，指定设备model，先使用 --list_devices 获取
-  --run PROMPT          使用自然语言描述你的需求，如果你有小爱音箱的话
-  --wifispeaker_name WIFISPEAKER_NAME
-                        指定小爱音箱名称，默认是获取到的第一个小爱音箱
-  --quiet               小爱音箱静默执行
 ```
 
 ```
@@ -395,6 +394,23 @@ options:
   --prop_name PROP_NAME
                         属性名称，先使用 --get_device_info 获取
   --value VALUE         需要设定的属性值
+```
+
+```
+usage: mijiaAPI run [-h] [-p AUTH_PATH]
+                       [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
+                       PROMPT
+
+positional arguments:
+  PROMPT                使用自然语言描述你的需求
+
+options:
+  -h, --help            show this help message and exit
+  -p, --auth_path AUTH_PATH
+                        认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json
+  --wifispeaker_name WIFISPEAKER_NAME
+                        指定小爱音箱名称，默认是获取到的第一个小爱音箱
+  --quiet               小爱音箱静默执行
 ```
 
 #### 获取设备属性
@@ -445,9 +461,9 @@ mijiaAPI --get_device_info yeelink.light.lamp4
 mijiaAPI --list_consumable_items
 
 # 使用小爱音箱执行自然语言命令
-mijiaAPI --run "打开卧室台灯"
-mijiaAPI --run "把亮度调到50%" --wifispeaker_name "卧室小爱"
-mijiaAPI --run "关闭所有灯" --quiet
+mijiaAPI run "打开卧室台灯"
+mijiaAPI run "把亮度调到50%" --wifispeaker_name "卧室小爱"
+mijiaAPI run "关闭所有灯" --quiet
 ```
 
 #### 直接使用 uvx（无需安装）
