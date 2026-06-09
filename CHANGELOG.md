@@ -2,6 +2,11 @@
 
 本文档记录了项目的v1.3.7以来的重要变更。
 
+## [3.2.0](https://github.com/Do1e/mijia-api/compare/v3.1.0...v3.2.0) - 2026-06-09
+### improvement
+* 将 `--run` 参数重构为独立的 `run` 子命令，提升 CLI 结构一致性
+* 保留 `--run` 作为隐藏的废弃参数，并显示迁移提示
+
 ## [3.1.0](https://github.com/Do1e/mijia-api/compare/v3.0.5...v3.1.0) - 2026-05-27
 ### new feature
 * 删除设备属性的单位`unit`属性，因为 home.miot-spec.com 上已废弃
