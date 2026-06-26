@@ -9,6 +9,7 @@ from typing import Optional
 
 from .apis import mijiaAPI
 from .devices import get_device_info, mijiaDevice
+from .mcp_server import run as run_mcp
 from .version import version
 
 
@@ -102,6 +103,30 @@ def parse_args(args):
         '--quiet',
         action='store_true',
         help="小爱音箱静默执行",
+    )
+
+    mcp_cmd = subparsers.add_parser(
+        'mcp',
+        help="启动 MCP server（stdio 传输）",
+    )
+    mcp_cmd.set_defaults(func='mcp')
+    mcp_cmd.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+
+    login_cmd = subparsers.add_parser(
+        'login',
+        help="二维码登录米家账号",
+    )
+    login_cmd.set_defaults(func='login')
+    login_cmd.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
     )
 
     get = subparsers.add_parser(
@@ -314,6 +339,15 @@ def main(args):
             args.list_consumable_items or
             args.run_scene or
             hasattr(args, 'func') and args.func is not None):
+        return
+
+    if hasattr(args, 'func') and args.func == 'mcp':
+        run_mcp(args.auth_path)
+        return
+    if hasattr(args, 'func') and args.func == 'login':
+        api = init_api(args.auth_path)
+        if not api.available:
+            api.login()
         return
 
     api = init_api(args.auth_path)
