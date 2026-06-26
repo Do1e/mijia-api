@@ -17,3 +17,7 @@ wheels/
 
 # har files
 *.har
+
+# VitePress
+node_modules/
+.vitepress/
