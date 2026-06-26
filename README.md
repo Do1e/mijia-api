@@ -1,12 +1,16 @@
 # mijiaAPI
 
-小米米家设备的 API，可以使用代码直接控制米家设备。
+米家 API，可以使用代码、CLI、MCP 直接控制米家设备。
+
+> 🎉 **v4 版本已支持 MCP**，详见 [MCP 使用文档](https://mijia-api.do1e.com/usage/mcp)
 
 [![GitHub](https://img.shields.io/badge/GitHub-Do1e%2Fmijia--api-blue)](https://github.com/Do1e/mijia-api)
 [![PyPI](https://img.shields.io/badge/PyPI-mijiaAPI-blue)](https://pypi.org/project/mijiaAPI/)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](https://opensource.org/licenses/GPL-3.0)
 
 📖 **完整文档请见 [mijia-api.do1e.com](https://mijia-api.do1e.com)**
+
+[常见问题](https://mijia-api.do1e.com/faq) | [更新日志](https://mijia-api.do1e.com/changelog)
 
 ## 安装
 
@@ -17,7 +21,7 @@ pip install mijiaAPI
 # Or `uv add mijiaAPI` for uv users
 ```
 
-其他安装方式（源码安装、AUR）请参考[文档](https://mijia-api.do1e.com)。
+其他安装方式（源码安装、AUR）请参考[文档](https://mijia-api.do1e.com/guide/installation)。
 
 ## 快速开始
 
@@ -43,6 +47,21 @@ CLI 用法：
 mijiaAPI login                          # 扫码登录
 mijiaAPI -l                             # 列出所有设备
 mijiaAPI set --dev_name "台灯" --prop_name "brightness" --value 60
+```
+
+MCP 用法：
+
+执行 `uvx mijiaAPI login -p /path/to/auth.json` 登录后，在 MCP 客户端配置中添加以下内容即可接入米家：
+
+```json
+{
+  "mcpServers": {
+    "mijia-api": {
+      "command": "uvx",
+      "args": ["mijiaAPI", "mcp", "-p", "/path/to/auth.json"]
+    }
+  }
+}
 ```
 
 更多用法（API 基础调用、MCP Server、CLI 完整参数、最佳实践等）请查阅[完整文档](https://mijia-api.do1e.com)。
