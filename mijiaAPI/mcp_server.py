@@ -10,9 +10,10 @@ from .apis import mijiaAPI
 from .devices import get_device_info, mijiaDevice
 from .errors import LoginError
 from .logger import logger
+from .version import version
 
 
-mcp = FastMCP("mijia-api")
+mcp = FastMCP("mijia-api", version=version)
 
 _api: Optional[mijiaAPI] = None
 _auth_path: Optional[Path] = None
