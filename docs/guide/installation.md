@@ -19,3 +19,11 @@ pip install .
 # Or `pip install git+https://github.com/Do1e/mijia-api.git` for direct install
 # Or `uv add git+https://github.com/Do1e/mijia-api.git` for uv users
 ```
+
+## AUR（Arch User Repository）
+
+如果你使用 Arch Linux 或基于 Arch 的发行版，可以通过 AUR 安装：
+
+```bash
+yay -S python-mijia-api
+```

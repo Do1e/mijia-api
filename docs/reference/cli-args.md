@@ -10,7 +10,7 @@
 uv tool install mijiaAPI
 ```
 
-## AUR
+## AUR（Arch User Repository）
 
 如果你使用 Arch Linux 或基于 Arch 的发行版，可以通过 AUR 安装：
 
