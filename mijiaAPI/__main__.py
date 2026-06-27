@@ -193,26 +193,27 @@ def parse_args(args):
     return parser.parse_args(args)
 
 def init_api(auth_path: Path) -> mijiaAPI:
-    class APIUnavailableError(Exception):
-        pass
-
     if Path(auth_path).is_dir():
         auth_path = auth_path / "auth.json"
-    if auth_path.exists():
-        try:
-            api = mijiaAPI(auth_data_path=auth_path)
-            if not api.available:
-                api._refresh_token()
-            if not api.available:
-                raise APIUnavailableError()
-            return api
-        except (json.JSONDecodeError, APIUnavailableError):
-            auth_path.unlink(missing_ok=True)
-            api = mijiaAPI(auth_data_path=auth_path)
-            api.login()
-    else:
+    if not auth_path.exists():
+        print(f"认证文件不存在: {auth_path}")
+        print("请调用 'mijiaAPI login' 进行扫描登录")
+        sys.exit(1)
+    try:
         api = mijiaAPI(auth_data_path=auth_path)
-        api.login()
+    except json.JSONDecodeError:
+        print(f"认证文件已损坏: {auth_path}")
+        print("请调用 'mijiaAPI login' 进行扫描登录")
+        sys.exit(1)
+    if not api.available:
+        try:
+            api._refresh_token()
+        except Exception:
+            pass
+        if not api.available:
+            print(f"认证已失效且刷新失败: {auth_path}")
+            print("请调用 'mijiaAPI login' 进行扫描登录")
+            sys.exit(1)
     return api
 
 def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional[dict] = None) -> dict:
@@ -345,7 +346,13 @@ def main(args):
         run_mcp(args.auth_path)
         return
     if hasattr(args, 'func') and args.func == 'login':
-        api = init_api(args.auth_path)
+        auth_path = args.auth_path
+        file_path = Path(auth_path) / "auth.json" if Path(auth_path).is_dir() else Path(auth_path)
+        try:
+            api = mijiaAPI(auth_data_path=auth_path)
+        except json.JSONDecodeError:
+            file_path.unlink(missing_ok=True)
+            api = mijiaAPI(auth_data_path=auth_path)
         if not api.available:
             api.login()
         return
