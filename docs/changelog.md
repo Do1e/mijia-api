@@ -2,6 +2,12 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.1.1](https://github.com/Do1e/mijia-api/compare/v4.1.0...v4.1.1) - 2026-06-27
+
+### improvement
+
+- CLI 的 `-l`/`--list_devices` 在列出设备时额外打印设备所属的 `家庭` 与 `房间`：通过家庭列表的 `roomlist` 反查每个设备 did 所在的家庭与房间，共享设备若不在任何房间则显示为"未知"；同时复用已获取的家庭列表，避免重复请求
+
 ## [4.1.0](https://github.com/Do1e/mijia-api/compare/v4.0.0...v4.1.0) - 2026-06-27
 
 ### new feature
