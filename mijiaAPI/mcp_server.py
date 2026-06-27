@@ -90,11 +90,21 @@ def list_devices(home_id: Optional[str] = None) -> str:
     参数:
         home_id: 可选，指定家庭ID则仅列出该家庭的设备；不传则列出所有设备。
 
-    返回每个设备的名称、did、model、在线状态等。
+    返回每个设备的名称、did、model、在线状态以及所属家庭(home)和房间(room)等。
     """
     api = _get_api()
     _refresh_if_needed(api)
     devices = api.get_devices_list() + api.get_shared_devices_list()
+    homes = api.get_homes_list()
+    did_location = {}
+    for home in homes:
+        for room in home.get('roomlist', []):
+            for did in room.get('dids', []) or []:
+                did_location[did] = (home['name'], room['name'])
+    for device in devices:
+        home_name, room_name = did_location.get(device['did'], ("未知", "未知"))
+        device['home'] = home_name
+        device['room'] = room_name
     if home_id is not None:
         devices = [d for d in devices if d.get("home_id") == home_id]
     return json.dumps(devices, ensure_ascii=False)
