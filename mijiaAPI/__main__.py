@@ -246,14 +246,24 @@ def get_homes_list(api: mijiaAPI, verbose: bool = True, device_mapping: Optional
     home_mapping = {home['id']: home for home in homes}
     return home_mapping
 
-def get_devices_list(api: mijiaAPI, verbose: bool = True) -> dict:
+def get_devices_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional[dict] = None) -> dict:
     devices = api.get_devices_list() + api.get_shared_devices_list()
     if verbose:
+        if home_mapping is None:
+            home_mapping = get_homes_list(api, verbose=False)
+        did_location = {}
+        for home in home_mapping.values():
+            for room in home.get('roomlist', []):
+                for did in room.get('dids', []) or []:
+                    did_location[did] = (home['name'], room['name'])
         print("设备列表:")
         for device in devices:
+            home_name, room_name = did_location.get(device['did'], ("未知", "未知"))
             print(f"  - {device['name']}\n"
                     f"    did: {device['did']}\n"
                     f"    model: {device['model']}\n"
+                    f"    home: {home_name}\n"
+                    f"    room: {room_name}\n"
                     f"    online: {device['isOnline']}")
     device_mapping = {device['did']: device for device in devices}
     return device_mapping
@@ -363,7 +373,9 @@ def main(args):
     scenes_mapping = None
 
     if args.list_devices:
-        device_mapping = get_devices_list(api)
+        if home_mapping is None:
+            home_mapping = get_homes_list(api, verbose=False)
+        device_mapping = get_devices_list(api, home_mapping=home_mapping)
     if args.list_homes:
         home_mapping = get_homes_list(api, device_mapping=device_mapping)
     if args.list_scenes:
