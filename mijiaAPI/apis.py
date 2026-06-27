@@ -226,15 +226,30 @@ class mijiaAPI():
         异常:
             LoginError: 当登录超时或服务器返回错误时抛出
         """
-        # Step 1: 从 serviceLogin 获取登录链接参数
+        login_data = self.get_qr_login_data()
+        if login_data.get("refreshed"):
+            return self.auth_data
+        self._print_qr(login_data["loginUrl"])
+        print(f"也可以访问链接查看二维码图片: {login_data['qr']}")
+        return self.complete_qr_login(login_data)
+
+    def get_qr_login_data(self) -> dict:
+        """获取二维码登录数据（含 loginUrl/qr/lp），不阻塞等待扫码。
+
+        先尝试刷新 token，若成功返回 {"refreshed": True}；否则请求二维码并返回
+        登录数据，供 complete_qr_login 长轮询完成登录。
+
+        返回值:
+            dict: 刷新成功时为 {"refreshed": True}；否则包含 loginUrl（二维码原始
+                  链接）、qr（二维码图片链接）、lp（长轮询地址）等字段。
+        """
         location_data = self._get_location()
         if location_data.get("code", -1) == 0 and location_data.get("message", "") == "刷新Token成功":
             self._save_auth_data()
             self._init_session()
             logger.info("刷新Token成功，无需登录")
-            return self.auth_data
+            return {"refreshed": True}
 
-        # Step 2: 获取并打印二维码
         location_data.update({
             "theme": "",
             "bizDeviceType": "",
@@ -251,10 +266,26 @@ class mijiaAPI():
         }
         login_ret = requests.get(url, headers=headers)
         login_data = self._handle_ret(login_ret)
-        self._print_qr(login_data["loginUrl"])
-        print(f"也可以访问链接查看二维码图片: {login_data['qr']}")
+        return login_data
 
-        # Step 3: 轮询等待扫码登录
+    def complete_qr_login(self, login_data: dict) -> dict:
+        """长轮询等待扫码并完成登录，保存认证数据。
+
+        参数:
+            login_data: get_qr_login_data 返回的登录数据（含 lp 等字段）。
+
+        返回值:
+            dict: 包含认证信息的字典。
+
+        异常:
+            LoginError: 当扫码超时或服务器返回错误时抛出。
+        """
+        headers = {
+            "User-Agent": self.user_agent,
+            "Accept-Encoding": "gzip",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Connection": "keep-alive",
+        }
         session = requests.Session()
         try:
             lp_ret = session.get(login_data["lp"], headers=headers, timeout=120)
@@ -262,7 +293,6 @@ class mijiaAPI():
         except requests.exceptions.Timeout:
             raise LoginError(-1, "超时，请重试")
 
-        # Step 4: 处理登录结果
         auth_keys = ["psecurity", "nonce", "ssecurity", "passToken", "userId", "cUserId"]
         for key in auth_keys:
             self.auth_data[key] = lp_data[key]

@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -18,12 +19,17 @@ mcp = FastMCP("mijia-api", version=version)
 _api: Optional[mijiaAPI] = None
 _auth_path: Optional[Path] = None
 
+_login_api: Optional[mijiaAPI] = None
+_login_data: Optional[dict] = None
+_login_thread: Optional[threading.Thread] = None
+_login_status: dict = {"status": "idle"}
+
 
 def _get_api() -> mijiaAPI:
     global _api
     if _api is not None:
         return _api
-    raise RuntimeError("mijiaAPI 未初始化，请先登录后重启 MCP server")
+    raise RuntimeError("mijiaAPI 未初始化，请先调用 login 工具完成登录")
 
 
 def _refresh_if_needed(api: mijiaAPI) -> None:
@@ -32,8 +38,7 @@ def _refresh_if_needed(api: mijiaAPI) -> None:
             api._refresh_token()
         except LoginError:
             raise RuntimeError(
-                "认证已失效且无法自动刷新，请运行 "
-                f"`mijiaAPI login -p {_auth_path}` 重新登录后重启 MCP server"
+                "认证已失效且无法自动刷新，请调用 login 工具重新登录"
             )
 
 
@@ -41,30 +46,28 @@ def run(auth_path: Path) -> None:
     global _api, _auth_path
     _auth_path = auth_path if not auth_path.is_dir() else auth_path / "auth.json"
 
-    if not _auth_path.exists():
-        print(
-            f"认证文件不存在: {_auth_path}\n"
-            f"请先运行 `mijiaAPI login -p {_auth_path}` 登录后再启动 MCP server",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
     logger.handlers = [h for h in logger.handlers if not isinstance(h, logging.StreamHandler) or h.stream is sys.stderr]
-    try:
-        _api = mijiaAPI(auth_data_path=_auth_path)
-        if not _api.available:
-            _api._refresh_token()
-        if not _api.available:
-            raise LoginError(-1, "认证不可用")
-    except Exception as e:
-        print(
-            f"认证不可用且无法自动刷新: {e}\n"
-            f"请运行 `mijiaAPI login -p {_auth_path}` 重新登录后再启动 MCP server",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
-    logger.info(f"MCP server 启动，认证文件: {_auth_path}")
+    if not _auth_path.exists():
+        _api = None
+        logger.warning(
+            f"认证文件不存在: {_auth_path}，请调用 login 工具完成登录后再使用其他工具"
+        )
+    else:
+        try:
+            _api = mijiaAPI(auth_data_path=_auth_path)
+            if not _api.available:
+                _api._refresh_token()
+            if not _api.available:
+                raise LoginError(-1, "认证不可用")
+            logger.info(f"MCP server 启动，认证文件: {_auth_path}")
+        except Exception as e:
+            _api = None
+            logger.warning(
+                f"认证不可用且无法自动刷新: {e}\n"
+                f"请调用 login 工具重新登录后再使用其他工具"
+            )
+
     mcp.run()
 
 
@@ -319,3 +322,84 @@ def run_speaker_command(
     speaker = mijiaDevice(api, did=match["did"])
     speaker.run_action("execute-text-directive", _in=[prompt, 1 if quiet else 0])
     return f"已通过 {match['name']} 执行: {prompt}"
+
+
+def _login_worker(api: mijiaAPI, login_data: dict) -> None:
+    try:
+        api.complete_qr_login(login_data)
+        _login_status.update({"status": "success", "message": "登录成功"})
+    except LoginError as e:
+        _login_status.update({"status": "error", "message": f"登录失败: {e}"})
+    except Exception as e:
+        _login_status.update({"status": "error", "message": f"登录失败: {e}"})
+
+
+@mcp.tool
+def login() -> str:
+    """发起米家二维码登录。
+
+    当 API 调用失败或凭证过期且自动刷新失败时使用。先尝试刷新 token，
+    失败则生成二维码并在后台长轮询等待扫码。返回二维码图片链接，请用
+    米家APP在2分钟内扫码，然后调用 login_status 查询结果。
+    """
+    global _api, _login_api, _login_data, _login_thread, _login_status
+    if _auth_path is None:
+        return "认证路径未初始化，请检查 MCP server 启动配置"
+    if _login_thread is not None and _login_thread.is_alive():
+        return "已有登录正在进行中，请调用 login_status 查询结果"
+
+    if _api is not None:
+        try:
+            if _api.available:
+                return "凭证仍然有效，无需重新登录"
+            _api._refresh_token()
+            if _api.available:
+                return "Token 刷新成功，无需重新登录"
+        except LoginError:
+            pass
+
+    new_api = mijiaAPI(auth_data_path=_auth_path)
+    login_data = new_api.get_qr_login_data()
+    if login_data.get("refreshed"):
+        _api = new_api
+        return "Token 刷新成功，无需重新登录"
+
+    _login_api = new_api
+    _login_data = login_data
+    _login_status = {"status": "pending", "message": "等待扫码"}
+    _login_thread = threading.Thread(target=_login_worker, args=(new_api, login_data), daemon=True)
+    _login_thread.start()
+    return (
+        "二维码已生成，请在2分钟内用米家APP扫码完成登录。\n"
+        f"二维码图片链接: {login_data['qr']}\n"
+        "扫码后请调用 login_status 查询登录结果。"
+    )
+
+
+@mcp.tool
+def login_status() -> str:
+    """查询 login 发起的二维码登录结果。
+
+    返回 pending（等待扫码）/ success（登录成功，已切换为新凭证）/ error（失败）。
+    成功后后续工具调用将使用新登录的凭证。
+    """
+    global _api, _login_api, _login_data, _login_thread, _login_status
+    if _login_thread is None:
+        return "没有正在进行的登录，请先调用 login"
+
+    status = _login_status.get("status", "idle")
+    if status == "success":
+        _api = _login_api
+        _login_thread = None
+        _login_api = None
+        _login_data = None
+        _login_status = {"status": "idle"}
+        return "登录成功，已切换为新凭证，可继续调用其他工具"
+    if status == "error":
+        message = _login_status.get("message", "登录失败")
+        _login_thread = None
+        _login_api = None
+        _login_data = None
+        _login_status = {"status": "idle"}
+        return message
+    return "等待扫码中，请用米家APP扫描 login 返回的二维码后再次查询"
