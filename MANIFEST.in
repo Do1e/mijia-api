@@ -1,0 +1,3 @@
+prune demos
+prune .github
+prune mijiaAPI.egg-info
