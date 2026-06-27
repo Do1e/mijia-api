@@ -326,7 +326,7 @@ def run_speaker_command(
 
 def _login_worker(api: mijiaAPI, login_data: dict) -> None:
     try:
-        api.complete_qr_login(login_data)
+        api._complete_qr_login(login_data)
         _login_status.update({"status": "success", "message": "登录成功"})
     except LoginError as e:
         _login_status.update({"status": "error", "message": f"登录失败: {e}"})
@@ -359,7 +359,7 @@ def login() -> str:
             pass
 
     new_api = mijiaAPI(auth_data_path=_auth_path)
-    login_data = new_api.get_qr_login_data()
+    login_data = new_api._get_qr_login_data()
     if login_data.get("refreshed"):
         _api = new_api
         return "Token 刷新成功，无需重新登录"

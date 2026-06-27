@@ -226,18 +226,18 @@ class mijiaAPI():
         异常:
             LoginError: 当登录超时或服务器返回错误时抛出
         """
-        login_data = self.get_qr_login_data()
+        login_data = self._get_qr_login_data()
         if login_data.get("refreshed"):
             return self.auth_data
         self._print_qr(login_data["loginUrl"])
         print(f"也可以访问链接查看二维码图片: {login_data['qr']}")
-        return self.complete_qr_login(login_data)
+        return self._complete_qr_login(login_data)
 
-    def get_qr_login_data(self) -> dict:
+    def _get_qr_login_data(self) -> dict:
         """获取二维码登录数据（含 loginUrl/qr/lp），不阻塞等待扫码。
 
         先尝试刷新 token，若成功返回 {"refreshed": True}；否则请求二维码并返回
-        登录数据，供 complete_qr_login 长轮询完成登录。
+        登录数据，供 _complete_qr_login 长轮询完成登录。
 
         返回值:
             dict: 刷新成功时为 {"refreshed": True}；否则包含 loginUrl（二维码原始
@@ -268,11 +268,11 @@ class mijiaAPI():
         login_data = self._handle_ret(login_ret)
         return login_data
 
-    def complete_qr_login(self, login_data: dict) -> dict:
+    def _complete_qr_login(self, login_data: dict) -> dict:
         """长轮询等待扫码并完成登录，保存认证数据。
 
         参数:
-            login_data: get_qr_login_data 返回的登录数据（含 lp 等字段）。
+            login_data: _get_qr_login_data 返回的登录数据（含 lp 等字段）。
 
         返回值:
             dict: 包含认证信息的字典。
