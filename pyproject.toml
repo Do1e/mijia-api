@@ -30,7 +30,7 @@ include = ["mijiaAPI"]
 version = {attr = "mijiaAPI.version.version"}
 
 [project.urls]
-Homepage = "https://github.com/Do1e/mijia-api"
+Homepage = "https://mijia-api.do1e.com/"
 Repository = "https://github.com/Do1e/mijia-api"
 
 [dependency-groups]
