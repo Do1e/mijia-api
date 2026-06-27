@@ -48,6 +48,7 @@ export default defineConfig({
             { text: 'mijiaDevice 高级封装', link: '/usage/mijia-device' },
             { text: 'CLI 命令行', link: '/usage/cli' },
             { text: 'MCP Server', link: '/usage/mcp' },
+            { text: 'Agent Skill', link: '/usage/skill' },
             { text: '最佳实践', link: '/usage/best-practices' },
           ],
         },

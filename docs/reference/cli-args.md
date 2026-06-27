@@ -61,6 +61,8 @@ usage: mijiaAPI login [-h] [-p AUTH_PATH]
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
 
+`login` 子命令会尝试刷新 token；若仍不可用则在终端打印二维码并阻塞等待扫码。其他子命令（`get`/`set`/`run`/`mcp` 及全局参数）在认证文件缺失、损坏或失效且刷新失败时，**不会**自动触发登录，而是打印 `请调用 'mijiaAPI login' 进行扫描登录` 并以退出码 1 退出。
+
 ## 子命令：get
 
 获取设备属性。

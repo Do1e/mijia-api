@@ -2,6 +2,20 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.1.0](https://github.com/Do1e/mijia-api/compare/v4.0.0...v4.1.0) - 2026-06-27
+
+### new feature
+
+- MCP server 新增 `login` 与 `login_status` 两个工具，支持在 MCP 会话内完成二维码登录，无需重启 server：`login` 先尝试刷新 token，失败则在后台线程长轮询等待扫码并返回二维码图片链接；`login_status` 查询登录结果（pending/success/error），成功后自动切换为新凭证
+- MCP server 启动时不再因认证缺失/失效而立即退出，而是以未认证状态启动并提示调用 `login` 工具完成登录
+- 新增 `skills/SKILL.md`，定义 mijia-api CLI 的 agent skill，供 AI 助手通过 `uvx mijiaAPI` 控制设备（明确禁止调用阻塞的 `login`/`mcp` 子命令）
+
+### improvement
+
+- MCP server 版本号与 Python 包版本同步，客户端可读取到正确的 server 版本
+- 重构 `mijiaAPI` 的二维码登录流程，将原 `QRlogin` 拆分为 `_get_qr_login_data`（获取二维码数据，不阻塞）与 `_complete_qr_login`（长轮询完成登录）两个内部方法，供 MCP server 的 `login` 工具复用；公开的 `login()` / `QRlogin()` 行为不变
+- CLI 的 `init_api` 在认证文件缺失、损坏或失效且刷新失败时，改为打印提示信息并以退出码 1 退出，提示用户运行 `mijiaAPI login`，不再自动触发登录（`login` 子命令本身仍执行登录）
+
 ## [4.0.0](https://github.com/Do1e/mijia-api/compare/v3.2.0...v4.0.0) - 2026-06-27
 
 ### new feature

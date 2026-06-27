@@ -95,3 +95,4 @@ uvx mijiaAPI -l
 - [mijiaDevice 高级封装](/usage/mijia-device) — 深入了解面向对象的设备控制
 - [CLI 命令行](/usage/cli) — 完整的 CLI 参数说明
 - [MCP Server](/usage/mcp) — 让 LLM 控制你的设备
+- [Agent Skill](/usage/skill) — 让 AI 助手通过 CLI 安全控制设备
