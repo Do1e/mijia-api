@@ -2,6 +2,12 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.1.2](https://github.com/Do1e/mijia-api/compare/v4.1.1...v4.1.2) - 2026-06-27
+
+### improvement
+
+- MCP server 的 `list_devices` 工具在返回设备列表时为每个设备补充 `home` 与 `room` 字段：通过家庭列表的 `roomlist` 反查每个设备 did 所在的家庭与房间，共享设备若不在任何房间则显示为"未知"，与 CLI 行为保持一致
+
 ## [4.1.1](https://github.com/Do1e/mijia-api/compare/v4.1.0...v4.1.1) - 2026-06-27
 
 ### improvement
