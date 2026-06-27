@@ -2,7 +2,8 @@
 
 米家 API，可以使用代码、CLI、MCP 直接控制米家设备。
 
-> 🎉 **v4 版本已支持 MCP**，详见 [MCP 使用文档](https://mijia-api.do1e.com/usage/mcp)
+> 🎉 **v4.0.0 版本已支持 MCP**，详见 [MCP 使用文档](https://mijia-api.do1e.com/usage/mcp)
+> 🎉 **v4.1.0 版本已支持 Agent Skill**，详见 [Agent Skill 使用文档](https://mijia-api.do1e.com/usage/skill)
 
 [![GitHub](https://img.shields.io/badge/GitHub-Do1e%2Fmijia--api-blue)](https://github.com/Do1e/mijia-api)
 [![PyPI](https://img.shields.io/badge/PyPI-mijiaAPI-blue)](https://pypi.org/project/mijiaAPI/)
