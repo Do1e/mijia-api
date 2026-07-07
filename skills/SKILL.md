@@ -5,6 +5,7 @@ description: |
   获取或设置设备属性、运行场景、通过小爱音箱执行自然语言命令。
   触发词包括"控制米家设备"、"米家"、"mijia"、"列出设备"、"设置亮度"、"打开灯"、
   "运行场景"、"小爱音箱"、"耗材"、"场景"。
+allowed-tools: Bash(uvx mijiaAPI:*)
 ---
 
 # mijia-api CLI

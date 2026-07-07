@@ -68,7 +68,7 @@ def run(auth_path: Path) -> None:
                 f"请调用 login 工具重新登录后再使用其他工具"
             )
 
-    mcp.run()
+    mcp.run(show_banner=False)
 
 
 @mcp.tool
