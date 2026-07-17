@@ -56,8 +56,22 @@ MCP server 暴露以下工具供 LLM 调用：
 | `set_device_property` | 设置设备属性值（高层封装，按属性名写入） |
 | `run_device_action` | 执行设备动作（高层封装，按动作名执行） |
 | `run_scene` | 运行手动场景（按 ID 或名称） |
-| `get_statistics` | 获取设备统计数据（如耗电量） |
+| `get_statistics` | 获取设备统计数据（如耗电量、使用时长） |
 | `run_speaker_command` | 通过小爱音箱执行自然语言指令 |
+
+## 统计数据
+
+`get_statistics` 接收设备 `did`、统计键 `key`、统计类型 `data_type`，以及可选的 `limit`、
+`time_start`、`time_end`。未指定时间时默认查询最近 30 天，最多返回 6 条。
+
+常用统计类型为 `stat_hour_v3`、`stat_day_v3`、`stat_week_v3`、`stat_month_v3`；较旧设备
+可能使用不带 `_v3` 的对应类型。`key` 同样依赖设备型号，例如
+`lumi.acpartner.mcn04` 的耗电量使用 `"7.1"`，`lumi.acpartner.mcn02` 使用 `"powerCost"`。
+
+工具返回 JSON 编码的统计条目列表，每项通常包含 Unix 秒级时间戳 `time` 和字符串
+`value`。`value` 可能仍是 JSON 数组字符串，例如 `"[48.476]"`。统计接口仅支持部分设备，
+不同型号可能使用不同 API，详见 [issue #46](https://github.com/Do1e/mijia-api/issues/46) 和
+[米家统计接口文档](https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface)。
 
 ## 会话内登录流程
 

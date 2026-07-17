@@ -257,13 +257,13 @@ def parse_args(args):
     statistics.add_argument(
         '--key',
         type=str,
-        help='统计数据键，例如 "7.1"',
+        help='设备相关的统计键，例如 lumi.acpartner.mcn04 的 "7.1"',
         required=True,
     )
     statistics.add_argument(
         '--data_type',
         type=str,
-        help="统计类型，例如 stat_month_v3",
+        help="统计类型，例如 stat_month_v3；旧设备可能不带 _v3",
         required=True,
     )
     statistics.add_argument(

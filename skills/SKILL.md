@@ -234,15 +234,24 @@ uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_day_v3 --limit 3
 | 参数 | 是否必填 | 说明 |
 |------|----------|------|
 | `--did` | **是** | 设备 did（从 `--list_devices` 获取） |
-| `--key` | **是** | 统计键，通常为 `siid.piid`，例如 `7.1` |
-| `--data_type` | **是** | 统计类型，如 `stat_day_v3`、`stat_month_v3`；旧设备可能不带 `_v3` |
+| `--key` | **是** | 设备相关的统计键，通常为 `siid.piid` |
+| `--data_type` | **是** | 统计类型，见下方说明 |
 | `--limit` | 否 | 最大条目数，默认 `6` |
 | `--time_start` | 否 | 开始 Unix 时间戳（秒），默认结束时间前 30 天 |
 | `--time_end` | 否 | 结束 Unix 时间戳（秒），默认当前时间 |
 | `-p` | 否 | 认证文件路径 |
 
-统计能力和 `key` 因设备型号而异。命令原样输出 API 返回的 JSON，不要用 `eval()` 解析
-其中的字符串值。
+常用统计类型为 `stat_hour_v3`、`stat_day_v3`、`stat_week_v3`、`stat_month_v3`；较旧设备
+可能使用不带 `_v3` 的 `stat_hour`、`stat_day`、`stat_week`、`stat_month`。
+
+统计能力和 `key` 因设备型号而异，不要把 `7.1` 当作通用值。例如
+`lumi.acpartner.mcn04` 的耗电量使用 `7.1`，`lumi.acpartner.mcn02` 使用 `powerCost`。不同型号甚至
+可能使用不同 API；查询失败时应向用户说明设备可能不支持，而不是反复猜测参数。
+
+命令输出 JSON 数组，每项通常包含 Unix 秒级时间戳 `time` 和字符串 `value`。`value` 可能
+仍是 JSON 数组字符串，例如 `"[48.476]"`；需要解析时仅使用 JSON 解析器，不要使用
+`eval()`。相关限制见 https://github.com/Do1e/mijia-api/issues/46，接口参考：
+https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface
 
 ### 运行（通过小爱音箱执行自然语言）
 

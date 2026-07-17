@@ -274,13 +274,20 @@ def get_statistics(
 
     参数:
         did: 设备ID，可从 list_devices 获取。
-        key: 统计数据键，格式为 siid.piid（如 "7.1"），需根据设备型号确定。
-        data_type: 统计粒度，可选 stat_hour_v3 / stat_day_v3 / stat_week_v3 / stat_month_v3。
+        key: 设备相关的统计键，通常为 siid.piid。例如 lumi.acpartner.mcn04
+             的耗电量使用 "7.1"，lumi.acpartner.mcn02 使用 "powerCost"。
+        data_type: 统计粒度：stat_hour_v3 / stat_day_v3 / stat_week_v3 /
+                   stat_month_v3。较旧设备可能使用不带 _v3 的对应类型。
         limit: 返回最大条目数，默认6。
         time_start: 起始时间戳（秒），不传默认为30天前。
         time_end: 结束时间戳（秒），不传默认为当前时间。
 
-    返回统计条目列表（时间戳与数值）。
+    返回 JSON 编码的统计条目列表。每项包含 time 时间戳和 value；value 通常仍是
+    JSON 数组字符串，例如 "[48.476]"。
+
+    注意：统计接口仅支持部分设备，不同型号可能需要不同的 key、data_type，甚至使用
+    不同 API。详见 https://github.com/Do1e/mijia-api/issues/46
+    参考 https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface
     """
     import time
     api = _get_api()

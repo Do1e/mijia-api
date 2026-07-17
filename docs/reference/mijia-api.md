@@ -145,15 +145,46 @@ run_action(data: Union[list, dict]) -> Union[list, dict]
 get_statistics(data: dict) -> list
 ```
 
-获取设备统计数据（如耗电量）。
+获取设备统计数据（如耗电量、使用时长），支持按小时、天、周、月查询。该接口仅支持
+部分设备，不同型号使用的统计键和统计类型可能不同。
 
 `data` 参数字段：
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `did` | `str` | 设备 ID |
-| `key` | `str` | 属性键，格式为 `siid.piid`，如 `"7.1"` |
-| `data_type` | `str` | 统计类型：`stat_hour_v3`, `stat_day_v3`, `stat_week_v3`, `stat_month_v3` |
+| `key` | `str` | 设备相关的统计键，通常为 `siid.piid`。例如 `lumi.acpartner.mcn04` 的耗电量使用 `"7.1"`，`lumi.acpartner.mcn02` 使用 `"powerCost"` |
+| `data_type` | `str` | 统计类型，见下表；较旧设备可能使用不带 `_v3` 的对应类型 |
 | `limit` | `int` | 返回的最大条目数 |
 | `time_start` | `int` | 开始时间戳（秒） |
 | `time_end` | `int` | 结束时间戳（秒） |
+
+| `data_type` | 粒度 | 旧设备可能使用 |
+|-------------|------|----------------|
+| `stat_hour_v3` | 小时 | `stat_hour` |
+| `stat_day_v3` | 天 | `stat_day` |
+| `stat_week_v3` | 周 | `stat_week` |
+| `stat_month_v3` | 月 | `stat_month` |
+
+返回值是统计条目列表，每项通常包含：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `time` | `int` | 统计周期对应的 Unix 时间戳（秒） |
+| `value` | `str` | 统计值，通常是 JSON 数组字符串，例如 `"[48.476]"` |
+
+当 `value` 是 JSON 字符串时，使用 `json.loads()` 解析：
+
+```python
+import json
+
+value = json.loads(item["value"])[0]
+```
+
+::: warning 已知限制
+- 统计接口仅支持部分设备，不同型号可能使用不同 API。
+- `key` 和 `data_type` 必须根据设备型号确定，不能假定所有设备都支持 `"7.1"` 或 `_v3` 类型。
+- 相关讨论见 [issue #46](https://github.com/Do1e/mijia-api/issues/46)。
+:::
+
+参考：[米家统计接口文档](https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface)。

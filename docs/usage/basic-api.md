@@ -87,21 +87,33 @@ consumables_in_home = api.get_consumable_items(home_id=home_id)
 ## 统计数据
 
 ```python
-# 获取设备统计数据（如耗电量）
+import json
 import time
 
+# 获取 lumi.acpartner.mcn04 过去约 6 个月的月度耗电量
 result = api.get_statistics({
     "did": "device_did",
-    "key": "7.1",                    # siid.piid
-    "data_type": "stat_month_v3",    # 统计类型：stat_hour_v3, stat_day_v3, stat_week_v3, stat_month_v3
+    "key": "7.1",
+    "data_type": "stat_month_v3",
     "limit": 6,                      # 返回的最大条目数
-    "time_start": int(time.time() - 30*24*3600),
+    "time_start": int(time.time() - 30 * 24 * 3600 * 6),
     "time_end": int(time.time()),
 })
 
 for item in result:
-    print(f"时间: {item['time']}, 数值: {item['value']}")
+    value = json.loads(item["value"])[0]
+    print(f"时间: {item['time']}, 数值: {value}")
 ```
+
+常用统计类型为 `stat_hour_v3`、`stat_day_v3`、`stat_week_v3`、`stat_month_v3`；
+较旧设备可能使用不带 `_v3` 的对应类型。`key` 同样依赖设备型号，例如
+`lumi.acpartner.mcn04` 的耗电量使用 `"7.1"`，`lumi.acpartner.mcn02` 使用 `"powerCost"`。
+
+::: warning
+统计接口仅支持部分设备，不同型号可能使用不同 API。详见
+[issue #46](https://github.com/Do1e/mijia-api/issues/46) 和
+[米家统计接口文档](https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface)。
+:::
 
 ## 设备信息获取
 

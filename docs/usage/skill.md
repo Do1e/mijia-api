@@ -124,6 +124,11 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
    uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
    ```
 
+   统计接口仅支持部分设备，`key` 和 `data_type` 必须按型号确定。`7.1` 是
+   `lumi.acpartner.mcn04` 的耗电量示例，`lumi.acpartner.mcn02` 则使用 `powerCost`；旧设备
+   还可能使用不带 `_v3` 的统计类型。详见 [issue #46](https://github.com/Do1e/mijia-api/issues/46)
+   和[米家统计接口文档](https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface)。
+
 ## 命令总览
 
 | 命令 / 参数 | 用途 | 需要认证 | 阻塞 |

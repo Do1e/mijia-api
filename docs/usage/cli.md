@@ -90,8 +90,14 @@ mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_day_v3 \
   --limit 30 --time_start 1700000000 --time_end 1702592000
 ```
 
-统计能力、`key` 和 `data_type` 因设备型号而异；旧设备的统计类型可能不带 `_v3` 后缀。
-命令原样输出 API 返回的 JSON。
+常用统计类型为 `stat_hour_v3`、`stat_day_v3`、`stat_week_v3`、`stat_month_v3`；较旧设备
+可能使用不带 `_v3` 的对应类型。统计能力和 `key` 因设备型号而异：例如
+`lumi.acpartner.mcn04` 的耗电量使用 `7.1`，`lumi.acpartner.mcn02` 使用 `powerCost`。
+
+命令原样输出 API 返回的 JSON。每项通常包含 Unix 秒级时间戳 `time` 和字符串 `value`；
+`value` 可能仍是 JSON 数组字符串，例如 `"[48.476]"`，解析时使用 JSON 解析器。不同型号可能使用不同统计 API，详见
+[issue #46](https://github.com/Do1e/mijia-api/issues/46) 和
+[米家统计接口文档](https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface)。
 
 ## 常用命令示例
 

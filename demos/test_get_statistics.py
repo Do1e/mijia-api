@@ -1,3 +1,4 @@
+import json
 import time
 
 from mijiaAPI import mijiaAPI
@@ -29,7 +30,7 @@ ret = api.get_statistics({
 """
 
 for item in ret:
-    value = eval(item['value'])[0]
+    value = json.loads(item['value'])[0]
     ts = item['time']
     date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts))
     print(f'{date}: {value}')

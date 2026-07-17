@@ -129,11 +129,16 @@ usage: mijiaAPI statistics [-h] [-p AUTH_PATH] --did DID --key KEY
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
 | `--did DID` | 设备 did（必填） |
-| `--key KEY` | 统计数据键，如 `7.1`（必填） |
-| `--data_type DATA_TYPE` | 统计类型，如 `stat_month_v3`（必填） |
+| `--key KEY` | 设备相关的统计键，如 `lumi.acpartner.mcn04` 的 `7.1`（必填） |
+| `--data_type DATA_TYPE` | 统计类型，如 `stat_month_v3`；旧设备可能不带 `_v3`（必填） |
 | `--limit LIMIT` | 最大条目数，默认 `6` |
 | `--time_start TIME_START` | 开始 Unix 时间戳（秒），默认结束时间前 30 天 |
 | `--time_end TIME_END` | 结束 Unix 时间戳（秒），默认当前时间 |
+
+常用统计类型为 `stat_hour_v3`、`stat_day_v3`、`stat_week_v3`、`stat_month_v3`，旧设备可能
+使用不带 `_v3` 的对应类型。统计接口仅支持部分设备，`key`、`data_type` 和返回值格式均可能
+因型号而异。例如 `lumi.acpartner.mcn04` 的耗电量使用 `7.1`，`lumi.acpartner.mcn02`
+使用 `powerCost`。
 
 ## 子命令：run
 
