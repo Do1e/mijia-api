@@ -36,6 +36,8 @@ CLI 包含以下子命令：
 | `login` | 二维码登录米家账号 |
 | `get` | 获取设备属性 |
 | `set` | 设置设备属性 |
+| `action` | 按动作名执行设备动作 |
+| `statistics` | 获取设备统计数据 |
 | `run` | 使用自然语言描述需求（通过小爱音箱执行） |
 | `mcp` | 启动 MCP server（stdio 传输） |
 
@@ -49,7 +51,7 @@ mijiaAPI get --help
 mijiaAPI get --dev_name "卧室台灯" --prop_name "brightness"
 
 # 指定认证文件路径
-mijiaAPI -p /path/to/auth.json get --dev_name "卧室台灯" --prop_name "on"
+mijiaAPI get -p /path/to/auth.json --dev_name "卧室台灯" --prop_name "on"
 ```
 
 ## 设置设备属性
@@ -64,6 +66,32 @@ mijiaAPI set --dev_name "卧室台灯" --prop_name "brightness" --value 60
 # 打开设备
 mijiaAPI set --dev_name "卧室台灯" --prop_name "on" --value True
 ```
+
+## 执行设备动作
+
+```bash
+# 无参数动作
+mijiaAPI action --dev_name "卧室台灯" --action_name toggle
+
+# 带参数动作，--params 必须是 JSON 对象
+mijiaAPI action --did 123456 --action_name execute-text-directive --params '{"in":["打开空调",1]}'
+```
+
+动作名可通过 `--get_device_info MODEL` 获取。`--did` 和 `--dev_name` 必须且只能提供一个。
+
+## 获取统计数据
+
+```bash
+# 默认查询最近 30 天，最多返回 6 条
+mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
+
+# 指定条数和时间范围（Unix 时间戳，秒）
+mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_day_v3 \
+  --limit 30 --time_start 1700000000 --time_end 1702592000
+```
+
+统计能力、`key` 和 `data_type` 因设备型号而异；旧设备的统计类型可能不带 `_v3` 后缀。
+命令原样输出 API 返回的 JSON。
 
 ## 常用命令示例
 
@@ -85,6 +113,12 @@ mijiaAPI --get_device_info yeelink.light.lamp4
 
 # 列出耗材
 mijiaAPI --list_consumable_items
+
+# 执行设备动作
+mijiaAPI action --dev_name "卧室台灯" --action_name toggle
+
+# 获取统计数据
+mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
 
 # 使用小爱音箱执行自然语言命令
 mijiaAPI run "打开卧室台灯"

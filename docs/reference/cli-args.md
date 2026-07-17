@@ -25,7 +25,7 @@ usage: mijiaAPI [-h] [-v] [-p AUTH_PATH] [--list_homes] [-l]
                    [--list_scenes] [--list_consumable_items]
                    [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]]
                    [--get_device_info DEVICE_MODEL]
-                   {run,get,set,mcp,login} ...
+                   {run,mcp,login,get,set,action,statistics} ...
 ```
 
 ### 全局参数
@@ -61,7 +61,7 @@ usage: mijiaAPI login [-h] [-p AUTH_PATH]
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
 
-`login` 子命令会尝试刷新 token；若仍不可用则在终端打印二维码并阻塞等待扫码。其他子命令（`get`/`set`/`run`/`mcp` 及全局参数）在认证文件缺失、损坏或失效且刷新失败时，**不会**自动触发登录，而是打印 `请调用 'mijiaAPI login' 进行扫描登录` 并以退出码 1 退出。
+`login` 子命令会尝试刷新 token；若仍不可用则在终端打印二维码并阻塞等待扫码。其他子命令（`get`/`set`/`action`/`statistics`/`run`/`mcp` 及全局参数）在认证文件缺失、损坏或失效且刷新失败时，**不会**自动触发登录，而是打印 `请调用 'mijiaAPI login' 进行扫描登录` 并以退出码 1 退出。
 
 ## 子命令：get
 
@@ -95,6 +95,45 @@ usage: mijiaAPI set [-h] [-p AUTH_PATH] [--did DID] [--dev_name DEV_NAME] --prop
 | `--dev_name DEV_NAME` | 设备名称，指定为米家APP中设定的名称 |
 | `--prop_name PROP_NAME` | 属性名称（必填），先使用 `--get_device_info` 获取 |
 | `--value VALUE` | 需要设定的属性值（必填） |
+
+## 子命令：action
+
+按设备规格中的动作名执行设备动作。
+
+```
+usage: mijiaAPI action [-h] [-p AUTH_PATH] (--did DID | --dev_name DEV_NAME)
+                       --action_name ACTION_NAME [--params PARAMS]
+```
+
+| 参数 | 说明 |
+|------|------|
+| `-h, --help` | 显示帮助信息并退出 |
+| `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
+| `--did DID` | 设备 did，与 `--dev_name` 二选一 |
+| `--dev_name DEV_NAME` | 设备名称，与 `--did` 二选一 |
+| `--action_name ACTION_NAME` | 动作名称（必填），先使用 `--get_device_info` 获取 |
+| `--params PARAMS` | 可选的动作参数 JSON 对象，例如 `{"value":[2]}` |
+
+## 子命令：statistics
+
+获取设备统计数据。
+
+```
+usage: mijiaAPI statistics [-h] [-p AUTH_PATH] --did DID --key KEY
+                           --data_type DATA_TYPE [--limit LIMIT]
+                           [--time_start TIME_START] [--time_end TIME_END]
+```
+
+| 参数 | 说明 |
+|------|------|
+| `-h, --help` | 显示帮助信息并退出 |
+| `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
+| `--did DID` | 设备 did（必填） |
+| `--key KEY` | 统计数据键，如 `7.1`（必填） |
+| `--data_type DATA_TYPE` | 统计类型，如 `stat_month_v3`（必填） |
+| `--limit LIMIT` | 最大条目数，默认 `6` |
+| `--time_start TIME_START` | 开始 Unix 时间戳（秒），默认结束时间前 30 天 |
+| `--time_end TIME_END` | 结束 Unix 时间戳（秒），默认当前时间 |
 
 ## 子命令：run
 

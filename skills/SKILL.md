@@ -2,9 +2,9 @@
 name: mijia-api
 description: |
   通过 `uvx mijiaAPI` CLI 控制米家智能设备。适用于：列出米家设备/家庭/场景/耗材、
-  获取或设置设备属性、运行场景、通过小爱音箱执行自然语言命令。
+  获取或设置设备属性、执行设备动作、查询统计数据、运行场景、通过小爱音箱执行自然语言命令。
   触发词包括"控制米家设备"、"米家"、"mijia"、"列出设备"、"设置亮度"、"打开灯"、
-  "运行场景"、"小爱音箱"、"耗材"、"场景"。
+  "执行动作"、"统计数据"、"耗电量"、"运行场景"、"小爱音箱"、"耗材"、"场景"。
 allowed-tools: Bash(uvx mijiaAPI:*)
 ---
 
@@ -25,7 +25,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 2. **绝对不要调用 `mcp`。** 它会启动一个长时间运行的 stdio MCP server，永久阻塞。
    该命令用于在 MCP 客户端配置中作为 server 启动，不能直接调用。
 
-3. 其他所有命令（list、get、set、run、run_scene、get_device_info）均为**非阻塞**，
+3. 其他所有命令（list、get、set、action、statistics、run、run_scene、get_device_info）均为**非阻塞**，
    可以直接调用。
 
 4. 如果任何命令以退出码 `1` 退出，并打印类似 `请调用 'mijiaAPI login' 进行扫描登录`
@@ -40,7 +40,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 
 - **全局参数**（`--list_devices`、`--list_homes` 等）：`-p` 放在参数前：
   `uvx mijiaAPI -p /path --list_devices`
-- **子命令**（`get`、`set`、`run`）：`-p` 放在子命令后：
+- **子命令**（`get`、`set`、`action`、`statistics`、`run`）：`-p` 放在子命令后：
   `uvx mijiaAPI get -p /path --dev_name "台灯" --prop_name "brightness"`
 
 认证失效时，`init_api` 会打印提示信息并以退出码 `1` 退出，提示用户运行
@@ -60,6 +60,8 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 | `--get_device_info MODEL` | 按 model 获取设备规格 | **否** | 否 |
 | `get` | 读取设备属性 | 是 | 否 |
 | `set` | 设置设备属性 | 是 | 否 |
+| `action` | 按动作名执行设备动作 | 是 | 否 |
+| `statistics` | 获取设备统计数据 | 是 | 否 |
 | `run` | 通过小爱音箱执行自然语言命令 | 是 | 否 |
 
 全局参数（`--list_devices`、`--list_homes`、`--list_scenes`、`--list_consumable_items`、
@@ -78,13 +80,24 @@ allowed-tools: Bash(uvx mijiaAPI:*)
    ```
    uvx mijiaAPI --get_device_info yeelink.light.lamp4
    ```
-   返回 JSON，描述设备的属性和动作。用于查找 `get`/`set` 可用的 `--prop_name` 值。
+   返回 JSON，描述设备的属性和动作。用于查找 `get`/`set` 可用的 `--prop_name` 和
+   `action` 可用的 `--action_name`。
 
 3. **获取或设置**属性（按设备名称）：
    ```
    uvx mijiaAPI get --dev_name "卧室台灯" --prop_name "brightness"
    uvx mijiaAPI set --dev_name "卧室台灯" --prop_name "brightness" --value 60
    uvx mijiaAPI set --dev_name "卧室台灯" --prop_name "on" --value True
+   ```
+
+4. **执行设备动作**：
+   ```
+   uvx mijiaAPI action --dev_name "卧室台灯" --action_name toggle
+   ```
+
+5. **获取统计数据**：
+   ```
+   uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
    ```
 
 ## 命令详情
@@ -155,8 +168,8 @@ uvx mijiaAPI --get_device_info yeelink.light.lamp4
 ```
 
 从公开的 MIoT 规格端点获取设备规格 JSON，返回所有可用属性（含类型和约束）及动作。
-**无需登录**——在认证初始化之前执行。用于在调用 `get`/`set` 前发现合法的
-`--prop_name` 和 `--value`。
+**无需登录**——在认证初始化之前执行。用于在调用 `get`/`set`/`action` 前发现合法的
+`--prop_name`、`--value` 和 `--action_name`。
 
 ### 获取设备属性
 
@@ -193,6 +206,44 @@ uvx mijiaAPI set --did 123456 --prop_name "on" --value False
 
 成功时输出确认信息，失败时输出 `设置 ... 失败: <错误>`。
 
+### 执行设备动作
+
+```
+uvx mijiaAPI action --dev_name "卧室台灯" --action_name toggle
+uvx mijiaAPI action --did 123456 --action_name execute-text-directive --params '{"in":["打开空调",1]}'
+```
+
+| 参数 | 是否必填 | 说明 |
+|------|----------|------|
+| `--action_name` | **是** | 动作名（通过 `--get_device_info` 发现） |
+| `--dev_name` | 二选一 | 米家 APP 中设置的设备名称 |
+| `--did` | 二选一 | 设备 did |
+| `--params` | 否 | 动作参数 JSON 对象；无参数动作不要传 |
+| `-p` | 否 | 认证文件路径 |
+
+`--params` 必须是 JSON 对象。普通动作参数可传 `{"value":[2]}`；名为 Python 关键字的
+字段也直接使用原名，例如 `{"in":["打开空调",1]}`。成功输出“指令已发送”。
+
+### 获取统计数据
+
+```
+uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
+uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_day_v3 --limit 30 --time_start 1700000000 --time_end 1702592000
+```
+
+| 参数 | 是否必填 | 说明 |
+|------|----------|------|
+| `--did` | **是** | 设备 did（从 `--list_devices` 获取） |
+| `--key` | **是** | 统计键，通常为 `siid.piid`，例如 `7.1` |
+| `--data_type` | **是** | 统计类型，如 `stat_day_v3`、`stat_month_v3`；旧设备可能不带 `_v3` |
+| `--limit` | 否 | 最大条目数，默认 `6` |
+| `--time_start` | 否 | 开始 Unix 时间戳（秒），默认结束时间前 30 天 |
+| `--time_end` | 否 | 结束 Unix 时间戳（秒），默认当前时间 |
+| `-p` | 否 | 认证文件路径 |
+
+统计能力和 `key` 因设备型号而异。命令原样输出 API 返回的 JSON，不要用 `eval()` 解析
+其中的字符串值。
+
 ### 运行（通过小爱音箱执行自然语言）
 
 ```
@@ -226,5 +277,5 @@ MIJIA_LOG_LEVEL=DEBUG uvx mijiaAPI -l
 
 - `0`：成功
 - `1`：认证文件缺失/损坏/过期（信息中包含
-  `请调用 'mijiaAPI login' 进行扫描登录`），或 set/run 失败。看到认证相关提示时，
+  `请调用 'mijiaAPI login' 进行扫描登录`），或命令发生未处理错误。看到认证相关提示时，
   提醒用户运行 `uvx mijiaAPI login -p [path]`。

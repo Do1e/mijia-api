@@ -19,6 +19,17 @@ if log_level_name not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
 log_level = getattr(logging, log_level_name, logging.INFO)
 logging.getLogger("mijiaAPI").setLevel(log_level)
 
+
+def json_object(value: str) -> dict:
+    try:
+        result = json.loads(value)
+    except json.JSONDecodeError as e:
+        raise argparse.ArgumentTypeError(f"无效 JSON: {e.msg}") from e
+    if not isinstance(result, dict):
+        raise argparse.ArgumentTypeError("必须是 JSON 对象")
+    return result
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(description=f"Mijia API CLI (v{version})")
     subparsers = parser.add_subparsers(dest='command')
@@ -190,6 +201,87 @@ def parse_args(args):
         help="需要设定的属性值",
         required=True,
     )
+
+    action = subparsers.add_parser(
+        'action',
+        help="执行设备动作",
+    )
+    action.set_defaults(func='action')
+    action.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    action_device = action.add_mutually_exclusive_group(required=True)
+    action_device.add_argument(
+        '--did',
+        type=str,
+        help="设备did",
+    )
+    action_device.add_argument(
+        '--dev_name',
+        type=str,
+        help="设备名称，指定为米家APP中设定的名称",
+    )
+    action.add_argument(
+        '--action_name',
+        type=str,
+        help="动作名称，先使用 --get_device_info 获取",
+        required=True,
+    )
+    action.add_argument(
+        '--params',
+        type=json_object,
+        help='动作参数 JSON 对象，例如 {"value":[2]}',
+        default=None,
+    )
+
+    statistics = subparsers.add_parser(
+        'statistics',
+        help="获取设备统计数据",
+    )
+    statistics.set_defaults(func='statistics')
+    statistics.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    statistics.add_argument(
+        '--did',
+        type=str,
+        help="设备did，先使用 --list_devices 获取",
+        required=True,
+    )
+    statistics.add_argument(
+        '--key',
+        type=str,
+        help='统计数据键，例如 "7.1"',
+        required=True,
+    )
+    statistics.add_argument(
+        '--data_type',
+        type=str,
+        help="统计类型，例如 stat_month_v3",
+        required=True,
+    )
+    statistics.add_argument(
+        '--limit',
+        type=int,
+        help="返回的最大条目数，默认 6",
+        default=6,
+    )
+    statistics.add_argument(
+        '--time_start',
+        type=int,
+        help="开始时间戳（秒），默认结束时间前 30 天",
+    )
+    statistics.add_argument(
+        '--time_end',
+        type=int,
+        help="结束时间戳（秒），默认为当前时间",
+    )
     return parser.parse_args(args)
 
 def init_api(auth_path: Path) -> mijiaAPI:
@@ -333,6 +425,27 @@ def set(args):
         return
     print(f"{device.name} ({device.did}) 的 {args.prop_name} 值已设置为 {args.value}")
 
+
+def run_action(api: mijiaAPI, args):
+    device = mijiaDevice(api, did=args.did, dev_name=args.dev_name)
+    device.run_action(args.action_name, **(args.params or {}))
+    print(f"{device.name} ({device.did}) 的动作 {args.action_name} 指令已发送")
+
+
+def get_statistics(api: mijiaAPI, args):
+    time_end = args.time_end if args.time_end is not None else int(time.time())
+    time_start = args.time_start if args.time_start is not None else time_end - 30 * 24 * 3600
+    result = api.get_statistics({
+        "did": args.did,
+        "key": args.key,
+        "data_type": args.data_type,
+        "limit": args.limit,
+        "time_start": time_start,
+        "time_end": time_end,
+    })
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+
 def main(args):
     args = parse_args(args)
 
@@ -390,6 +503,10 @@ def main(args):
             get(args)
         if args.func == 'set':
             set(args)
+        if args.func == 'action':
+            run_action(api, args)
+        if args.func == 'statistics':
+            get_statistics(api, args)
         if args.func == 'run':
             if device_mapping is None:
                 device_mapping = get_devices_list(api, verbose=False)

@@ -86,7 +86,7 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
 
 1. **禁止调用 `login`**：它会在终端打印二维码并阻塞等待扫码，导致会话挂起。需要登录时，skill 会提醒你自行执行 `uvx mijiaAPI login -p [path]`。
 2. **禁止调用 `mcp`**：它会启动长时间运行的 stdio MCP server，永久阻塞。该命令仅供 MCP 客户端配置使用。
-3. 其余命令（`-l`/`--list_devices`、`--list_homes`、`--list_scenes`、`--list_consumable_items`、`--run_scene`、`--get_device_info`、`get`、`set`、`run`）均为非阻塞，可直接调用。
+3. 其余命令（`-l`/`--list_devices`、`--list_homes`、`--list_scenes`、`--list_consumable_items`、`--run_scene`、`--get_device_info`、`get`、`set`、`action`、`statistics`、`run`）均为非阻塞，可直接调用。
 4. 当命令以退出码 1 退出并提示 `请调用 'mijiaAPI login' 进行扫描登录` 时，说明认证缺失/损坏/过期，模型会转告你执行登录命令而非自行修复。
 
 ::: tip
@@ -95,7 +95,7 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
 
 ## 认证文件
 
-默认路径 `~/.config/mijia-api/auth.json`，可用 `-p /path/to/auth.json` 覆盖。全局参数的 `-p` 放在参数前；子命令（`get`/`set`/`run`）的 `-p` 放在子命令后。
+默认路径 `~/.config/mijia-api/auth.json`，可用 `-p /path/to/auth.json` 覆盖。全局参数的 `-p` 放在参数前；子命令（`get`/`set`/`action`/`statistics`/`run`）的 `-p` 放在子命令后。
 
 ## 典型工作流
 
@@ -105,7 +105,7 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
    ```bash
    uvx mijiaAPI -l
    ```
-2. **查看设备规格**（无需登录，发现可用的 `--prop_name`）：
+2. **查看设备规格**（无需登录，发现可用的 `--prop_name` 和 `--action_name`）：
    ```bash
    uvx mijiaAPI --get_device_info yeelink.light.lamp4
    ```
@@ -114,6 +114,14 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
    uvx mijiaAPI get --dev_name "卧室台灯" --prop_name "brightness"
    uvx mijiaAPI set --dev_name "卧室台灯" --prop_name "brightness" --value 60
    uvx mijiaAPI set --dev_name "卧室台灯" --prop_name "on" --value True
+   ```
+4. **执行设备动作**：
+   ```bash
+   uvx mijiaAPI action --dev_name "卧室台灯" --action_name toggle
+   ```
+5. **获取统计数据**：
+   ```bash
+   uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
    ```
 
 ## 命令总览
@@ -130,6 +138,8 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
 | `--get_device_info MODEL` | 按 model 获取设备规格 | 否 | 否 |
 | `get` | 读取设备属性 | 是 | 否 |
 | `set` | 设置设备属性 | 是 | 否 |
+| `action` | 按动作名执行设备动作 | 是 | 否 |
+| `statistics` | 获取设备统计数据 | 是 | 否 |
 | `run` | 通过小爱音箱执行自然语言命令 | 是 | 否 |
 
 ::: tip
