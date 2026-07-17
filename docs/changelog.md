@@ -2,6 +2,19 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.1.3](https://github.com/Do1e/mijia-api/compare/v4.1.2...v4.1.3) - 2026-07-17
+
+### new feature
+
+- CLI 新增 `action` 子命令，支持按动作名称执行设备动作，并通过 `--params` 传入 JSON 参数
+- CLI 新增 `statistics` 子命令，支持按设备、统计键、数据类型与时间范围查询设备统计数据
+
+### improvement
+
+- 补充统计接口中 `key` 与 `data_type` 因设备型号而异、返回值需使用 `json.loads()` 解析等说明，并提供具体设备示例与旧设备 `_v3` 后缀迁移提示
+- MCP server 启动时隐藏 FastMCP banner，并限制 agent skill 仅可调用 `uvx mijiaAPI` 命令
+- 安装文档新增 Arch Linux AUR 安装方式
+
 ## [4.1.2](https://github.com/Do1e/mijia-api/compare/v4.1.1...v4.1.2) - 2026-06-27
 
 ### improvement
