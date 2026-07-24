@@ -2,6 +2,13 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.2.0](https://github.com/Do1e/mijia-api/compare/v4.1.3...v4.2.0) - 2026-07-24
+
+### improvement
+
+- 重构 `get_device_info` 的属性/动作名去重逻辑，提取 `_deduplicate_names` 通用函数统一处理：同名时优先追加 `siid`，仍重复时追加 `piid`/`aiid`，替代之前基于 `svc_type` 的前缀方案
+- `get_device_info` 新增缓存版本号校验，缓存格式变更时自动失效并重新获取
+
 ## [4.1.3](https://github.com/Do1e/mijia-api/compare/v4.1.2...v4.1.3) - 2026-07-17
 
 ### new feature
