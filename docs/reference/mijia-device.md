@@ -85,7 +85,9 @@ device.brightness = 60
 ```
 
 ::: tip
-包含 `-` 的属性名请使用下划线 `_` 替代，例如 `color-temperature` 对应 `device.color_temperature`。
+包含 `-` 的属性名请使用下划线 `_` 替代，例如 `color-temperature` 对应 `device.color_temperature`。  
+同名属性会追加 `siid`，例如 `on-2` 对应 `device.on_2`；同一 `siid` 内仍有重名时，
+还会追加 `piid`，例如 `on-5-1` 对应 `device.on_5_1`。
 Python 关键字（如 `in`）可在前面加上下划线 `_`，如 `device._in`。
 :::
 

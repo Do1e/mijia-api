@@ -1,6 +1,7 @@
 import json
 import re
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Optional, Union
 
@@ -20,6 +21,19 @@ from .version import version
 
 
 device_url = "https://home.miot-spec.com/spec/"
+device_info_version = 1
+
+
+def _deduplicate_names(items: list[dict], iid_key: str) -> None:
+    name_counts = Counter(item["name"] for item in items)
+    for item in items:
+        if name_counts[item["name"]] > 1:
+            item["name"] = f"{item['name']}-{item['method']['siid']}"
+
+    name_counts = Counter(item["name"] for item in items)
+    for item in items:
+        if name_counts[item["name"]] > 1:
+            item["name"] = f"{item['name']}-{item['method'][iid_key]}"
 
 
 class DevProp():
@@ -252,6 +266,7 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
 
     返回值:
         dict: 设备规格信息字典，包含以下字段：
+            - version (int): 设备信息缓存格式版本
             - name (str): 设备名称
             - model (str): 设备型号
             - properties (list): 设备属性列表，每个属性包含以下字段：
@@ -275,12 +290,16 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
         >>> print(info['name'])  # 输出设备名称
         >>> print(info['properties'][0]['name'])  # 输出第一个属性的名称
     """
+    cache_file = None
     if cache_path is not None:
         cache_file = Path(cache_path) / f"{device_model}.json"
         if cache_file.exists():
             logger.debug(f"从缓存加载设备信息: {cache_file}")
             with cache_file.open("r", encoding="utf-8") as f:
-                return json.load(f)
+                cached_result = json.load(f)
+            if cached_result.get("version") == device_info_version:
+                return cached_result
+            logger.debug(f"设备信息缓存版本不匹配，重新获取: {cache_file}")
     response = requests.get(device_url + device_model, headers={
         "User-Agent": f"mijiaAPI/{version}"
     })
@@ -297,6 +316,7 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
     model = product["model"]
     i18n_zh = content["props"]["i18n"]["zh_cn"]
     result = {
+        "version": device_info_version,
         "name": name,
         "model": model,
         "properties": [],
@@ -304,11 +324,8 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
     }
     services = content["props"]["tree"]["services"]
 
-    properties_name = []
-    actions_name = []
     for svc in services:
         siid = svc["iid"]
-        svc_type = svc["type"]
         for prop in svc.get("properties", []):
             piid = prop["iid"]
             if prop["format"].startswith("int"):
@@ -345,9 +362,6 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
                     if vl_zh:
                         vl_entry["desc_zh_cn"] = vl_zh
                     item["value-list"].append(vl_entry)
-            if item["name"] in properties_name:
-                item["name"] = f"{svc_type}-{item['name']}"
-            properties_name.append(item["name"])
             result["properties"].append(item)
         for act in svc.get("actions", []):
             aiid = act["iid"]
@@ -360,15 +374,13 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
                     "aiid": aiid
                 }
             }
-            if act_item["name"] in actions_name:
-                act_item["name"] = f"{svc_type}-{act_item['name']}"
-            actions_name.append(act_item["name"])
             result["actions"].append(act_item)
 
-    if cache_path is not None:
-        cache_path = Path(cache_path)
-        cache_path.mkdir(parents=True, exist_ok=True)
-        cache_file = cache_path / f"{device_model}.json"
+    _deduplicate_names(result["properties"], "piid")
+    _deduplicate_names(result["actions"], "aiid")
+
+    if cache_file is not None:
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
         logger.debug(f"缓存设备信息到: {cache_file}")
         with cache_file.open("w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, ensure_ascii=False)

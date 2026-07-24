@@ -68,7 +68,9 @@ print(device)
 ```
 
 ::: tip
-包含 `-` 的属性名请使用下划线 `_` 替代，例如 `color-temperature` 对应 `device.color_temperature`。
+包含 `-` 的属性名请使用下划线 `_` 替代，例如 `color-temperature` 对应 `device.color_temperature`。  
+当设备的多个服务包含同名属性时，属性名会追加 `siid`，例如三键开关的
+`on-2`、`on-3`、`on-4` 分别可通过 `device.on_2`、`device.on_3`、`device.on_4` 访问。
 :::
 
 ## CLI 命令行

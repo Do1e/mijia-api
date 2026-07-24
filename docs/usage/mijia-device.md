@@ -37,16 +37,23 @@ device.set('on', True)            # 打开设备
 device.set('color-temperature', 5000)  # 设置色温
 ```
 
-也可以直接使用属性值赋值的方式，包含 `-` 的属性名请使用下划线 `_` 替代：
+也可以直接使用属性值赋值的方式，包含 `-` 的属性名请使用下划线 `_` 替代。  
+当设备的多个服务包含同名属性时，属性名会追加 `siid`，例如三键开关的
+`on-2`、`on-3`、`on-4` 分别对应 `device.on_2`、`device.on_3`、`device.on_4`，依然重复时会追加 `piid`：
 
 ```python
 print(f"当前亮度: {device.brightness}%")
 device.brightness = 60  # 设置亮度为60%
 device.on = True        # 打开设备
 device.color_temperature = 5000  # 设置色温
+
+# 多键开关
+device.on_2 = True       # 设置 siid=2 的按键
 ```
 
 ## 执行设备动作
+
+同名处理机制同上。
 
 ```python
 # 执行动作（如切换开关）
