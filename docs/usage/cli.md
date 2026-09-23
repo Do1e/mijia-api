@@ -39,6 +39,7 @@ CLI 包含以下子命令：
 | `action` | 按动作名执行设备动作 |
 | `statistics` | 获取设备统计数据 |
 | `run` | 使用自然语言描述需求（通过小爱音箱执行） |
+| `play` | 通过小爱音箱朗读指定文本 |
 | `mcp` | 启动 MCP server（stdio 传输） |
 
 ## 获取设备属性
@@ -129,8 +130,17 @@ mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_month_v3
 # 使用小爱音箱执行自然语言命令
 mijiaAPI run "打开卧室台灯"
 mijiaAPI run "把亮度调到50%" --wifispeaker_name "卧室小爱"
-mijiaAPI run "关闭所有灯" --quiet
+mijiaAPI run "关闭所有灯" --no-quiet
+
+# 通过小爱音箱直接朗读文本（不会作为设备控制指令执行）
+mijiaAPI play "你好，我是小爱同学"
+mijiaAPI play "晚饭做好了" --wifispeaker_name "卧室小爱" -p /path/to/auth.json
 ```
+
+`run` 使用 `execute-text-directive` 处理自然语言命令，默认静默执行；
+如需播报回复可使用 `--no-quiet`（`--quiet` 可显式指定静默）。
+`play` 使用 `play-text` 朗读指定文本，不支持静默参数。两者默认选择设备列表中的
+第一台小爱音箱，也可通过 `--wifispeaker_name` 指定。
 
 ## 直接使用 uvx（无需安装）
 

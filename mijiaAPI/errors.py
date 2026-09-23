@@ -1,4 +1,4 @@
-# https://github.com/kekeandzeyu/ha_xiaomi_home/blob/main/custom_components/xiaomi_home/miot/i18n/zh-Hans.json
+# https://github.com/XiaoMi/ha_xiaomi_home/blob/main/custom_components/xiaomi_home/miot/i18n/zh-Hans.json
 ERROR_CODE = {
     "-10000": "未知错误",
     "-10001": "服务不可用",

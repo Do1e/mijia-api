@@ -305,40 +305,52 @@ def get_statistics(
     return json.dumps(ret, ensure_ascii=False)
 
 
+def _find_speaker(api: mijiaAPI, speaker_name: Optional[str]) -> Optional[dict]:
+    devices = api.get_devices_list()
+    if speaker_name is not None:
+        return next((d for d in devices if d["name"] == speaker_name), None)
+    return next((d for d in devices if "xiaomi.wifispeaker" in d["model"]), None)
+
+
 @mcp.tool
 def run_speaker_command(
     prompt: str,
     speaker_name: Optional[str] = None,
-    quiet: bool = False,
+    quiet: bool = True,
 ) -> str:
     """通过小爱音箱执行自然语言指令。
 
     参数:
         prompt: 自然语言指令，如 "打开卧室台灯"、"把亮度调到50%"。
         speaker_name: 可选，指定小爱音箱名称，默认使用获取到的第一个小爱音箱。
-        quiet: 是否静默执行（不语音播报），默认 False。
+        quiet: 是否静默执行（不语音播报），默认 True。
 
     返回执行结果。
     """
     api = _get_api()
     _refresh_if_needed(api)
-    devices = api.get_devices_list()
-    if speaker_name is None:
-        match = None
-        for device in devices:
-            if "xiaomi.wifispeaker" in device["model"]:
-                match = device
-                break
-        if match is None:
-            return "未找到小爱音箱设备"
-    else:
-        matches = [d for d in devices if d["name"] == speaker_name]
-        if not matches:
-            return f"未找到名为 {speaker_name} 的小爱音箱"
-        match = matches[0]
+    match = _find_speaker(api, speaker_name)
+    if match is None:
+        return "未找到小爱音箱设备" if speaker_name is None else f"未找到名为 {speaker_name} 的小爱音箱"
     speaker = mijiaDevice(api, did=match["did"])
     speaker.run_action("execute-text-directive", _in=[prompt, 1 if quiet else 0])
     return f"已通过 {match['name']} 执行: {prompt}"
+
+
+@mcp.tool
+def speaker_play(
+    text: str,
+    speaker_name: Optional[str] = None,
+) -> str:
+    """通过小爱音箱朗读指定文本（play-text），不是执行设备控制指令。"""
+    api = _get_api()
+    _refresh_if_needed(api)
+    match = _find_speaker(api, speaker_name)
+    if match is None:
+        return "未找到小爱音箱设备" if speaker_name is None else f"未找到名为 {speaker_name} 的小爱音箱"
+    speaker = mijiaDevice(api, did=match["did"])
+    speaker.run_action("play-text", _in=[text])
+    return f"已通过 {match['name']} 播放: {text}"
 
 
 def _login_worker(api: mijiaAPI, login_data: dict) -> None:

@@ -112,8 +112,33 @@ def parse_args(args):
     )
     run.add_argument(
         '--quiet',
-        action='store_true',
-        help="小爱音箱静默执行",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="小爱音箱静默执行（默认开启；使用 --no-quiet 播报回复）",
+    )
+
+    play = subparsers.add_parser(
+        'play',
+        help="通过小爱音箱播放指定文本",
+    )
+    play.set_defaults(func='play')
+    play.add_argument(
+        '-p', '--auth_path',
+        type=Path,
+        default=Path.home() / ".config" / "mijia-api" / "auth.json",
+        help="认证文件保存路径，默认保存在 ~/.config/mijia-api/auth.json",
+    )
+    play.add_argument(
+        'text',
+        type=str,
+        help="要通过小爱音箱播放的文本",
+        metavar='TEXT',
+    )
+    play.add_argument(
+        '--wifispeaker_name',
+        type=str,
+        help="指定小爱音箱名称，默认是获取到的第一个小爱音箱",
+        default=None,
     )
 
     mcp_cmd = subparsers.add_parser(
@@ -507,7 +532,7 @@ def main(args):
             run_action(api, args)
         if args.func == 'statistics':
             get_statistics(api, args)
-        if args.func == 'run':
+        if args.func in ('run', 'play'):
             if device_mapping is None:
                 device_mapping = get_devices_list(api, verbose=False)
             if args.wifispeaker_name is None:
@@ -520,7 +545,10 @@ def main(args):
                     raise ValueError("未找到小爱音箱设备")
             else:
                 wifispeaker = mijiaDevice(api, dev_name=args.wifispeaker_name)
-            wifispeaker.run_action('execute-text-directive', _in=[args.prompt, 1 if args.quiet else 0])
+            if args.func == 'run':
+                wifispeaker.run_action('execute-text-directive', _in=[args.prompt, 1 if args.quiet else 0])
+            else:
+                wifispeaker.run_action('play-text', _in=[args.text])
 
 def cli():
     main(sys.argv[1:])

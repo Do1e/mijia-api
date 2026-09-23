@@ -25,7 +25,7 @@ usage: mijiaAPI [-h] [-v] [-p AUTH_PATH] [--list_homes] [-l]
                    [--list_scenes] [--list_consumable_items]
                    [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]]
                    [--get_device_info DEVICE_MODEL]
-                   {run,mcp,login,get,set,action,statistics} ...
+                   {run,play,mcp,login,get,set,action,statistics} ...
 ```
 
 ### 全局参数
@@ -61,7 +61,7 @@ usage: mijiaAPI login [-h] [-p AUTH_PATH]
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
 
-`login` 子命令会尝试刷新 token；若仍不可用则在终端打印二维码并阻塞等待扫码。其他子命令（`get`/`set`/`action`/`statistics`/`run`/`mcp` 及全局参数）在认证文件缺失、损坏或失效且刷新失败时，**不会**自动触发登录，而是打印 `请调用 'mijiaAPI login' 进行扫描登录` 并以退出码 1 退出。
+`login` 子命令会尝试刷新 token；若仍不可用则在终端打印二维码并阻塞等待扫码。其他子命令（`get`/`set`/`action`/`statistics`/`run`/`play`/`mcp` 及全局参数）在认证文件缺失、损坏或失效且刷新失败时，**不会**自动触发登录，而是打印 `请调用 'mijiaAPI login' 进行扫描登录` 并以退出码 1 退出。
 
 ## 子命令：get
 
@@ -146,7 +146,7 @@ usage: mijiaAPI statistics [-h] [-p AUTH_PATH] --did DID --key KEY
 
 ```
 usage: mijiaAPI run [-h] [-p AUTH_PATH]
-                       [--wifispeaker_name WIFISPEAKER_NAME] [--quiet]
+                       [--wifispeaker_name WIFISPEAKER_NAME] [--quiet | --no-quiet]
                        PROMPT
 ```
 
@@ -156,7 +156,26 @@ usage: mijiaAPI run [-h] [-p AUTH_PATH]
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
 | `--wifispeaker_name WIFISPEAKER_NAME` | 指定小爱音箱名称，默认是获取到的第一个小爱音箱 |
-| `--quiet` | 小爱音箱静默执行 |
+| `--quiet, --no-quiet` | 默认静默执行；`--no-quiet` 播报回复 |
+
+`run` 使用小爱音箱的 `execute-text-directive` 动作，处理自然语言控制指令。
+
+## 子命令：play
+
+通过小爱音箱直接朗读文本（`play-text` 动作），不执行设备控制指令。
+
+```
+usage: mijiaAPI play [-h] [-p AUTH_PATH]
+                     [--wifispeaker_name WIFISPEAKER_NAME]
+                     TEXT
+```
+
+| 参数 | 说明 |
+|------|------|
+| `TEXT` | 要朗读的文本（位置参数，必填） |
+| `-h, --help` | 显示帮助信息并退出 |
+| `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
+| `--wifispeaker_name WIFISPEAKER_NAME` | 指定小爱音箱名称，默认是获取到的第一个小爱音箱 |
 
 ## 子命令：mcp
 

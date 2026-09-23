@@ -2,7 +2,7 @@
 name: mijia-api
 description: |
   通过 `uvx mijiaAPI` CLI 控制米家智能设备。适用于：列出米家设备/家庭/场景/耗材、
-  获取或设置设备属性、执行设备动作、查询统计数据、运行场景、通过小爱音箱执行自然语言命令。
+  获取或设置设备属性、执行设备动作、查询统计数据、运行场景、通过小爱音箱执行自然语言命令或播放文本。
   触发词包括"控制米家设备"、"米家"、"mijia"、"列出设备"、"设置亮度"、"打开灯"、
   "执行动作"、"统计数据"、"耗电量"、"运行场景"、"小爱音箱"、"耗材"、"场景"。
 allowed-tools: Bash(uvx mijiaAPI:*)
@@ -25,7 +25,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 2. **绝对不要调用 `mcp`。** 它会启动一个长时间运行的 stdio MCP server，永久阻塞。
    该命令用于在 MCP 客户端配置中作为 server 启动，不能直接调用。
 
-3. 其他所有命令（list、get、set、action、statistics、run、run_scene、get_device_info）均为**非阻塞**，
+3. 其他所有命令（list、get、set、action、statistics、run、play、run_scene、get_device_info）均为**非阻塞**，
    可以直接调用。
 
 4. 如果任何命令以退出码 `1` 退出，并打印类似 `请调用 'mijiaAPI login' 进行扫描登录`
@@ -40,7 +40,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 
 - **全局参数**（`--list_devices`、`--list_homes` 等）：`-p` 放在参数前：
   `uvx mijiaAPI -p /path --list_devices`
-- **子命令**（`get`、`set`、`action`、`statistics`、`run`）：`-p` 放在子命令后：
+- **子命令**（`get`、`set`、`action`、`statistics`、`run`、`play`）：`-p` 放在子命令后：
   `uvx mijiaAPI get -p /path --dev_name "台灯" --prop_name "brightness"`
 
 认证失效时，`init_api` 会打印提示信息并以退出码 `1` 退出，提示用户运行
@@ -63,6 +63,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 | `action` | 按动作名执行设备动作 | 是 | 否 |
 | `statistics` | 获取设备统计数据 | 是 | 否 |
 | `run` | 通过小爱音箱执行自然语言命令 | 是 | 否 |
+| `play` | 通过小爱音箱播放指定文本 | 是 | 否 |
 
 全局参数（`--list_devices`、`--list_homes`、`--list_scenes`、`--list_consumable_items`、
 `--run_scene`、`--get_device_info`）可在一次调用中**组合使用**；其中 `--get_device_info`
@@ -253,15 +254,21 @@ uvx mijiaAPI statistics --did 123456 --key 7.1 --data_type stat_day_v3 --limit 3
 `eval()`。相关限制见 https://github.com/Do1e/mijia-api/issues/46，接口参考：
 https://iot.mi.com/new/doc/accesses/direct-access/extension-development/extension-functions/statistical-interface
 
-### 运行（通过小爱音箱执行自然语言）
+### 小爱音箱：执行命令与播放文本
 
 ```
 uvx mijiaAPI run "打开卧室台灯"
 uvx mijiaAPI run "把亮度调到50%" --wifispeaker_name "卧室小爱"
-uvx mijiaAPI run "关闭所有灯" --quiet
+uvx mijiaAPI run "关闭所有灯" --no-quiet
+uvx mijiaAPI play "你好，我是小爱同学"
+uvx mijiaAPI play "晚饭做好了" --wifispeaker_name "卧室小爱" -p /path/to/auth.json
 ```
 
-将自然语言指令通过小爱音箱的 `execute-text-directive` 动作执行。未指定
+需要**执行设备控制命令**时使用 `run`：它通过小爱音箱的 `execute-text-directive`
+动作处理自然语言指令，默认静默执行；需要音箱播报回复时加 `--no-quiet`
+（`--quiet` 可显式指定静默）。需要**直接朗读指定文本**时使用
+`play`：它通过 `play-text` 动作播放文本，不会将其当作设备控制命令执行，也没有 `--quiet` 参数。
+两者都是向音箱发送文字，而不是接收音箱的语音输入。未指定
 `--wifispeaker_name` 时，自动选用第一个 model 包含 `xiaomi.wifispeaker` 的设备。
 若未找到小爱音箱，抛出 `ValueError("未找到小爱音箱设备")`。
 
@@ -269,8 +276,11 @@ uvx mijiaAPI run "关闭所有灯" --quiet
 |------|----------|------|
 | `PROMPT`（位置参数） | **是** | 自然语言指令 |
 | `--wifispeaker_name` | 否 | 指定小爱音箱名称 |
-| `--quiet` | 否 | 静默执行（音箱不播报回复） |
+| `--quiet` / `--no-quiet` | 否 | 仅 `run`：默认静默；`--no-quiet` 播报回复 |
 | `-p` | 否 | 认证文件路径 |
+
+`play` 的位置参数为必填的 `TEXT`（要朗读的文本），支持同样的
+`--wifispeaker_name` 和 `-p` 选项。
 
 ## 环境变量
 

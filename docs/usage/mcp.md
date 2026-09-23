@@ -57,7 +57,19 @@ MCP server 暴露以下工具供 LLM 调用：
 | `run_device_action` | 执行设备动作（高层封装，按动作名执行） |
 | `run_scene` | 运行手动场景（按 ID 或名称） |
 | `get_statistics` | 获取设备统计数据（如耗电量、使用时长） |
-| `run_speaker_command` | 通过小爱音箱执行自然语言指令 |
+| `run_speaker_command` | 通过小爱音箱执行自然语言指令（默认静默） |
+| `speaker_play` | 通过小爱音箱朗读指定文本 |
+
+## 小爱音箱：执行命令与播放文本
+
+- `run_speaker_command(prompt="打开卧室台灯", speaker_name="卧室小爱")`：通过
+  `execute-text-directive` 执行自然语言控制指令；`quiet` 默认为 `true`（不播报回复），
+  传入 `quiet=false` 可播报回复。
+- `speaker_play(text="你好，我是小爱同学", speaker_name="卧室小爱")`：通过
+  `play-text` 朗读指定文本，不将其当成控制指令执行；没有 `quiet` 参数。
+
+两种操作在未指定 `speaker_name` 时都默认选择设备列表中的第一台小爱音箱。
+这些工具是向音箱**发送文字**，不是接收音箱语音输入。
 
 ## 统计数据
 
