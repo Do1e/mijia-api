@@ -2,6 +2,19 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.3.0](https://github.com/Do1e/mijia-api/compare/v4.2.1...v4.3.0) - 2026-09-23
+
+### new feature
+
+- CLI 新增 `play` 子命令，通过小爱音箱的 `play-text` 动作直接朗读指定文本，不会将其当作设备控制指令执行；可用 `--wifispeaker_name` 指定音箱，默认使用第一台小爱音箱
+- MCP server 新增 `speaker_play` 工具，与 CLI 的 `play` 行为一致
+
+### improvement
+
+- `run` 子命令的 `--quiet` 改为 `argparse.BooleanOptionalAction`，默认静默执行，需要音箱播报回复时使用 `--no-quiet`（此前默认为播报回复，属于行为变更）
+- MCP server 的 `run_speaker_command` 的 `quiet` 参数默认值改为 `True`，与 CLI 保持一致；同时提取 `_find_speaker` 复用音箱查找逻辑
+- skill 安装说明改为 `npx skills add Do1e/mijia-api --skill mijia-api`，由安装器自动检测或通过 `-a` 指定 opencode、Claude Code、Codex 等助手，替代原先手工下载 `SKILL.md` 的说明
+
 ## [4.2.1](https://github.com/Do1e/mijia-api/compare/v4.2.0...v4.2.1) - 2026-08-19
 
 ### bugfix

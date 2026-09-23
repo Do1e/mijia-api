@@ -1,6 +1,6 @@
 {
   "name": "mijia-api-docs",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "private": true,
   "scripts": {
     "docs:dev": "vitepress dev",
