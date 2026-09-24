@@ -2,6 +2,14 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [4.4.0](https://github.com/Do1e/mijia-api/compare/v4.3.0...v4.4.0) - 2026-09-24
+
+### improvement
+
+- `fastmcp` 从必需依赖移入可选的 `mcp` extra，`pip install mijiaAPI` 不再安装 MCP server 依赖，需要时使用 `pip install "mijiaAPI[mcp]"` 或 `uv add "mijiaAPI[mcp]"` 安装（此前随主包一并安装，属于安装方式变更）
+- MCP server 改为在 `mcp` 子命令内延迟导入，未安装 `fastmcp` 时仅该子命令提示缺少依赖并退出，Python API 与其他 CLI 子命令不受影响
+- README 与安装文档补充可选依赖与 extra 用法说明，`uvx` 改为直接指定 `mijiaAPI[mcp]`（旧版 uv 可用 `uvx --from "mijiaAPI[mcp]" mijiaAPI mcp`），并将 uv 安装注释统一为中文
+
 ## [4.3.0](https://github.com/Do1e/mijia-api/compare/v4.2.1...v4.3.0) - 2026-09-23
 
 ### new feature
