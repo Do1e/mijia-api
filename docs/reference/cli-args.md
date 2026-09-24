@@ -179,7 +179,7 @@ usage: mijiaAPI play [-h] [-p AUTH_PATH]
 
 ## 子命令：mcp
 
-启动 MCP server（stdio 传输）。
+启动 MCP server（stdio 传输）。该子命令需要可选依赖 `fastmcp`，未安装时会提示并退出。
 
 ```
 usage: mijiaAPI mcp [-h] [-p AUTH_PATH]
@@ -189,3 +189,11 @@ usage: mijiaAPI mcp [-h] [-p AUTH_PATH]
 |------|------|
 | `-h, --help` | 显示帮助信息并退出 |
 | `-p, --auth_path AUTH_PATH` | 认证文件保存路径 |
+
+安装可选依赖后即可运行：
+
+```bash
+pip install "mijiaAPI[mcp]"
+# uvx 用户直接在命令中指定 extra
+uvx "mijiaAPI[mcp]" mcp
+```

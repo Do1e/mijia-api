@@ -5,11 +5,16 @@
 ## 启动 MCP server
 
 ```bash
-uvx mijiaAPI mcp
+# 直接在命令中指定带 mcp extra 的包（注意引号，否则 shell 会把 [] 当作通配符）
+uvx "mijiaAPI[mcp]" mcp
 
 # 或指定认证文件路径
-uvx mijiaAPI mcp -p /path/to/auth.json
+uvx "mijiaAPI[mcp]" mcp -p /path/to/auth.json
 ```
+
+若 uv 版本较旧不支持上述写法，可使用 `--from` 形式：`uvx --from "mijiaAPI[mcp]" mijiaAPI mcp`。
+
+安装时若已经指定 `mijiaAPI[mcp]`，也可直接运行 `mijiaAPI mcp`。
 
 ## 客户端配置
 
@@ -20,7 +25,7 @@ uvx mijiaAPI mcp -p /path/to/auth.json
   "mcpServers": {
     "mijia-api": {
       "command": "uvx",
-      "args": ["mijiaAPI", "mcp"]
+      "args": ["mijiaAPI[mcp]", "mcp"]
     }
   }
 }
@@ -33,7 +38,7 @@ uvx mijiaAPI mcp -p /path/to/auth.json
   "mcpServers": {
     "mijia-api": {
       "command": "uvx",
-      "args": ["mijiaAPI", "mcp", "-p", "/path/to/auth.json"]
+      "args": ["mijiaAPI[mcp]", "mcp", "-p", "/path/to/auth.json"]
     }
   }
 }

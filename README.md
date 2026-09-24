@@ -19,7 +19,7 @@
 
 ```bash
 pip install mijiaAPI
-# Or `uv add mijiaAPI` for uv users
+# uv 用户可使用 `uv add mijiaAPI`
 ```
 
 其他安装方式（源码安装、AUR）请参考[文档](https://mijia-api.do1e.com/guide/installation)。
@@ -59,7 +59,7 @@ MCP 用法：
   "mcpServers": {
     "mijia-api": {
       "command": "uvx",
-      "args": ["mijiaAPI", "mcp", "-p", "/path/to/auth.json"]
+      "args": ["mijiaAPI[mcp]", "mcp", "-p", "/path/to/auth.json"]
     }
   }
 }

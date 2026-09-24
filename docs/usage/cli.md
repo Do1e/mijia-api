@@ -40,7 +40,7 @@ CLI 包含以下子命令：
 | `statistics` | 获取设备统计数据 |
 | `run` | 使用自然语言描述需求（通过小爱音箱执行） |
 | `play` | 通过小爱音箱朗读指定文本 |
-| `mcp` | 启动 MCP server（stdio 传输） |
+| `mcp` | 启动 MCP server（stdio 传输，需安装可选依赖 `mijiaAPI[mcp]`） |
 
 ## 获取设备属性
 

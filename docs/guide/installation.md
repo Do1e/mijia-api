@@ -6,8 +6,19 @@
 
 ```bash
 pip install mijiaAPI
-# Or `uv add mijiaAPI` for uv users
+# uv 用户可使用 `uv add mijiaAPI`
 ```
+
+## 可选依赖
+
+MCP Server 功能依赖 `fastmcp`，该依赖不随主包安装，需通过 `mcp` extra 安装：
+
+```bash
+pip install "mijiaAPI[mcp]"
+# uv 用户可使用 `uv add "mijiaAPI[mcp]"`
+```
+
+未安装时仅有 `mijiaAPI mcp` 子命令不可用（会提示缺少依赖并退出），Python API 与其他 CLI 子命令不受影响。
 
 ## 从源码安装
 
@@ -15,9 +26,10 @@ pip install mijiaAPI
 git clone https://github.com/Do1e/mijia-api.git
 cd mijia-api
 pip install .
-# Or `pip install -e .` for editable mode
-# Or `pip install git+https://github.com/Do1e/mijia-api.git` for direct install
-# Or `uv add git+https://github.com/Do1e/mijia-api.git` for uv users
+# 或 `pip install -e .` 以可编辑模式安装
+# 或 `pip install ".[mcp]"` 一并安装 MCP server 依赖
+# 或 `pip install git+https://github.com/Do1e/mijia-api.git` 直接从仓库安装
+# uv 用户可使用 `uv add git+https://github.com/Do1e/mijia-api.git`
 ```
 
 ## AUR（Arch User Repository）

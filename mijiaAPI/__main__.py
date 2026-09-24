@@ -9,7 +9,6 @@ from typing import Optional
 
 from .apis import mijiaAPI
 from .devices import get_device_info, mijiaDevice
-from .mcp_server import run as run_mcp
 from .version import version
 
 
@@ -491,6 +490,13 @@ def main(args):
         return
 
     if hasattr(args, 'func') and args.func == 'mcp':
+        try:
+            from .mcp_server import run as run_mcp
+        except ModuleNotFoundError as e:
+            if e.name != 'fastmcp':
+                raise
+            print("启动 MCP server 需要 fastmcp，请先安装: pip install 'mijiaAPI[mcp]'")
+            sys.exit(1)
         run_mcp(args.auth_path)
         return
     if hasattr(args, 'func') and args.func == 'login':
