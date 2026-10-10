@@ -95,6 +95,7 @@ class mijiaDevice():
                     raise MultipleDevicesFoundError(f"找到多个 dev_name 为 '{dev_name}' 的设备，请使用 did 参数指定具体设备或者修改设备名称以区分")
                 did = matches[0]["did"]
                 model = matches[0]["model"]
+                spec_type = matches[0].get("spec_type")
         else:
             matches = [device for device in devices_list if device["did"] == did]
             if not matches:
@@ -104,10 +105,12 @@ class mijiaDevice():
                     raise MultipleDevicesFoundError(f"找到多个 did 为 '{did}' 的设备，未预想的问题，欢迎提交 issue: https://github.com/Do1e/mijia-api/issues")
                 dev_name = matches[0].get("name", None)
                 model = matches[0]["model"]
+                spec_type = matches[0].get("spec_type")
 
-        dev_info = get_device_info(matches[0].get("spec_type"), cache_path=api.auth_data_path.parent)
+        dev_info = get_device_info(spec_type, cache_path=api.auth_data_path.parent)
         self.did = did
         self.model = model
+        self.spec_type = spec_type
         self.name = dev_name if dev_name is not None else dev_info["name"]
         self.sleep_time = sleep_time
 
@@ -127,7 +130,7 @@ class mijiaDevice():
     def __str__(self) -> str:
         prop_list_str = "\n".join(filter(None, (str(v) for k, v in self.prop_list.items() if "_" not in k)))
         action_list_str = "\n".join(map(str, self.action_list.values()))
-        return (f"{self.name} ({self.model})\n"
+        return (f"{self.name} ({self.model} {self.spec_type})\n"
                 f"Properties:\n{prop_list_str if prop_list_str else 'No properties available'}\n"
                 f"Actions:\n{action_list_str if action_list_str else 'No actions available'}")
 
