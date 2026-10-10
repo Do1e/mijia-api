@@ -2,8 +2,13 @@
 
 米家 API，可以使用代码、CLI、MCP 直接控制米家设备。
 
-> 🎉 **v4.0.0 版本已支持 MCP**，详见 [MCP 使用文档](https://mijia-api.do1e.com/usage/mcp)  
-> 🎉 **v4.1.0 版本已支持 Agent Skill**，详见 [Agent Skill 使用文档](https://mijia-api.do1e.com/usage/skill)
+> ⚠️ **v5.0.0 兼容性说明**：设备规格数据源迁移至 [miot-spec.org](https://miot-spec.org/)（小米官方数据源），有以下破坏性变更：
+>
+> - `get_device_info()` 参数由 `device_model` 改为 `spec_type`（设备规格类型 URN，可从 `get_devices_list()` 返回的设备信息中获取）
+> - CLI `--get_device_info` 由接收 model 改为接收 `spec_type`（可从 `-l` 输出的 `spec_type` 字段获取）
+> - MCP 工具 `get_device_spec` 参数由 `device_model` 改为 `spec_type`
+>
+> 除上述改动外，其余用法与 v4 保持兼容。
 
 [![GitHub](https://img.shields.io/badge/GitHub-Do1e%2Fmijia--api-blue)](https://github.com/Do1e/mijia-api)
 [![PyPI](https://img.shields.io/badge/PyPI-mijiaAPI-blue)](https://pypi.org/project/mijiaAPI/)

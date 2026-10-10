@@ -2,6 +2,23 @@
 
 本文档记录了项目的 v1.3.7 以来的重要变更。
 
+## [5.0.0](https://github.com/Do1e/mijia-api/compare/v4.4.0...v5.0.0) - 2026-10-10
+
+#### 此版本含破坏性变更，请在升级后参考下述说明修复
+
+### new feature
+
+- 设备规格数据源从 [home.miot-spec.com](https://home.miot-spec.com/) 迁移至 [miot-spec.org](https://miot-spec.org/)，改为按设备规格类型 URN（`spec_type`）获取，支持 URN 带厂商后缀、无法从短型号推导的新设备（如 `xiaomi.sensor_ht.new3pr`）
+- CLI `-l`/`--list_devices` 输出新增 `spec_type` 字段，用于获取 `--get_device_info` 所需参数
+
+### improvement
+
+- **`get_device_info()` 参数由 `device_model` 改为 `spec_type`，返回结果中的 `model` 字段改为 `spec_type`；`spec_type` 可从 `get_devices_list()` 返回的设备信息中获取**
+- **CLI `--get_device_info` 参数由设备型号改为 `spec_type`**
+- **MCP server `get_device_spec` 工具参数由 `device_model` 改为 `spec_type`**
+- 设备信息缓存版本号升至 2，旧版本缓存自动失效并重新获取
+- 规格解析适配 miot-spec.org 的字段命名（`value-range`、`value-list`），跳过 `device-information` 服务；属性/动作名改取 URN 中的短名段，中文描述取自 `comment` 字段
+
 ## [4.4.0](https://github.com/Do1e/mijia-api/compare/v4.3.0...v4.4.0) - 2026-09-24
 
 ### improvement
