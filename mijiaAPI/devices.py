@@ -1,5 +1,4 @@
 import json
-import re
 import time
 from collections import Counter
 from pathlib import Path
@@ -20,8 +19,8 @@ from .logger import logger
 from .version import version
 
 
-device_url = "https://home.miot-spec.com/spec/"
-device_info_version = 1
+device_url = "https://miot-spec.org/miot-spec-v2/instance"
+device_info_version = 2
 
 
 def _deduplicate_names(items: list[dict], iid_key: str) -> None:
@@ -106,7 +105,7 @@ class mijiaDevice():
                 dev_name = matches[0].get("name", None)
                 model = matches[0]["model"]
 
-        dev_info = get_device_info(model, cache_path=api.auth_data_path.parent)
+        dev_info = get_device_info(matches[0].get("spec_type"), cache_path=api.auth_data_path.parent)
         self.did = did
         self.model = model
         self.name = dev_name if dev_name is not None else dev_info["name"]
@@ -251,24 +250,27 @@ class mijiaDevice():
         logger.debug(f"执行动作: {self.name} -> {name}, 结果: {result}")
 
 
-def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = None) -> dict:
+def get_device_info(spec_type: str, cache_path: Optional[Union[str, Path]] = None) -> dict:
     """
     获取设备规格信息
 
-    根据设备型号获取设备的详细规格信息，包括属性、操作等。
-    支持缓存功能，避免重复请求网络。
+    根据设备规格类型（spec_type）从 miot-spec.org 获取设备的详细规格信息，
+    包括属性、操作等。支持缓存功能，避免重复请求网络。
 
     参数:
-        device_model (str): 设备型号，例如 'yeelink.light.lamp4'
+        spec_type (str): 设备规格类型，例如
+            'urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1'。
+            可从 get_devices_list() 返回的设备信息的 spec_type 字段获取。
         cache_path (Optional[Union[str, Path]]): 可选，缓存目录路径。
             - 如果为 None，则不使用缓存
-            - 如果指定，则将设备信息缓存到该目录下的 {device_model}.json 文件中
+            - 如果指定，则将设备信息缓存到该目录下的
+              {spec_type}.json 文件中（文件名中的 ':' 替换为 '_'）
 
     返回值:
         dict: 设备规格信息字典，包含以下字段：
             - version (int): 设备信息缓存格式版本
-            - name (str): 设备名称
-            - model (str): 设备型号
+            - name (str): 规格名称
+            - spec_type (str): 设备规格类型
             - properties (list): 设备属性列表，每个属性包含以下字段：
                 - name (str): 属性名称
                 - description (str): 属性描述
@@ -286,13 +288,16 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
         GetDeviceInfoError: 当获取设备信息失败时抛出
 
     示例:
-        >>> info = get_device_info('yeelink.light.lamp4')
-        >>> print(info['name'])  # 输出设备名称
+        >>> info = get_device_info('urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1')
+        >>> print(info['name'])  # 输出规格名称
         >>> print(info['properties'][0]['name'])  # 输出第一个属性的名称
     """
+    if not spec_type:
+        raise ValueError("必须提供 spec_type 参数（设备规格类型 URN），"
+                         "可从 get_devices_list() 返回的设备信息的 spec_type 字段获取")
     cache_file = None
     if cache_path is not None:
-        cache_file = Path(cache_path) / f"{device_model}.json"
+        cache_file = Path(cache_path) / f"{spec_type.replace(':', '_')}.json"
         if cache_file.exists():
             logger.debug(f"从缓存加载设备信息: {cache_file}")
             with cache_file.open("r", encoding="utf-8") as f:
@@ -300,31 +305,28 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
             if cached_result.get("version") == device_info_version:
                 return cached_result
             logger.debug(f"设备信息缓存版本不匹配，重新获取: {cache_file}")
-    response = requests.get(device_url + device_model, headers={
+    response = requests.get(device_url, params={"type": spec_type}, headers={
         "User-Agent": f"mijiaAPI/{version}"
     })
     if response.status_code != 200:
-        raise GetDeviceInfoError(device_model)
-    content = re.search(r"<script data-page=\"app\" type=\"application/json\">(.*?)</script>", response.text)
-    if content is None:
-        raise GetDeviceInfoError(device_model)
-    content = content.group(1)
-    content = json.loads(content)
+        raise GetDeviceInfoError(spec_type)
+    content = response.json()
+    if (not isinstance(content, dict) or "description" not in content
+            or "services" not in content):
+        raise GetDeviceInfoError(spec_type)
 
-    product = content["props"]["product"]
-    name = product["name"]
-    model = product["model"]
-    i18n_zh = content["props"].get("i18n", {}).get("zh_cn", {})
     result = {
         "version": device_info_version,
-        "name": name,
-        "model": model,
+        "name": content["description"],
+        "spec_type": spec_type,
         "properties": [],
         "actions": []
     }
-    services = content["props"]["tree"]["services"]
+    services = content["services"]
 
     for svc in services:
+        if svc["type"].split(":")[3] == "device-information":
+            continue
         siid = svc["iid"]
         for prop in svc.get("properties", []):
             piid = prop["iid"]
@@ -334,41 +336,39 @@ def get_device_info(device_model: str, cache_path: Optional[Union[str, Path]] = 
                 prop_type = "uint"
             else:
                 prop_type = prop["format"]
+            access = prop.get("access", [])
             access_str = "".join([
-                "r" if "read" in prop["access"] else "",
-                "w" if "write" in prop["access"] else ""
+                "r" if "read" in access else "",
+                "w" if "write" in access else ""
             ])
-            zh_cn = i18n_zh.get(f"service:{siid:03d}:property:{piid:03d}", "")
             item = {
-                "name": prop["type"],
-                "description": f"{prop['description']} / {zh_cn}".rstrip(" / "),
+                "name": prop["type"].split(":")[3],
+                "description": f"{prop['description']} / {prop.get('comment', '')}".rstrip(" / "),
                 "type": prop_type,
                 "rw": access_str,
-                "range": prop.get("valueRange", None),
+                "range": prop.get("value-range", None),
                 "value-list": None,
                 "method": {
                     "siid": siid,
                     "piid": piid
                 }
             }
-            if prop.get("valueList"):
+            if prop.get("value-list"):
                 item["value-list"] = []
-                for vl_item in prop["valueList"]:
-                    vl_zh = i18n_zh.get(vl_item.get("i18nKey", ""), "")
+                for vl_item in prop["value-list"]:
                     vl_entry = {
                         "value": vl_item["value"],
                         "description": vl_item["description"]
                     }
-                    if vl_zh:
-                        vl_entry["desc_zh_cn"] = vl_zh
+                    if vl_item.get("comment"):
+                        vl_entry["desc_zh_cn"] = vl_item["comment"]
                     item["value-list"].append(vl_entry)
             result["properties"].append(item)
         for act in svc.get("actions", []):
             aiid = act["iid"]
-            zh_cn = i18n_zh.get(f"service:{siid:03d}:action:{aiid:03d}", "")
             act_item = {
-                "name": act["type"],
-                "description": f"{act['description']} / {zh_cn}".rstrip(" / "),
+                "name": act["type"].split(":")[3],
+                "description": f"{act['description']} / {act.get('comment', '')}".rstrip(" / "),
                 "method": {
                     "siid": siid,
                     "aiid": aiid

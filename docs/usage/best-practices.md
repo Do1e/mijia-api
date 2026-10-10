@@ -19,8 +19,8 @@ value = device.get('brightness')
 ```python
 from mijiaAPI import get_device_info
 
-# 从米家规格平台获取设备信息
-device_info = get_device_info('yeelink.light.lamp4')
+# 从 miot-spec.org 获取设备信息（spec_type 可从 get_devices_list() 获取）
+device_info = get_device_info('urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1')
 
 # 查看原始信息
 import json

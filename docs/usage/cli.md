@@ -78,7 +78,7 @@ mijiaAPI action --dev_name "卧室台灯" --action_name toggle
 mijiaAPI action --did 123456 --action_name execute-text-directive --params '{"in":["打开空调",1]}'
 ```
 
-动作名可通过 `--get_device_info MODEL` 获取。`--did` 和 `--dev_name` 必须且只能提供一个。
+动作名可通过 `--get_device_info SPEC_TYPE` 获取。`--did` 和 `--dev_name` 必须且只能提供一个。
 
 ## 获取统计数据
 
@@ -115,8 +115,8 @@ mijiaAPI --list_scenes
 # 执行场景
 mijiaAPI --run_scene "睡眠模式" "晚安"
 
-# 获取设备规格信息
-mijiaAPI --get_device_info yeelink.light.lamp4
+# 获取设备规格信息（spec_type 从 -l 输出中获取）
+mijiaAPI --get_device_info "urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1"
 
 # 列出耗材
 mijiaAPI --list_consumable_items

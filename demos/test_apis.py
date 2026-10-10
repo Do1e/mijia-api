@@ -69,7 +69,7 @@ time.sleep(1)
 
 # ----------------- get/set device properties ------------------
 # did 和 model 从 get_devices_list() 接口获取
-# siid 和 piid 请查阅 https://home.miot-spec.com/spec/{model}
+# siid 和 piid 可通过 get_device_info(spec_type) 获取
 # 或者也可以直接在 米家APP->智能->+->手动控制 中
 # 添加 scene，调用 run_scene() 接口控制设备
 for device in devices:

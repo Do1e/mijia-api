@@ -74,8 +74,8 @@ def parse_args(args):
     parser.add_argument(
         '--get_device_info',
         type=str,
-        help="获取设备信息，指定设备model，先使用 --list_devices 获取",
-        metavar='DEVICE_MODEL',
+        help="获取设备信息，指定设备spec_type，先使用 --list_devices 获取",
+        metavar='SPEC_TYPE',
     )
     parser.add_argument(
         '--run',
@@ -378,6 +378,7 @@ def get_devices_list(api: mijiaAPI, verbose: bool = True, home_mapping: Optional
             print(f"  - {device['name']}\n"
                     f"    did: {device['did']}\n"
                     f"    model: {device['model']}\n"
+                    f"    spec_type: {device.get('spec_type')}\n"
                     f"    home: {home_name}\n"
                     f"    room: {room_name}\n"
                     f"    online: {device['isOnline']}")

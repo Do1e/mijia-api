@@ -79,5 +79,5 @@ class DeviceActionError(Exception):
         super().__init__(f"执行设备 '{dev_name}' 的动作 '{name}' 时失败, code: {code}, message: {ERROR_CODE.get(str(code), '未知错误')}")
 
 class GetDeviceInfoError(Exception):
-    def __init__(self, device_model: str):
-        super().__init__(f"获取设备型号 '{device_model}' 的设备信息失败")
+    def __init__(self, spec_type: str):
+        super().__init__(f"获取设备规格 '{spec_type}' 的设备信息失败")

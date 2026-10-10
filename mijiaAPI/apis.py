@@ -587,10 +587,10 @@ class mijiaAPI():
 
                 dict/list 中每个元素的格式：
                 - did (str): 设备ID，从 get_devices_list() 获取
-                - siid (int): 服务ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
-                - piid (int): 属性ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
+                - siid (int): 服务ID，从 get_device_info() 返回的属性 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
+                - piid (int): 属性ID，从 get_device_info() 返回的属性 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
 
         返回值:
             Union[list, dict]: 设备属性查询结果
@@ -649,10 +649,10 @@ class mijiaAPI():
 
                 dict/list 中每个元素的格式：
                 - did (str): 设备ID，从 get_devices_list() 获取
-                - siid (int): 服务ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
-                - piid (int): 属性ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
+                - siid (int): 服务ID，从 get_device_info() 返回的属性 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
+                - piid (int): 属性ID，从 get_device_info() 返回的属性 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
                 - value: 要设置的值，数据类型根据属性定义而定
 
         返回值:
@@ -717,10 +717,10 @@ class mijiaAPI():
 
                 dict/list 中每个元素的格式：
                 - did (str): 设备ID，从 get_devices_list() 获取
-                - siid (int): 服务ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
-                - aiid (int): 操作/方法ID，从 https://home.miot-spec.com/spec/{model} 获取，
-                              model 从 get_devices_list() 获取
+                - siid (int): 服务ID，从 get_device_info() 返回的动作 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
+                - aiid (int): 操作/方法ID，从 get_device_info() 返回的动作 method 字段获取，
+                              spec_type 可从 get_devices_list() 获取
                 - value (list): 可选，操作的参数列表，根据具体操作定义而定
 
         返回值:

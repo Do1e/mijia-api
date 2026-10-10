@@ -116,14 +116,14 @@ Python 关键字（如 `in`）可在前面加上下划线 `_`，如 `device._in`
 
 ```python
 get_device_info(
-    device_model: str,
+    spec_type: str,
     cache_path: Optional[Union[str, Path]] = None
 ) -> dict
 ```
 
-从[米家规格平台](https://home.miot-spec.com/)在线获取设备规格信息，支持缓存。
+从 [miot-spec.org](https://miot-spec.org/) 在线获取设备规格信息，支持缓存。
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `device_model` | `str` | （必填） | 设备型号，如 `yeelink.light.lamp4` |
+| `spec_type` | `str` | （必填） | 设备规格类型 URN，如 `urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1`，可从 `get_devices_list()` 的 `spec_type` 字段获取 |
 | `cache_path` | `Optional[Union[str, Path]]` | `None` | 缓存路径，指定后会缓存结果以加速 |

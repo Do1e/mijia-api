@@ -57,7 +57,7 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 | `--list_scenes` | 列出各家庭场景 | 是 | 否 |
 | `--list_consumable_items` | 列出各家庭耗材 | 是 | 否 |
 | `--run_scene 名称/ID [...]` | 运行一个或多个场景 | 是 | 否 |
-| `--get_device_info MODEL` | 按 model 获取设备规格 | **否** | 否 |
+| `--get_device_info SPEC_TYPE` | 按 spec_type 获取设备规格 | **否** | 否 |
 | `get` | 读取设备属性 | 是 | 否 |
 | `set` | 设置设备属性 | 是 | 否 |
 | `action` | 按动作名执行设备动作 | 是 | 否 |
@@ -71,15 +71,15 @@ allowed-tools: Bash(uvx mijiaAPI:*)
 
 ## 典型工作流
 
-1. **列出设备**，获取设备名称和 model：
+1. **列出设备**，获取设备名称、model 和 spec_type：
    ```
    uvx mijiaAPI -l
    ```
-   输出每个设备的 `name`、`did`、`model`、`online` 状态。
+   输出每个设备的 `name`、`did`、`model`、`spec_type`、`online` 状态。
 
-2. **按 model 查看设备支持的属性和动作**（无需登录）：
+2. **按 spec_type 查看设备支持的属性和动作**（无需登录）：
    ```
-   uvx mijiaAPI --get_device_info yeelink.light.lamp4
+   uvx mijiaAPI --get_device_info "urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1"
    ```
    返回 JSON，描述设备的属性和动作。用于查找 `get`/`set` 可用的 `--prop_name` 和
    `action` 可用的 `--action_name`。
@@ -165,12 +165,12 @@ uvx mijiaAPI --list_homes --list_consumable_items
 ### 获取设备规格（无需认证）
 
 ```
-uvx mijiaAPI --get_device_info yeelink.light.lamp4
+uvx mijiaAPI --get_device_info "urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1"
 ```
 
-从公开的 MIoT 规格端点获取设备规格 JSON，返回所有可用属性（含类型和约束）及动作。
-**无需登录**——在认证初始化之前执行。用于在调用 `get`/`set`/`action` 前发现合法的
-`--prop_name`、`--value` 和 `--action_name`。
+从公开的 MIoT 规格端点（miot-spec.org）按 `spec_type` 获取设备规格 JSON，返回所有可用属性
+（含类型和约束）及动作。`spec_type` 可从 `-l` 输出获取。**无需登录**——在认证初始化之前
+执行。用于在调用 `get`/`set`/`action` 前发现合法的 `--prop_name`、`--value` 和 `--action_name`。
 
 ### 获取设备属性
 

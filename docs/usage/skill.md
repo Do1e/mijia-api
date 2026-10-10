@@ -66,13 +66,13 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
 
 以下流程均可由 LLM 自主完成（除登录外）：
 
-1. **列出设备**，获取名称和 model：
+1. **列出设备**，获取名称、model 和 spec_type：
    ```bash
    uvx mijiaAPI -l
    ```
 2. **查看设备规格**（无需登录，发现可用的 `--prop_name` 和 `--action_name`）：
    ```bash
-   uvx mijiaAPI --get_device_info yeelink.light.lamp4
+   uvx mijiaAPI --get_device_info "urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1"
    ```
 3. **获取/设置属性**：
    ```bash
@@ -105,7 +105,7 @@ skill 对 LLM 设定了明确的边界，避免会话卡死：
 | `--list_scenes` | 列出各家庭场景 | 是 | 否 |
 | `--list_consumable_items` | 列出各家庭耗材 | 是 | 否 |
 | `--run_scene 名称/ID [...]` | 运行一个或多个场景 | 是 | 否 |
-| `--get_device_info MODEL` | 按 model 获取设备规格 | 否 | 否 |
+| `--get_device_info SPEC_TYPE` | 按 spec_type 获取设备规格 | 否 | 否 |
 | `get` | 读取设备属性 | 是 | 否 |
 | `set` | 设置设备属性 | 是 | 否 |
 | `action` | 按动作名执行设备动作 | 是 | 否 |

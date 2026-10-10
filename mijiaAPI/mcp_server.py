@@ -141,17 +141,17 @@ def list_consumables(home_id: Optional[str] = None) -> str:
 
 
 @mcp.tool
-def get_device_spec(device_model: str) -> str:
+def get_device_spec(spec_type: str) -> str:
     """获取设备规格信息（属性和动作列表）。
 
     参数:
-        device_model: 设备型号，例如 'yeelink.light.lamp4'，可从 list_devices 获取。
+        spec_type: 设备规格类型（urn:miot-spec-v2:...），可从 list_devices 返回的 spec_type 字段获取。
 
     返回设备支持的属性（名称/描述/类型/读写/范围/枚举值）和动作列表，
     用于确定 get_device_properties / set_device_property / run_device_action 的可用参数名。
     """
     api = _get_api()
-    info = get_device_info(device_model, cache_path=api.auth_data_path.parent)
+    info = get_device_info(spec_type, cache_path=api.auth_data_path.parent)
     return json.dumps(info, ensure_ascii=False)
 
 

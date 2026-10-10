@@ -24,7 +24,7 @@ yay -S python-mijia-api
 usage: mijiaAPI [-h] [-v] [-p AUTH_PATH] [--list_homes] [-l]
                    [--list_scenes] [--list_consumable_items]
                    [--run_scene SCENE_ID/SCENE_NAME [SCENE_ID/SCENE_NAME ...]]
-                   [--get_device_info DEVICE_MODEL]
+                   [--get_device_info SPEC_TYPE]
                    {run,play,mcp,login,get,set,action,statistics} ...
 ```
 
@@ -40,7 +40,7 @@ usage: mijiaAPI [-h] [-v] [-p AUTH_PATH] [--list_homes] [-l]
 | `--list_scenes` | 列出场景列表 |
 | `--list_consumable_items` | 列出耗材列表 |
 | `--run_scene SCENE_ID/SCENE_NAME [...]` | 运行场景，指定场景ID或名称（可多个） |
-| `--get_device_info DEVICE_MODEL` | 获取设备信息，指定设备 model |
+| `--get_device_info SPEC_TYPE` | 获取设备信息，指定设备 spec_type（设备规格类型 URN） |
 
 ### 环境变量
 

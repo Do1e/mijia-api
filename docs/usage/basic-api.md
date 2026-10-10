@@ -117,13 +117,17 @@ for item in result:
 
 ## 设备信息获取
 
-使用 `get_device_info()` 函数可从[米家规格平台](https://home.miot-spec.com/)在线获取设备属性和动作信息：
+使用 `get_device_info()` 函数可从 [miot-spec.org](https://miot-spec.org/) 在线获取设备属性和动作信息。
+需要提供设备的 `spec_type`（设备规格类型 URN），可从设备列表的 `spec_type` 字段获取：
 
 ```python
 from mijiaAPI import get_device_info
 
+# spec_type 可从 api.get_devices_list() 或 CLI 的 --list_devices 输出中获取
+spec_type = 'urn:miot-spec-v2:device:light:0000A001:yeelink-lamp4:1'  # 米家台灯 1S
+
 # 获取设备规格信息
-device_info = get_device_info('yeelink.light.lamp4')  # 米家台灯 1S 的 model
+device_info = get_device_info(spec_type)
 
 # 查看设备支持的属性和动作
 print(device_info)
